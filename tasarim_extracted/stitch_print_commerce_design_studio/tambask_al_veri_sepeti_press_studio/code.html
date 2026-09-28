@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+
+<html lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sepetim | PRESS &amp; STUDIO - Lüks Ticari Baskı Çözümleri</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary": "#ffffff",
+            "on-tertiary-fixed-variant": "#005236",
+            "error-container": "#ffdad6",
+            "surface-dim": "#d8dadc",
+            "secondary-container": "#316bf3",
+            "primary-container": "#131b2e",
+            "secondary-fixed-dim": "#b4c5ff",
+            "tertiary-fixed-dim": "#4edea3",
+            "surface-container-high": "#e6e8ea",
+            "on-secondary-container": "#fefcff",
+            "on-primary-fixed": "#131b2e",
+            "surface": "#f7f9fb",
+            "tertiary-fixed": "#6ffbbe",
+            "surface-bright": "#f7f9fb",
+            "secondary": "#0051d5",
+            "on-error-container": "#93000a",
+            "outline-variant": "#c6c6cd",
+            "tertiary": "#000000",
+            "inverse-surface": "#2d3133",
+            "on-secondary-fixed": "#00174b",
+            "primary-fixed-dim": "#bec6e0",
+            "surface-container-highest": "#e0e3e5",
+            "on-secondary-fixed-variant": "#003ea8",
+            "on-surface-variant": "#45464d",
+            "primary-fixed": "#dae2fd",
+            "on-primary-container": "#7c839b",
+            "on-tertiary-container": "#009668",
+            "primary": "#000000",
+            "on-error": "#ffffff",
+            "on-primary": "#ffffff",
+            "surface-container-low": "#f2f4f6",
+            "secondary-fixed": "#dbe1ff",
+            "tertiary-container": "#002113",
+            "on-surface": "#191c1e",
+            "error": "#ba1a1a",
+            "on-secondary": "#ffffff",
+            "on-background": "#191c1e",
+            "surface-container": "#eceef0",
+            "surface-variant": "#e0e3e5",
+            "outline": "#76777d",
+            "background": "#f7f9fb",
+            "on-tertiary-fixed": "#002113",
+            "on-primary-fixed-variant": "#3f465c",
+            "inverse-on-surface": "#eff1f3",
+            "surface-tint": "#565e74",
+            "surface-container-lowest": "#ffffff",
+            "inverse-primary": "#bec6e0"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-lg": "1.5rem",
+            "space-sm": "0.5rem",
+            "space-xl": "2.5rem",
+            "space-xs": "0.25rem",
+            "gutter": "1.5rem",
+            "space-md": "1rem",
+            "margin-mobile": "1rem",
+            "margin": "3rem",
+            "gutter-mobile": "0.75rem"
+          },
+          "fontFamily": {
+            "headline-lg-mobile": ["Inter"],
+            "body-lg": ["Inter"],
+            "body-sm": ["Inter"],
+            "body-md": ["Inter"],
+            "headline-sm": ["Inter"],
+            "headline-md": ["Inter"],
+            "headline-lg": ["Inter"],
+            "label-numeric": ["JetBrains Mono"],
+            "display-hero-mobile": ["Inter"],
+            "label-caps": ["Inter"],
+            "display-hero": ["Inter"]
+          },
+          "fontSize": {
+            "headline-lg-mobile": ["26px", {"lineHeight": "34px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+            "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400"}],
+            "body-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.005em", "fontWeight": "400"}],
+            "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+            "headline-sm": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+            "headline-md": ["22px", {"lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+            "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+            "label-numeric": ["11px", {"lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+            "display-hero-mobile": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "600"}],
+            "label-caps": ["11px", {"lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "600"}],
+            "display-hero": ["56px", {"lineHeight": "64px", "letterSpacing": "-0.03em", "fontWeight": "600"}]
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-background text-on-surface antialiased min-h-screen flex flex-col font-body-md text-body-md selection:bg-secondary selection:text-on-secondary">
+<!-- TopNavBar (Shared Component) -->
+<header class="bg-surface dark:bg-inverse-surface border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none docked full-width top-0 sticky z-40">
+<div class="flex justify-between items-center w-full px-6 py-3 max-w-7xl mx-auto">
+<!-- Brand & Left Cluster -->
+<div class="flex items-center gap-8">
+<a class="text-headline-sm font-headline-sm font-semibold tracking-tight text-primary dark:text-inverse-primary flex items-center gap-2" href="#">
+<span class="w-8 h-8 rounded-lg bg-primary text-on-primary flex items-center justify-center font-bold text-body-lg shadow-sm">P</span>
+<span>PRESS &amp; STUDIO</span>
+</a>
+<!-- Search Bar on Left as defined in JSON -->
+<div class="hidden lg:flex items-center relative">
+<span class="material-symbols-outlined absolute left-3 text-outline text-[18px]">search</span>
+<input class="bg-surface-container-lowest border border-outline-variant rounded-lg pl-9 pr-4 py-1.5 text-body-sm font-body-sm w-64 focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" placeholder="Ürün, stok veya sipariş kodu ara..." type="text"/>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-on-surface-variant dark:text-outline-variant font-medium transition-colors hover:text-primary dark:hover:text-on-primary text-body-md font-body-md" href="#">Products</a>
+<a class="text-on-surface-variant dark:text-outline-variant font-medium transition-colors hover:text-primary dark:hover:text-on-primary text-body-md font-body-md" href="#">Custom Studio</a>
+<a class="text-on-surface-variant dark:text-outline-variant font-medium transition-colors hover:text-primary dark:hover:text-on-primary text-body-md font-body-md" href="#">Paper Stocks</a>
+<a class="text-on-surface-variant dark:text-outline-variant font-medium transition-colors hover:text-primary dark:hover:text-on-primary text-body-md font-body-md" href="#">Proofing</a>
+<a class="text-on-surface-variant dark:text-outline-variant font-medium transition-colors hover:text-primary dark:hover:text-on-primary text-body-md font-body-md" href="#">Enterprise</a>
+</nav>
+<!-- Trailing Action Cluster -->
+<div class="flex items-center gap-3">
+<button class="hidden sm:inline-flex items-center px-3 py-1.5 rounded-lg border border-outline-variant text-body-sm font-body-sm font-medium hover:bg-surface-container-high transition-colors">
+          Sample Kit
+        </button>
+<button class="bg-primary text-on-primary px-4 py-1.5 rounded-lg text-body-sm font-body-sm font-semibold hover:bg-primary-container transition-all duration-150 ease-out active:scale-95 shadow-sm flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">draw</span>
+<span>Launch Studio</span>
+</button>
+<div class="h-5 w-[1px] bg-outline-variant mx-1"></div>
+<!-- Trailing Icon Actions -->
+<div class="flex items-center gap-1">
+<button class="relative p-2 text-secondary hover:text-primary transition-colors rounded-full" title="Sepetim">
+<span class="material-symbols-outlined text-[20px]" data-icon="shopping_bag">shopping_bag</span>
+<span class="absolute top-1 right-1 w-4 h-4 bg-secondary text-on-secondary rounded-full text-[10px] flex items-center justify-center font-bold">2</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors rounded-full" title="Ayarlar">
+<span class="material-symbols-outlined text-[20px]" data-icon="tune">tune</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors rounded-full" title="Hesabım">
+<span class="material-symbols-outlined text-[20px]" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</div>
+</div>
+</header>
+<!-- Step Indicator Bar -->
+<section class="bg-surface-container-lowest border-b border-outline-variant py-4">
+<div class="max-w-7xl mx-auto px-6">
+<div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+<!-- Step Indicator -->
+<nav aria-label="Aşama Takibi" class="flex items-center gap-3">
+<!-- Step 1: Active -->
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-secondary text-on-secondary text-label-numeric font-label-numeric font-bold flex items-center justify-center shadow-sm">1</span>
+<span class="text-body-md font-body-md font-semibold text-primary">Sepetim</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant text-[18px]">chevron_right</span>
+<!-- Step 2: Inactive -->
+<div class="flex items-center gap-2 text-outline">
+<span class="w-6 h-6 rounded-full border border-outline-variant text-label-numeric font-label-numeric flex items-center justify-center">2</span>
+<span class="text-body-md font-body-md">Teslimat &amp; Fatura</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant text-[18px]">chevron_right</span>
+<!-- Step 3: Inactive -->
+<div class="flex items-center gap-2 text-outline">
+<span class="w-6 h-6 rounded-full border border-outline-variant text-label-numeric font-label-numeric flex items-center justify-center">3</span>
+<span class="text-body-md font-body-md">Ödeme &amp; Onay</span>
+</div>
+</nav>
+<!-- Right Quick Assurance Tag -->
+<div class="flex items-center gap-2 text-on-surface-variant text-body-sm font-body-sm">
+<span class="material-symbols-outlined text-on-tertiary-container text-[18px]">verified</span>
+<span>ISO 12647-2 Renk Kalibrasyon Onaylı</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Main Content Layout -->
+<main class="flex-1 max-w-7xl w-full mx-auto px-6 py-8">
+<!-- Free Shipping Progress Banner -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-4 mb-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex items-start gap-3">
+<div class="p-2.5 rounded-lg bg-surface-container text-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-[24px]">local_shipping</span>
+</div>
+<div>
+<h2 class="text-headline-sm font-headline-sm text-primary flex items-center gap-2">
+            1.500 ₺ üzeri Ücretsiz Kargo Kazandınız!
+            <span class="bg-tertiary-fixed text-on-tertiary-container px-2 py-0.5 rounded-full text-label-caps font-label-caps font-semibold">Tebrikler</span>
+</h2>
+<p class="text-on-surface-variant text-body-sm font-body-sm mt-0.5">
+            Mevcut sepet tutarınız kargo muafiyet limitini aştı. Ekspres anlaşmalı kargo gönderimi tamamen ücretsiz.
+          </p>
+</div>
+</div>
+<!-- Progress Indicator (Completed State) -->
+<div class="min-w-[260px] flex flex-col gap-1.5">
+<div class="flex justify-between items-center text-label-numeric font-label-numeric">
+<span class="text-on-surface-variant">2.395,00 ₺ / 1.500,00 ₺</span>
+<span class="text-on-tertiary-container font-semibold">%100 Tamamlandı</span>
+</div>
+<div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full transition-all duration-500" style="width: 100%;"></div>
+</div>
+</div>
+</div>
+<!-- 2-Column E-Commerce Cart Interface -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- Left Column: Cart Items & Cross-sell (8 cols) -->
+<div class="lg:col-span-8 flex flex-col gap-6">
+<div class="flex items-center justify-between pb-2 border-b border-outline-variant">
+<h1 class="text-headline-md font-headline-md text-primary tracking-tight">Sipariş Edilecek Kalemler (2)</h1>
+<span class="text-body-sm font-body-sm text-on-surface-variant">Üretim Kodu: <span class="font-label-numeric">#PS-2025-089</span></span>
+</div>
+<!-- Product Card 1: Ultra Prestij Kartvizit -->
+<article class="bg-surface-container-lowest rounded-xl border border-outline-variant p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+<div class="flex flex-col md:flex-row gap-5">
+<!-- Visual / Spec Stage Thumbnail -->
+<div class="w-full md:w-36 h-36 rounded-lg bg-surface-container-low border border-outline-variant overflow-hidden flex-shrink-0 relative group">
+<img class="w-full h-full object-cover" data-alt="A luxurious business card on 350gsm coated paper with selective spot UV gloss embossing reflecting studio light against a clean minimal white aesthetic with deep navy shadows and subtle high-key paper texture." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7DShFk8ulfn-FWi_RJ-1eQX35lnOfBb-51anXTN_o721cTad8QD871Qkhm8bJdhGyvDFZmA2Wa83pvGSGLN2VYfOyneAj3nzOBFCKTjhtEmYz0g2imlZWYIMdQXmJQ0Ta5plQCM-TkVun7ShKfqQ2DJ4cbm4YJe22FdUfxGA2LbYycv0fsOV6hZ5-mxt51xZ85aueEAEIrX5Q7lZOxpC4AGnbgx5uUC2Og6jSwmWWCWR2DM8-mDcN"/>
+<span class="absolute top-2 left-2 bg-primary/80 backdrop-blur-sm text-on-primary text-label-numeric font-label-numeric px-1.5 py-0.5 rounded">350 GSM</span>
+<button class="absolute inset-0 bg-primary/40 text-on-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1 text-body-sm font-body-sm font-medium">
+<span class="material-symbols-outlined text-[18px]">zoom_in</span> 3D İncele
+              </button>
+</div>
+<!-- Item Specifications & Details -->
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<div class="flex items-start justify-between gap-4">
+<div>
+<span class="text-label-caps font-label-caps text-secondary font-semibold uppercase tracking-wider">Premium Kurumsal Baskı</span>
+<h3 class="text-headline-sm font-headline-sm text-primary mt-0.5">Ultra Prestij Kartvizit</h3>
+</div>
+<div class="text-right">
+<span class="text-headline-sm font-headline-sm font-label-numeric text-primary font-semibold">945,00 ₺</span>
+<span class="text-label-numeric font-label-numeric text-on-surface-variant block text-body-sm">+KDV</span>
+</div>
+</div>
+<!-- Technical Configuration Badges -->
+<div class="flex flex-wrap gap-1.5 mt-3">
+<span class="px-2 py-0.5 bg-surface-container text-on-surface text-label-numeric font-label-numeric rounded border border-outline-variant">350gr Kuşe</span>
+<span class="px-2 py-0.5 bg-surface-container text-on-surface text-label-numeric font-label-numeric rounded border border-outline-variant">Çift Yön Baskı</span>
+<span class="px-2 py-0.5 bg-surface-container text-on-surface text-label-numeric font-label-numeric rounded border border-outline-variant">Ön-Arka Mat Selefon</span>
+<span class="px-2 py-0.5 bg-secondary-fixed text-on-secondary-fixed text-label-numeric font-label-numeric rounded border border-secondary/20 font-semibold">Bölgesel Kabartma Lak</span>
+<span class="px-2 py-0.5 bg-surface-container text-on-surface text-label-numeric font-label-numeric rounded border border-outline-variant">Düz Kesim</span>
+</div>
+<!-- Design Status Box -->
+<div class="mt-4 p-3 rounded-lg bg-surface border border-outline-variant flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[20px]">design_services</span>
+<div class="text-body-sm font-body-sm">
+<span class="text-primary font-medium">Online Editörde Hazırlandı</span>
+<span class="text-on-surface-variant font-label-numeric text-[11px] block sm:inline sm:ml-1">(#NEXUS-ARCH-2025)</span>
+</div>
+</div>
+<div class="flex items-center gap-3 text-body-sm font-body-sm font-medium">
+<button class="text-secondary hover:underline flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[16px]">visibility</span> Önizle
+                    </button>
+<span class="text-outline-variant">•</span>
+<button class="text-secondary hover:underline flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[16px]">edit</span> Düzenle
+                    </button>
+</div>
+</div>
+<!-- Pre-flight Validation Badge -->
+<div class="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 bg-tertiary-fixed/30 border border-on-tertiary-container/30 text-on-tertiary-fixed-variant rounded-full text-label-numeric font-label-numeric">
+<span class="material-symbols-outlined text-[16px] text-on-tertiary-container">check_circle</span>
+<span class="font-medium">Otomatik Pre-Flight Onaylı (300 DPI - CMYK FOGRA39)</span>
+</div>
+</div>
+<!-- Quantity Stepper & Actions -->
+<div class="flex flex-wrap items-center justify-between gap-4 pt-4 mt-4 border-t border-outline-variant">
+<div class="flex items-center gap-3">
+<label class="text-body-sm font-body-sm text-on-surface-variant" for="qty-1">Baskı Adedi:</label>
+<div class="flex items-center border border-outline-variant rounded-lg bg-surface-container-lowest overflow-hidden">
+<button class="px-2.5 py-1 text-on-surface-variant hover:bg-surface-container transition-colors">-</button>
+<input class="w-16 text-center font-label-numeric text-body-sm font-medium border-0 focus:ring-0 py-1" id="qty-1" readonly="" type="text" value="3.000"/>
+<button class="px-2.5 py-1 text-on-surface-variant hover:bg-surface-container transition-colors">+</button>
+</div>
+<span class="text-[11px] text-on-tertiary-container font-label-numeric bg-tertiary-fixed/40 px-1.5 py-0.5 rounded font-medium">Birim: 0,315 ₺</span>
+</div>
+<div class="flex items-center gap-4 text-body-sm font-body-sm">
+<button class="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]">bookmark_border</span> Favorilere Kaydet
+                  </button>
+<button class="text-error hover:text-on-error-container transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]">delete_outline</span> Kaldır
+                  </button>
+</div>
+</div>
+</div>
+</div>
+</article>
+<!-- Product Card 2: A4 Kabartma Laklı Cepli Dosya -->
+<article class="bg-surface-container-lowest rounded-xl border border-outline-variant p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+<div class="flex flex-col md:flex-row gap-5">
+<!-- Visual Stage Thumbnail -->
+<div class="w-full md:w-36 h-36 rounded-lg bg-surface-container-low border border-outline-variant overflow-hidden flex-shrink-0 relative group">
+<img class="w-full h-full object-cover" data-alt="A high-end corporate presentation presentation folder made of matte coated 350gsm cardstock with selective embossed UV gloss details and business card slit displayed on a studio architectural table." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBN6OMWBYerqb3091pWIkCqrWR_iQ1pnbLIO43jvdA3ubrKRWaDJPddjX85XEIb7hJ7QzoWFUKKjEszP9vugh4paBICIwPw6rikCDaRgD-yWBc8ke6lBBJKwfwtNgF9woXtWdv7eEz_eSUCu9uqfdkrxv07RAPZOdciqQsNTlxi6rI0FOce8sSQWinIGSyIVDpemlu4yu362O4yquGgFfkp2HfMPD8LIWXYekFoRygXRxhzpQjzhp4U"/>
+<span class="absolute top-2 left-2 bg-primary/80 backdrop-blur-sm text-on-primary text-label-numeric font-label-numeric px-1.5 py-0.5 rounded">A4 Format</span>
+<button class="absolute inset-0 bg-primary/40 text-on-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1 text-body-sm font-body-sm font-medium">
+<span class="material-symbols-outlined text-[18px]">zoom_in</span> 3D İncele
+              </button>
+</div>
+<!-- Item Specifications & Details -->
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<div class="flex items-start justify-between gap-4">
+<div>
+<span class="text-label-caps font-label-caps text-secondary font-semibold uppercase tracking-wider">Kurumsal Sunum Dosyası</span>
+<h3 class="text-headline-sm font-headline-sm text-primary mt-0.5">A4 Kabartma Laklı Cepli Dosya</h3>
+</div>
+<div class="text-right">
+<span class="text-headline-sm font-headline-sm font-label-numeric text-primary font-semibold">1.450,00 ₺</span>
+<span class="text-label-numeric font-label-numeric text-on-surface-variant block text-body-sm">+KDV</span>
+</div>
+</div>
+<!-- Technical Configuration Badges -->
+<div class="flex flex-wrap gap-1.5 mt-3">
+<span class="px-2 py-0.5 bg-surface-container text-on-surface text-label-numeric font-label-numeric rounded border border-outline-variant">350gr Mat Kuşe</span>
+<span class="px-2 py-0.5 bg-surface-container text-on-surface text-label-numeric font-label-numeric rounded border border-outline-variant">Tek Yön Baskı</span>
+<span class="px-2 py-0.5 bg-surface-container text-on-surface text-label-numeric font-label-numeric rounded border border-outline-variant">Sağ Cep Kartvizit Yuvalı</span>
+</div>
+<!-- File Status Alert (Warning / Pending Review) -->
+<div class="mt-4 p-3 rounded-lg bg-surface-container-high/60 border border-outline-variant flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-[20px]">pending_actions</span>
+<div class="text-body-sm font-body-sm">
+<span class="text-primary font-medium">Tasarım Dosyası Yüklendi</span>
+<span class="text-on-surface-variant font-label-numeric text-[11px] block sm:inline sm:ml-1">(nexus_dosya.pdf - Kontrol Bekliyor)</span>
+</div>
+</div>
+<button class="text-secondary hover:underline font-medium text-body-sm font-body-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">cloud_upload</span> Yeni Dosya Yükle
+                  </button>
+</div>
+<!-- Flight-Check Badges -->
+<div class="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 bg-surface-container-high text-on-surface-variant rounded-full text-label-numeric font-label-numeric border border-outline-variant">
+<span class="material-symbols-outlined text-[16px] text-outline">history</span>
+<span>Operatör Onayı: Otomatik taşma payı kontrolü sırada</span>
+</div>
+</div>
+<!-- Quantity Stepper & Actions -->
+<div class="flex flex-wrap items-center justify-between gap-4 pt-4 mt-4 border-t border-outline-variant">
+<div class="flex items-center gap-3">
+<label class="text-body-sm font-body-sm text-on-surface-variant" for="qty-2">Baskı Adedi:</label>
+<div class="flex items-center border border-outline-variant rounded-lg bg-surface-container-lowest overflow-hidden">
+<button class="px-2.5 py-1 text-on-surface-variant hover:bg-surface-container transition-colors">-</button>
+<input class="w-16 text-center font-label-numeric text-body-sm font-medium border-0 focus:ring-0 py-1" id="qty-2" readonly="" type="text" value="500"/>
+<button class="px-2.5 py-1 text-on-surface-variant hover:bg-surface-container transition-colors">+</button>
+</div>
+<span class="text-[11px] text-on-surface-variant font-label-numeric">Önerilen: 1.000 Adette %22 Tasarruf</span>
+</div>
+<div class="flex items-center gap-4 text-body-sm font-body-sm">
+<button class="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]">bookmark_border</span> Favorilere Kaydet
+                  </button>
+<button class="text-error hover:text-on-error-container transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]">delete_outline</span> Kaldır
+                  </button>
+</div>
+</div>
+</div>
+</div>
+</article>
+<!-- Cross-sell Section: Baskınızı Tamamlayıcı Ürünler -->
+<section class="mt-2 bg-surface-container-low rounded-xl border border-outline-variant p-6">
+<div class="flex items-center justify-between mb-4">
+<div>
+<h3 class="text-headline-sm font-headline-sm text-primary">Baskınızı Tamamlayıcı Ürünler</h3>
+<p class="text-on-surface-variant text-body-sm font-body-sm">Siparişinizle aynı üretim bandında hazırlanabilecek profesyonel ekstralar</p>
+</div>
+<span class="material-symbols-outlined text-outline">add_circle_outline</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<!-- Cross-sell Item 1 -->
+<div class="bg-surface-container-lowest rounded-lg border border-outline-variant p-4 flex flex-col justify-between hover:border-secondary transition-colors">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="material-symbols-outlined text-secondary text-[22px]">inventory_2</span>
+<span class="text-label-numeric font-label-numeric font-semibold text-primary">+85 ₺</span>
+</div>
+<h4 class="font-headline-sm text-body-md font-semibold text-primary">Lüks Kartvizitlik Metal Kutu</h4>
+<p class="text-on-surface-variant text-body-sm font-body-sm mt-1">Eloksallı mat siyah alüminyum, 25 kartvizit kapasiteli masaüstü kılıfı.</p>
+</div>
+<button class="mt-4 w-full py-1.5 px-3 rounded-lg border border-outline-variant text-body-sm font-body-sm font-medium hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[16px]">add</span> Sepete Ekle
+              </button>
+</div>
+<!-- Cross-sell Item 2 -->
+<div class="bg-surface-container-lowest rounded-lg border border-outline-variant p-4 flex flex-col justify-between hover:border-secondary transition-colors">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="material-symbols-outlined text-secondary text-[22px]">palette</span>
+<span class="text-label-numeric font-label-numeric font-semibold text-primary">+150 ₺</span>
+</div>
+<h4 class="font-headline-sm text-body-md font-semibold text-primary">Profesyonel Renk Provası</h4>
+<p class="text-on-surface-variant text-body-sm font-body-sm mt-1">Epson GMG kalibreli onay baskısı, seri üretim öncesi kapınıza kargolanır.</p>
+</div>
+<button class="mt-4 w-full py-1.5 px-3 rounded-lg border border-outline-variant text-body-sm font-body-sm font-medium hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[16px]">add</span> Sepete Ekle
+              </button>
+</div>
+<!-- Cross-sell Item 3 -->
+<div class="bg-surface-container-lowest rounded-lg border border-outline-variant p-4 flex flex-col justify-between hover:border-secondary transition-colors">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="material-symbols-outlined text-secondary text-[22px]">bolt</span>
+<span class="text-label-numeric font-label-numeric font-semibold text-primary">+200 ₺</span>
+</div>
+<h4 class="font-headline-sm text-body-md font-semibold text-primary">Acil 24 Saat Ekspres Üretim</h4>
+<p class="text-on-surface-variant text-body-sm font-body-sm mt-1">Sıra önceliği sağlanarak işiniz aynı gün gece vardiyasında kalıba bağlanır.</p>
+</div>
+<button class="mt-4 w-full py-1.5 px-3 rounded-lg border border-outline-variant text-body-sm font-body-sm font-medium hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[16px]">add</span> Sepete Ekle
+              </button>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Order Summary & Checkout Panel (4 cols - Sticky) -->
+<aside class="lg:col-span-4 sticky top-20 flex flex-col gap-6">
+<!-- Summary Box -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-6 shadow-sm">
+<h2 class="text-headline-sm font-headline-sm text-primary pb-3 border-b border-outline-variant">Sipariş Özeti</h2>
+<!-- Promo Code Input Group -->
+<div class="mt-5">
+<label class="block text-body-sm font-body-sm text-on-surface-variant mb-1.5 font-medium" for="coupon-code">Promosyon / Kurumsal Kupon Kodu</label>
+<div class="flex gap-2">
+<input class="flex-1 bg-surface border border-outline-variant rounded-lg px-3 py-2 text-body-sm font-body-sm uppercase font-label-numeric focus:ring-1 focus:ring-secondary focus:border-secondary" id="coupon-code" placeholder="Örn: PRESTIGE20" type="text"/>
+<button class="px-4 py-2 bg-surface-container hover:bg-surface-container-high text-primary rounded-lg text-body-sm font-body-sm font-medium border border-outline-variant transition-colors">
+                Uygula
+              </button>
+</div>
+</div>
+<!-- Price Line Items -->
+<div class="mt-6 flex flex-col gap-3 text-body-md font-body-md border-t border-outline-variant pt-5">
+<div class="flex justify-between items-center text-on-surface-variant">
+<span>Ara Toplam</span>
+<span class="font-label-numeric text-primary font-medium">2.395,00 ₺</span>
+</div>
+<div class="flex justify-between items-center text-on-surface-variant">
+<span>KDV (%20)</span>
+<span class="font-label-numeric text-primary font-medium">479,00 ₺</span>
+</div>
+<div class="flex justify-between items-center text-on-surface-variant">
+<div class="flex items-center gap-1">
+<span>Kargo</span>
+<span class="material-symbols-outlined text-[16px] text-outline" title="1.500 ₺ üzeri ücretsiz">info</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="line-through text-outline font-label-numeric text-body-sm">85,00 ₺</span>
+<span class="text-on-tertiary-container font-medium font-label-numeric">Ücretsiz</span>
+</div>
+</div>
+<div class="border-t border-outline-variant pt-3 mt-1 flex justify-between items-baseline">
+<div>
+<span class="text-headline-sm font-headline-sm text-primary">Genel Toplam</span>
+<span class="text-on-surface-variant text-[11px] block">KDV ve Sigortalı Sevkiyat Dahil</span>
+</div>
+<span class="text-headline-lg font-headline-lg font-label-numeric text-primary tracking-tight font-bold">2.874,00 ₺</span>
+</div>
+</div>
+<!-- Primary Checkout CTA Button -->
+<button class="mt-6 w-full bg-primary hover:bg-secondary text-on-primary py-3.5 px-6 rounded-lg text-body-lg font-body-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 group">
+<span>Ödemeye Geç (Güvenli Checkout)</span>
+<span class="material-symbols-outlined text-[20px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+<p class="text-center text-outline text-[11px] font-body-sm mt-3">
+            Sipariş vermeden önce teknik dosya onayı alınır, hatalı baskıda anında revizyon yapılır.
+          </p>
+</div>
+<!-- Trust Badges & Assurances -->
+<div class="bg-surface-container-low rounded-xl border border-outline-variant p-5 flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container-lowest border border-outline-variant flex items-center justify-center text-secondary flex-shrink-0">
+<span class="material-symbols-outlined text-[22px]">lock</span>
+</div>
+<div>
+<h4 class="font-semibold text-body-sm font-body-sm text-primary">256-Bit SSL Uçtan Uca Güvenlik</h4>
+<p class="text-[11px] text-on-surface-variant">Ödemeleriniz PCI-DSS Seviye 1 sertifikalı altyapıyla korunmaktadır.</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container-lowest border border-outline-variant flex items-center justify-center text-secondary flex-shrink-0">
+<span class="material-symbols-outlined text-[22px]">verified</span>
+</div>
+<div>
+<h4 class="font-semibold text-body-sm font-body-sm text-primary">Heidelberg Renk Doğruluk Garantisi</h4>
+<p class="text-[11px] text-on-surface-variant">Dijital prova ve ofset baskı arasında Delta-E &lt; 2 hassasiyet taahhüdü.</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container-lowest border border-outline-variant flex items-center justify-center text-secondary flex-shrink-0">
+<span class="material-symbols-outlined text-[22px]">published_with_changes</span>
+</div>
+<div>
+<h4 class="font-semibold text-body-sm font-body-sm text-primary">Ücretsiz Hatalı Baskı Yenileme</h4>
+<p class="text-[11px] text-on-surface-variant">Üretim kaynaklı tüm sapmalarda sorgusuz 48 saatte yeniden basım garantisi.</p>
+</div>
+</div>
+</div>
+<!-- Help & Production Support -->
+<div class="p-4 rounded-lg border border-outline-variant bg-surface-container-lowest flex items-center justify-between text-body-sm font-body-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline">support_agent</span>
+<span class="text-on-surface-variant">Baskı Uzmanına Danışın:</span>
+</div>
+<a class="font-semibold text-secondary hover:underline font-label-numeric" href="#">0850 441 77 37</a>
+</div>
+</aside>
+</div>
+</main>
+<!-- Footer (Shared Component) -->
+<footer class="bg-surface-container-low dark:bg-surface-container-highest border-t border-outline-variant dark:border-outline flat no shadows mt-16 docked full-width bottom">
+<div class="w-full px-6 py-12 max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+<!-- Brand & Copyright -->
+<div class="flex flex-col items-center md:items-start gap-2">
+<span class="text-headline-sm font-headline-sm font-semibold text-primary dark:text-inverse-primary tracking-tight">PRESS &amp; STUDIO</span>
+<p class="text-body-sm font-body-sm text-on-surface-variant dark:text-outline-variant text-center md:text-left">
+          © 2025 Press &amp; Studio Commercial Printworks Inc. Calibrated CMYK &amp; Pantone certified.
+        </p>
+</div>
+<!-- Links as defined in JSON -->
+<nav class="flex flex-wrap justify-center md:justify-end gap-x-6 gap-y-2 text-body-sm font-body-sm">
+<a class="text-on-surface-variant dark:text-outline-variant hover:underline hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-150" href="#">Material Standards</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:underline hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-150" href="#">Color Profile ICC</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:underline hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-150" href="#">FSC Certified Stocks</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:underline hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-150" href="#">Vector Studio API</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:underline hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-150" href="#">Bleed &amp; Tolerances</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:underline hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-150" href="#">Production SLA</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:underline hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-150" href="#">Terms of Presswork</a>
+</nav>
+</div>
+</footer>
+</body></html>

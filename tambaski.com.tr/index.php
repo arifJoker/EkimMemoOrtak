@@ -1,283 +1,398 @@
 <?php
 /**
- * TAMBASKI.COM.TR - Anasayfa
+ * TAMBASKI.COM.TR - Anasayfa (Precision Studio Print - 1:1 Tam Uyumlu)
  */
-$page_title = "TamBaskı – Online Matbaa, Dijital Baskı & Pleksi / Dekota Kesim Merkezi";
+$page_title = "TAM BASKI | Endüstriyel Baskı & Kurumsal Matbaa Çözümleri";
+$page_desc = "Heidelberg ofset kalitesi, 420+ kurumsal şablon ve anında online vektör prova imkanıyla prestijli kurumsal baskı çözümleri.";
 require_once __DIR__ . '/includes/header.php';
 
 $featured_products = get_all_products(null, true);
 ?>
 
-<!-- Apple Tarzı Otomatik Ürün Slaytı (Hero Carousel) -->
-<section class="hero-slider-section position-relative overflow-hidden">
-    <div class="hero-ambient-glow orb-1"></div>
-    <div class="hero-ambient-glow orb-2"></div>
-
-    <div id="tamBaskiHeroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
-        <div class="carousel-inner">
+<!-- ================= HERO SECTION ================= -->
+<section class="relative pt-12 pb-20 overflow-hidden subtle-grid border-b border-outline-variant/40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <!-- Top Micro-Badge -->
+        <div class="flex justify-center mb-6">
+            <div class="inline-flex items-center gap-2.5 px-3.5 py-1 rounded-full bg-surface-container border border-outline-variant/60 shadow-xs">
+                <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+                <span class="font-label-numeric text-[11px] text-on-surface tracking-wider uppercase font-semibold">Heidelberg XL 106 10-Color Press Live</span>
+                <span class="text-outline-variant">|</span>
+                <span class="text-xs font-semibold text-secondary">v4.2 Vector Studio Aktif</span>
+            </div>
+        </div>
+        
+        <!-- Headline & Subtitle -->
+        <div class="text-center max-w-4xl mx-auto mb-10">
+            <h1 class="text-3xl sm:text-5xl md:text-6xl font-extrabold text-primary tracking-tight mb-5 leading-tight">
+                Endüstriyel Baskı Hassasiyeti, Doğrudan Tarayıcınızda.
+            </h1>
+            <p class="text-base sm:text-lg text-on-surface-variant max-w-2xl mx-auto">
+                Heidelberg Speedmaster ofset kalitesi, 420+ hazır kurumsal şablon ve anında online vektör prova imkanıyla prestijli kurumsal baskı çözümleri.
+            </p>
             
-            <!-- SLIDE 1: KARTVİZİT -->
-            <div class="carousel-item active">
-                <div class="container">
-                    <div class="row align-items-center py-5">
-                        <div class="col-lg-6">
-                            <span class="hero-pill-badge">
-                                <i class="bi bi-patch-check-fill text-warning"></i> Prestij & Çok Satan
-                            </span>
-                            <h1 class="slide-headline">
-                                Kartvizitte İlk İzlenim,<br>
-                                <span class="slide-grad-kartvizit">Kusursuz Prestij.</span>
-                            </h1>
-                            <p class="slide-description">
-                                250gr Solvent Ekonomik, 350gr Mat Kuşe, Kabartma Lak, Altın Varak ve Şeffaf PVC seçenekleri. 1.000 adetten başlayan hazır paketler veya ihtiyacınıza özel adet girişi.
-                            </p>
-                            <div class="slide-price-pill">
-                                <i class="bi bi-tag-fill text-primary"></i> 1.000 Adet Paket: <strong>1.000 ₺</strong> • <strong>Bedava Kargo</strong>
-                            </div>
-                            <div class="d-flex gap-3 flex-wrap">
-                                <a href="product.php?slug=ekonomik-kartvizit-250gr" class="btn btn-apple btn-apple-orange px-4 py-3">
-                                    <i class="bi bi-calculator me-1"></i> Fiyat Hesapla
-                                </a>
-                                <a href="category.php?slug=kartvizit" class="btn btn-apple btn-apple-secondary px-4 py-3">
-                                    Tüm Kartvizitler
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 text-center mt-4 mt-lg-0">
-                            <div class="p-4 bg-white rounded-5 shadow-lg border d-inline-block">
-                                <i class="bi bi-person-badge text-warning" style="font-size: 100px;"></i>
-                                <h4 class="fw-bold mt-2 mb-1">Kurumsal Prestij Kartvizit</h4>
-                                <span class="badge bg-dark rounded-pill px-3 py-2">350gr Mat Kuşe + Kabartma Lak</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <!-- CTA Buttons -->
+            <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
+                <a class="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-primary text-on-primary font-semibold text-sm shadow-md hover:bg-slate-800 transition-all active:scale-95" href="#products">
+                    <span>Ürünleri Keşfet</span>
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                </a>
+                <a class="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-surface-container-lowest text-on-surface font-semibold text-sm border border-outline-variant shadow-xs hover:border-secondary hover:text-secondary transition-all active:scale-95" href="product.php?slug=ekonomik-kartvizit-250gr">
+                    <span class="material-symbols-outlined text-lg text-secondary">design_services</span>
+                    <span>Online Tasarım Editörünü Dene</span>
+                </a>
             </div>
-
-            <!-- SLIDE 2: DEKOTA & PLEKSİ KESİM -->
-            <div class="carousel-item">
-                <div class="container">
-                    <div class="row align-items-center py-5">
-                        <div class="col-lg-6">
-                            <span class="hero-pill-badge">
-                                <i class="bi bi-scissors text-danger"></i> CNC & Lazer Kesim Parkuru
-                            </span>
-                            <h1 class="slide-headline">
-                                Dekota & Pleksi Kesim,<br>
-                                <span class="slide-grad-kesim">İstediğiniz Ebat ve Şekilde.</span>
-                            </h1>
-                            <p class="slide-description">
-                                3mm - 5mm Dekota (Foreks) UV baskı, Pleksi lazer harf ve tabela kesimi. Milimetrik ebat girin, anlık m² ve birim fiyatınızı otomatik hesaplayın.
-                            </p>
-                            <div class="slide-price-pill">
-                                <i class="bi bi-aspect-ratio text-success"></i> m² Başlangıç Fiyatı: <strong>320 ₺/m²</strong>
-                            </div>
-                            <div class="d-flex gap-3 flex-wrap">
-                                <a href="product.php?slug=dekota-foreks-baski-kesim" class="btn btn-apple btn-apple-orange px-4 py-3">
-                                    <i class="bi bi-aspect-ratio me-1"></i> Ebat Gir & Hesapla
-                                </a>
-                                <a href="category.php?slug=dekota-pleksi-kesim" class="btn btn-apple btn-apple-secondary px-4 py-3">
-                                    Kesim Modelleri
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 text-center mt-4 mt-lg-0">
-                            <div class="p-4 bg-white rounded-5 shadow-lg border d-inline-block">
-                                <i class="bi bi-layers text-primary" style="font-size: 100px;"></i>
-                                <h4 class="fw-bold mt-2 mb-1">3mm / 5mm Dekota & Pleksi</h4>
-                                <span class="badge bg-danger rounded-pill px-3 py-2">UV Baskı + Özel Şekilli Kesim</span>
-                            </div>
-                        </div>
-                    </div>
+            
+            <!-- Live Badges -->
+            <div class="mt-10 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-on-surface-variant">
+                <div class="flex items-center gap-2 text-xs font-medium bg-surface-container-lowest px-3 py-1.5 rounded-lg border border-outline-variant/60 shadow-xs">
+                    <span class="material-symbols-outlined text-secondary text-base">verified</span>
+                    <span>300 DPI Ultra HD Ofset</span>
                 </div>
-            </div>
-
-            <!-- SLIDE 3: BROŞÜR & EL İLANI -->
-            <div class="carousel-item">
-                <div class="container">
-                    <div class="row align-items-center py-5">
-                        <div class="col-lg-6">
-                            <span class="hero-pill-badge">
-                                <i class="bi bi-lightning-charge-fill text-primary"></i> Yüksek Tiraj & Ofset
-                            </span>
-                            <h1 class="slide-headline">
-                                Kampanyanızı Duyurun,<br>
-                                <span class="slide-grad-brosur">Toptan Fiyatla Kazanın.</span>
-                            </h1>
-                            <p class="slide-description">
-                                A4, A5, Kırımlı ve Z-Katlamalı broşürlerde Heidelberg ofset baskı kalitesi. Canlı renkler, çift yön baskı ve 24 saatte hızlı teslimat.
-                            </p>
-                            <div class="slide-price-pill">
-                                <i class="bi bi-tag-fill text-danger"></i> 1.000 Adet A5 Broşür: <strong>850 ₺</strong>
-                            </div>
-                            <div class="d-flex gap-3 flex-wrap">
-                                <a href="product.php?slug=a5-tanitim-brosuru-135gr" class="btn btn-apple btn-apple-orange px-4 py-3">
-                                    <i class="bi bi-calculator me-1"></i> Broşür Fiyatı Gör
-                                </a>
-                                <a href="category.php?slug=el-ilani-brosur" class="btn btn-apple btn-apple-secondary px-4 py-3">
-                                    Broşür Çeşitleri
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 text-center mt-4 mt-lg-0">
-                            <div class="p-4 bg-white rounded-5 shadow-lg border d-inline-block">
-                                <i class="bi bi-file-earmark-richtext text-danger" style="font-size: 100px;"></i>
-                                <h4 class="fw-bold mt-2 mb-1">A5 & A4 Ofset Broşür</h4>
-                                <span class="badge bg-primary rounded-pill px-3 py-2">135gr & 170gr Parlak Kuşe</span>
-                            </div>
-                        </div>
-                    </div>
+                <div class="flex items-center gap-2 text-xs font-medium bg-surface-container-lowest px-3 py-1.5 rounded-lg border border-outline-variant/60 shadow-xs">
+                    <span class="material-symbols-outlined text-secondary text-base">timer</span>
+                    <span>24 Saatte Üretim SLA</span>
                 </div>
-            </div>
-
-        </div>
-
-        <!-- Carousel Kontrolleri -->
-        <button class="carousel-control-prev" type="button" data-bs-target="#tamBaskiHeroCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#tamBaskiHeroCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
-        </button>
-    </div>
-</section>
-
-<!-- Avantajlar / Güven Faktörleri -->
-<section class="py-4 bg-white border-bottom">
-    <div class="container">
-        <div class="row g-3 text-center">
-            <div class="col-md-3 col-6">
-                <div class="d-flex align-items-center justify-content-center gap-3">
-                    <i class="bi bi-aspect-ratio text-primary fs-2"></i>
-                    <div class="text-start">
-                        <div class="fw-bold small">Hazır Paket & Özel Adet</div>
-                        <div class="text-muted" style="font-size: 11px;">İstediğiniz Adeti Girin</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 col-6">
-                <div class="d-flex align-items-center justify-content-center gap-3">
-                    <i class="bi bi-truck text-success fs-2"></i>
-                    <div class="text-start">
-                        <div class="fw-bold small">750 ₺ Üzeri Ücretsiz Kargo</div>
-                        <div class="text-muted" style="font-size: 11px;">Anlaşmalı Hızlı Kurye</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 col-6">
-                <div class="d-flex align-items-center justify-content-center gap-3">
-                    <i class="bi bi-shield-check text-primary fs-2"></i>
-                    <div class="text-start">
-                        <div class="fw-bold small">PayTR 3D Güvenli Ödeme</div>
-                        <div class="text-muted" style="font-size: 11px;">Kredi Kartına 12 Taksit</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 col-6">
-                <div class="d-flex align-items-center justify-content-center gap-3">
-                    <i class="bi bi-headset text-danger fs-2"></i>
-                    <div class="text-start">
-                        <div class="fw-bold small">Grafik & Baskı Kontrolü</div>
-                        <div class="text-muted" style="font-size: 11px;">Ücretsiz Teknik Destek</div>
-                    </div>
+                <div class="flex items-center gap-2 text-xs font-medium bg-surface-container-lowest px-3 py-1.5 rounded-lg border border-outline-variant/60 shadow-xs">
+                    <span class="material-symbols-outlined text-secondary text-base">palette</span>
+                    <span>%100 Renk Doğruluk (FOGRA 39/51)</span>
                 </div>
             </div>
         </div>
-    </div>
-</section>
 
-<!-- Popüler Kategoriler -->
-<section class="py-5">
-    <div class="container">
-        <div class="d-flex justify-content-between align-items-end mb-4">
-            <div>
-                <h3 class="fw-bold mb-1">Baskı & Üretim Kategorileri</h3>
-                <p class="text-muted small mb-0">En çok tercih edilen ofset, dijital baskı ve lazer kesim ürünleri</p>
-            </div>
-            <a href="category.php" class="btn btn-sm btn-apple-secondary">Tümünü Gör <i class="bi bi-arrow-right ms-1"></i></a>
-        </div>
-
-        <div class="row g-3">
-            <?php foreach ($all_categories as $cat): ?>
-                <div class="col-lg-2 col-md-4 col-6">
-                    <a href="category.php?slug=<?= urlencode($cat['slug']) ?>" class="text-decoration-none">
-                        <div class="apple-card p-4 text-center h-100">
-                            <div class="mb-3 text-primary">
-                                <i class="bi <?= htmlspecialchars($cat['icon']) ?>" style="font-size: 32px;"></i>
-                            </div>
-                            <h6 class="fw-bold text-dark mb-1" style="font-size: 14px;"><?= htmlspecialchars($cat['name']) ?></h6>
-                            <span class="text-muted" style="font-size: 11px;">İncele & Hesapla →</span>
-                        </div>
+        <!-- 3D Stationery Stage Container -->
+        <div class="relative max-w-5xl mx-auto rounded-2xl bg-gradient-to-b from-surface-container-lowest to-surface-container-low p-2 md:p-3 border border-outline-variant shadow-xl">
+            <div class="relative w-full rounded-xl overflow-hidden bg-surface-container-high aspect-[16/9] md:aspect-[21/9] flex items-center justify-center">
+                <img class="w-full h-full object-cover" alt="Tam Baskı Kurumsal Kırtasiye ve Kartvizit Baskı Parkuru" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDz0TcydwvPaWv8eC5GJA0oh71XhZIcs0i4EBcwj15AZdXHUKeUhp2PgbxggR1pKRGLnw1gK3OSYfQ7Ne2UdoNjPjK2CC4N7l4fPxp0jEuN5OLA6pTnKQpwrZiHBGyhqCLGFFjPPWtkk4maQ-thaeyBKJaoKf4NI9uIK1of9QH2P8yxrKuT3vp6IoaeeaYBXv0WF6bOoJKoBcDZaFUVVA7uDh5xI2YtJ_yDznFwW7uCdj-kI0mVZ_IP"/>
+                <!-- Floating Interactive Pill HUD -->
+                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 frosted-glass px-4 py-2 rounded-full shadow-lg flex items-center gap-4 text-xs font-medium text-primary">
+                    <div class="flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-base text-secondary">360</span>
+                        <span class="font-semibold">3D Canlı Doku Önizleme</span>
+                    </div>
+                    <span class="text-outline-variant">|</span>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
+                        <span class="font-label-numeric text-[11px] text-on-surface-variant">Cotton Tuale 380 GSM</span>
+                    </div>
+                    <a href="product.php?slug=ekonomik-kartvizit-250gr" class="ml-2 px-2.5 py-1 rounded-full bg-primary text-on-primary text-[10px] font-bold hover:bg-slate-800 transition-colors">
+                        Stüdyoda İncele
                     </a>
                 </div>
-            <?php endforeach; ?>
+                <!-- Top-Right Flight Status Tag -->
+                <div class="absolute top-4 right-4 bg-surface-container-lowest/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-outline-variant/60 shadow-sm flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span class="font-label-numeric text-[11px] font-medium text-primary">Pre-flight: Ready for CTP Plate</span>
+                </div>
+            </div>
         </div>
     </div>
 </section>
 
-<!-- Öne Çıkan Ürünler Vitrini -->
-<section class="py-5 bg-white border-top border-bottom">
-    <div class="container">
-        <div class="d-flex justify-content-between align-items-end mb-4">
+<!-- ================= POPULAR PRINT CATEGORIES ================= -->
+<section class="py-20 bg-surface-container-lowest border-b border-outline-variant/40" id="products">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <!-- Section Header -->
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
             <div>
-                <span class="badge bg-primary-subtle text-primary px-3 py-1 rounded-pill mb-1">🔥 Çok Satanlar</span>
-                <h3 class="fw-bold mb-1">Öne Çıkan Matbaa & Kesim Ürünleri</h3>
-                <p class="text-muted small mb-0">Sabit hazır paket fiyatları veya anlık özel adet & m² hesaplayıcı</p>
+                <div class="flex items-center gap-2 text-secondary font-label-numeric text-xs tracking-wider uppercase font-semibold mb-2">
+                    <span class="material-symbols-outlined text-base">layers</span>
+                    <span>Standart &amp; Özel Üretim Portföyü</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-primary tracking-tight">
+                    Popüler Baskı Kategorileri
+                </h2>
+                <p class="text-sm text-on-surface-variant mt-1">
+                    Kurumsal kimliğinizi zirveye taşıyan sertifikalı matbaa ürünleri.
+                </p>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-xs text-on-surface-variant font-label-numeric font-medium">12 Ana Kategori / 48 Varyant</span>
+                <a class="inline-flex items-center gap-1 text-xs font-semibold text-secondary hover:underline" href="category.php?slug=kartvizit">
+                    Tüm Ürünler
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                </a>
             </div>
         </div>
 
-        <div class="row g-4">
-            <?php foreach ($featured_products as $p): ?>
-                <div class="col-lg-3 col-md-6">
-                    <div class="apple-card product-card">
-                        <div class="product-img-wrapper">
-                            <i class="bi <?= ($p['pricing_type'] === 'sqm_calculator' ? 'bi-layers' : 'bi-box-seam') ?> text-primary" style="font-size: 64px;"></i>
-                        </div>
-                        <div class="product-body">
-                            <span class="text-muted small mb-1"><?= ucfirst(str_replace('-', ' ', $p['category_slug'])) ?></span>
-                            <a href="product.php?slug=<?= urlencode($p['slug']) ?>" class="product-title"><?= htmlspecialchars($p['name']) ?></a>
-                            <p class="product-desc"><?= htmlspecialchars($p['short_desc']) ?></p>
-                            
-                            <div class="product-price-row">
-                                <div>
-                                    <?php if ($p['pricing_type'] === 'sqm_calculator'): ?>
-                                        <span class="product-price"><?= format_price($p['base_sqm_price']) ?></span>
-                                        <span class="product-price-sub">/ m²'den başlayan fiyatlarla</span>
-                                    <?php elseif (!empty($p['packages'])): ?>
-                                        <span class="product-price"><?= format_price($p['packages'][0]['price']) ?></span>
-                                        <span class="product-price-sub"><?= $p['packages'][0]['quantity'] ?> Adet Hazır Paket</span>
-                                    <?php else: ?>
-                                        <span class="product-price"><?= format_price($p['base_setup_fee']) ?></span>
-                                        <span class="product-price-sub">'den başlayan</span>
-                                    <?php endif; ?>
-                                </div>
-                                <a href="product.php?slug=<?= urlencode($p['slug']) ?>" class="btn btn-sm btn-apple btn-apple-orange">
-                                    Hesapla <i class="bi bi-chevron-right ms-1"></i>
-                                </a>
+        <!-- Categories 4-Column Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            
+            <!-- Card 1: Özel Kartvizitler -->
+            <div class="group rounded-2xl border border-outline-variant/80 bg-surface-container-lowest overflow-hidden hover:shadow-xl hover:border-secondary transition-all duration-200 flex flex-col">
+                <div class="relative aspect-[4/3] bg-surface-container-low overflow-hidden">
+                    <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Özel Kartvizitler" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLEpiRfEU7EJiQRDuxS10Jg2sEb0R7SucCnK-B7JvT2hl8zjtCaos34Rlol0SfIfRbZ1CrK7gylZh935mH_yC6UK06xRG78FViLw2-BQVFveQK-LmBxi9y4-M2mFuYzhLP_GYJA9msUaUUJ9rz20lvhkNHLbBfWRXVlmPwOs2_m1ADyGeSbnl8TL17zn3H4zb3s-MAnlAZx3oYpLD-owfJkz_Y_WnRxcPPsvjpjc6MeATBAxfy7Gpj"/>
+                    <div class="absolute top-3 left-3 bg-surface-container-lowest/90 backdrop-blur-md px-2.5 py-1 rounded text-primary font-label-numeric text-[11px] font-semibold">
+                        Ultra Prestij
+                    </div>
+                    <div class="absolute bottom-3 right-3 bg-primary text-on-primary px-2 py-0.5 rounded text-[10px] font-label-numeric">
+                        Lak &amp; Varak Uyumlu
+                    </div>
+                </div>
+                <div class="p-5 flex-1 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-base font-bold text-primary mb-1 group-hover:text-secondary transition-colors">
+                            Özel Kartvizitler
+                        </h3>
+                        <p class="text-xs text-on-surface-variant mb-4 leading-relaxed">
+                            Kabartma lak, altın/gümüş varak, PVC ve dokulu tuale kağıt seçenekleriyle kusursuz ilk izlenim.
+                        </p>
+                        <div class="space-y-1.5 pb-4 border-b border-outline-variant/40 text-xs">
+                            <div class="flex items-center justify-between">
+                                <span class="text-on-surface-variant">Stok Gramajı:</span>
+                                <span class="font-label-numeric font-semibold text-primary">350 - 600 GSM</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-on-surface-variant">Min. Sipariş:</span>
+                                <span class="font-label-numeric font-semibold text-primary">100 Adet</span>
                             </div>
                         </div>
                     </div>
+                    <div class="pt-4 flex items-center justify-between mt-auto">
+                        <div>
+                            <span class="text-[10px] text-on-surface-variant font-label-numeric uppercase block">Başlangıç</span>
+                            <span class="text-lg font-bold font-label-numeric text-primary">450 ₺</span>
+                        </div>
+                        <a class="px-3.5 py-2 bg-surface-container hover:bg-secondary hover:text-white rounded-xl text-xs font-semibold transition-colors" href="product.php?slug=ekonomik-kartvizit-250gr">
+                            Konfigüre Et
+                        </a>
+                    </div>
                 </div>
-            <?php endforeach; ?>
+            </div>
+
+            <!-- Card 2: Kurumsal Kimlik -->
+            <div class="group rounded-2xl border border-outline-variant/80 bg-surface-container-lowest overflow-hidden hover:shadow-xl hover:border-secondary transition-all duration-200 flex flex-col">
+                <div class="relative aspect-[4/3] bg-surface-container-low overflow-hidden">
+                    <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Kurumsal Kimlik" src="https://lh3.googleusercontent.com/aida-public/AB6AXuATVhSAYambtmmhjHuz-047VBk1PuNa5TOCs11s0hUwpnFt-cNRcn65o4cyrqWDOwJ5L3cMk4240bmsttYsu8I5iJyE6qMaoxaxcEaj4aX1I_n4v_QEblLW3Lr-VCLYgXkduhsFKnzENQhPU6Ugi-LZ4FvGmthlPk-ylteZ2AQzqzMXPCPlNqIXrU3YUqETSfABMYR3vhqqEl2RtjbRe10oAYwp-Kj3AtGmfXUtrN4D4NAy2bMzLk5q"/>
+                    <div class="absolute top-3 left-3 bg-surface-container-lowest/90 backdrop-blur-md px-2.5 py-1 rounded text-primary font-label-numeric text-[11px] font-semibold">
+                        Ofset Serisi
+                    </div>
+                    <div class="absolute bottom-3 right-3 bg-surface-container-lowest/90 text-primary px-2 py-0.5 rounded text-[10px] font-label-numeric border border-outline-variant/40">
+                        Pantone Calibrated
+                    </div>
+                </div>
+                <div class="p-5 flex-1 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-base font-bold text-primary mb-1 group-hover:text-secondary transition-colors">
+                            Kurumsal Kimlik
+                        </h3>
+                        <p class="text-xs text-on-surface-variant mb-4 leading-relaxed">
+                            Antetli kağıt, pencereli/penceresiz cepli dosya, diplomat zarf ve bloknot takımları.
+                        </p>
+                        <div class="space-y-1.5 pb-4 border-b border-outline-variant/40 text-xs">
+                            <div class="flex items-center justify-between">
+                                <span class="text-on-surface-variant">Kağıt Tipi:</span>
+                                <span class="font-label-numeric font-semibold text-primary">110g 1. Hamur / Kuşe</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-on-surface-variant">Standart:</span>
+                                <span class="font-label-numeric font-semibold text-primary">DIN A4 / A5</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-4 flex items-center justify-between mt-auto">
+                        <div>
+                            <span class="text-[10px] text-on-surface-variant font-label-numeric uppercase block">Başlangıç</span>
+                            <span class="text-lg font-bold font-label-numeric text-primary">1.250 ₺</span>
+                        </div>
+                        <a class="px-3.5 py-2 bg-surface-container hover:bg-secondary hover:text-white rounded-xl text-xs font-semibold transition-colors" href="category.php?slug=kurumsal-urunler">
+                            Konfigüre Et
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3: Tanıtım & Reklam -->
+            <div class="group rounded-2xl border border-outline-variant/80 bg-surface-container-lowest overflow-hidden hover:shadow-xl hover:border-secondary transition-all duration-200 flex flex-col">
+                <div class="relative aspect-[4/3] bg-surface-container-low overflow-hidden">
+                    <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Tanıtım & Reklam" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6ZD3XE0DcDiaujkXPlFPBZtT74Fbaqcx7koOtoFznCZ99tKHrCY7usEYfKLrNPPZBf06MnZfjLHJTJyEfry2cIFHVVD_ktNE0bG2bSJSskD-rcsVio2pdsmBA7TxASVJuh_Y3-3auNV0GLxHqChsNvX8-TlD6hKs8eIfEJV44J7W1Ev-YFPOTRCH2aUoKXG2ALZcgQdHhbeZB3Lc2Ce_UWICdz38QNawlDtIEs5qBx3_v8_3xFRWQ"/>
+                    <div class="absolute top-3 left-3 bg-surface-container-lowest/90 backdrop-blur-md px-2.5 py-1 rounded text-primary font-label-numeric text-[11px] font-semibold">
+                        Çok Sayfalı
+                    </div>
+                    <div class="absolute bottom-3 right-3 bg-surface-container-lowest/90 text-primary px-2 py-0.5 rounded text-[10px] font-label-numeric border border-outline-variant/40">
+                        Tel Dikiş / Pur Cilt
+                    </div>
+                </div>
+                <div class="p-5 flex-1 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-base font-bold text-primary mb-1 group-hover:text-secondary transition-colors">
+                            Broşür &amp; El İlanı
+                        </h3>
+                        <p class="text-xs text-on-surface-variant mb-4 leading-relaxed">
+                            Kırım broşür, lüks ürün katalogları, el ilanları ve restoran menüleri.
+                        </p>
+                        <div class="space-y-1.5 pb-4 border-b border-outline-variant/40 text-xs">
+                            <div class="flex items-center justify-between">
+                                <span class="text-on-surface-variant">Selefon:</span>
+                                <span class="font-label-numeric font-semibold text-primary">Mat / Parlak / Soft Touch</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-on-surface-variant">Baskı Türü:</span>
+                                <span class="font-label-numeric font-semibold text-primary">8 Renk UV Ofset</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-4 flex items-center justify-between mt-auto">
+                        <div>
+                            <span class="text-[10px] text-on-surface-variant font-label-numeric uppercase block">Başlangıç</span>
+                            <span class="text-lg font-bold font-label-numeric text-primary">890 ₺</span>
+                        </div>
+                        <a class="px-3.5 py-2 bg-surface-container hover:bg-secondary hover:text-white rounded-xl text-xs font-semibold transition-colors" href="category.php?slug=el-ilani-brosur">
+                            Konfigüre Et
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4: Tabela & İç Mekan -->
+            <div class="group rounded-2xl border border-outline-variant/80 bg-surface-container-lowest overflow-hidden hover:shadow-xl hover:border-secondary transition-all duration-200 flex flex-col">
+                <div class="relative aspect-[4/3] bg-surface-container-low overflow-hidden">
+                    <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Tabela & İç Mekan" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsc4wYzNFA7DwYwfOwJCJOnyGa9HvueoWmGuRWdvLJnLzGrrp--cRAex3VNasYu13AfoIYq9wvyesEtMIqkgwYBKEM1VVkc722pGtAYODJWyOYxkDYAqWJnUJYt2VGGGR9oxk983q4eCRo0bxiMzYj5FzNlq4sDsUK9EsSWycbSwzo8dvZo2CewCpDua9eojeQV6qqTaxq_CB_rE5zd-xq6RCrImMGBziObbJVpGHgBXh_rrcv_79k"/>
+                    <div class="absolute top-3 left-3 bg-surface-container-lowest/90 backdrop-blur-md px-2.5 py-1 rounded text-primary font-label-numeric text-[11px] font-semibold">
+                        Geniş Format
+                    </div>
+                    <div class="absolute bottom-3 right-3 bg-surface-container-lowest/90 text-primary px-2 py-0.5 rounded text-[10px] font-label-numeric border border-outline-variant/40">
+                        Direkt UV Baskı
+                    </div>
+                </div>
+                <div class="p-5 flex-1 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-base font-bold text-primary mb-1 group-hover:text-secondary transition-colors">
+                            Dekota &amp; Pleksi Kesim
+                        </h3>
+                        <p class="text-xs text-on-surface-variant mb-4 leading-relaxed">
+                            Dekota foreks, şeffaf pleksi, vinil germe branda ve kurumsal roll-up banner sistemleri.
+                        </p>
+                        <div class="space-y-1.5 pb-4 border-b border-outline-variant/40 text-xs">
+                            <div class="flex items-center justify-between">
+                                <span class="text-on-surface-variant">Dayanıklılık:</span>
+                                <span class="font-label-numeric font-semibold text-primary">5 Yıl Solmazlık</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-on-surface-variant">Çözünürlük:</span>
+                                <span class="font-label-numeric font-semibold text-primary">1440 DPI Piezo</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-4 flex items-center justify-between mt-auto">
+                        <div>
+                            <span class="text-[10px] text-on-surface-variant font-label-numeric uppercase block">Başlangıç</span>
+                            <span class="text-lg font-bold font-label-numeric text-primary">640 ₺</span>
+                        </div>
+                        <a class="px-3.5 py-2 bg-surface-container hover:bg-secondary hover:text-white rounded-xl text-xs font-semibold transition-colors" href="category.php?slug=dekota-pleksi-kesim">
+                            Konfigüre Et
+                        </a>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </section>
 
-<!-- B2B & E-Bayi Çağrısı -->
-<section class="py-5 bg-dark text-white rounded-5 mx-3 mx-lg-5 my-5" style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);">
-    <div class="container py-3">
-        <div class="row align-items-center g-4">
-            <div class="col-lg-8">
-                <span class="badge bg-warning text-dark px-3 py-1 rounded-pill fw-bold mb-2">🤝 Ajanslar & Grafikerler İçin</span>
-                <h2 class="fw-bold mb-2">TamBaskı E-Bayi Ailesine Katılın</h2>
-                <p class="text-light opacity-75 mb-0">
-                    Reklam ajansları, matbaacılar ve serbest grafik tasarımcılar için %25'e varan özel iskonto tarifesi, faturasız/isimsiz kargo gönderimi ve öncelikli üretim ayrıcalıkları.
+<!-- ================= WHY PRESS & STUDIO (VALUE PROPOSITIONS) ================= -->
+<section class="py-20 bg-surface border-b border-outline-variant/40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <div class="text-center max-w-2xl mx-auto mb-16">
+            <span class="font-label-numeric text-xs uppercase tracking-wider text-secondary font-bold">Endüstri Standartları</span>
+            <h2 class="text-2xl sm:text-3xl font-bold text-primary tracking-tight mt-1 mb-3">
+                Neden Tam Baskı Studio?
+            </h2>
+            <p class="text-sm text-on-surface-variant">
+                Geleneksel matbaacılığın hata payını ortadan kaldıran yapay zeka denetimli dijital üretim altyapısı.
+            </p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Prop 1 -->
+            <div class="p-6 rounded-2xl bg-surface-container-lowest border border-outline-variant/60 shadow-xs hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 rounded-xl bg-surface-container-low flex items-center justify-center text-secondary mb-5 border border-outline-variant/40">
+                    <span class="material-symbols-outlined text-[28px]">auto_fix_high</span>
+                </div>
+                <div class="font-label-numeric text-[11px] text-secondary font-bold mb-1">01 / PRE-FLIGHT</div>
+                <h3 class="text-base font-bold text-primary mb-2">Otomatik Vektör Denetimi</h3>
+                <p class="text-xs text-on-surface-variant leading-relaxed">
+                    Yüklediğiniz PDF ve AI dosyaları 3mm taşma payı, RGB/CMYK dönüşümü ve 300 DPI çözünürlük açısından milisaniyeler içinde taranır.
                 </p>
             </div>
-            <div class="col-lg-4 text-lg-end">
-                <a href="dealer_apply.php" class="btn btn-lg btn-warning text-dark fw-bold px-4 py-3 rounded-pill shadow">
-                    <i class="bi bi-award-fill me-2"></i>E-Bayi Başvurusu Yap
-                </a>
+            <!-- Prop 2 -->
+            <div class="p-6 rounded-2xl bg-surface-container-lowest border border-outline-variant/60 shadow-xs hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 rounded-xl bg-surface-container-low flex items-center justify-center text-secondary mb-5 border border-outline-variant/40">
+                    <span class="material-symbols-outlined text-[28px]">precision_manufacturing</span>
+                </div>
+                <div class="font-label-numeric text-[11px] text-secondary font-bold mb-1">02 / OFFSET MASTERY</div>
+                <h3 class="text-base font-bold text-primary mb-2">Mikron Düzeyinde Baskı</h3>
+                <p class="text-xs text-on-surface-variant leading-relaxed">
+                    Heidelberg Speedmaster XL 106 parkurumuz, lazerle pozlandırılmış CTP kalıplarıyla ±0.02 mm kros hassasiyeti sunar.
+                </p>
+            </div>
+            <!-- Prop 3 -->
+            <div class="p-6 rounded-2xl bg-surface-container-lowest border border-outline-variant/60 shadow-xs hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 rounded-xl bg-surface-container-low flex items-center justify-center text-secondary mb-5 border border-outline-variant/40">
+                    <span class="material-symbols-outlined text-[28px]">view_in_ar</span>
+                </div>
+                <div class="font-label-numeric text-[11px] text-secondary font-bold mb-1">03 / AR &amp; 3D PROVA</div>
+                <h3 class="text-base font-bold text-primary mb-2">Gerçek Zamanlı 3D Simülasyon</h3>
+                <p class="text-xs text-on-surface-variant leading-relaxed">
+                    Baskıya onay vermeden önce kabartma lakın ışık kırılmasını, kağıt dokusunu ve kırım çizgilerini 3D ortamda döndürerek inceleyin.
+                </p>
+            </div>
+            <!-- Prop 4 -->
+            <div class="p-6 rounded-2xl bg-surface-container-lowest border border-outline-variant/60 shadow-xs hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 rounded-xl bg-surface-container-low flex items-center justify-center text-secondary mb-5 border border-outline-variant/40">
+                    <span class="material-symbols-outlined text-[28px]">local_shipping</span>
+                </div>
+                <div class="font-label-numeric text-[11px] text-secondary font-bold mb-1">04 / EXPRESS LOGISTICS</div>
+                <h3 class="text-base font-bold text-primary mb-2">VIP Kurumsal Sevkiyat</h3>
+                <p class="text-xs text-on-surface-variant leading-relaxed">
+                    750 ₺ üzeri siparişlerde neme ve darbelere dayanıklı kraft korumalı ambalajlarla Türkiye genelinde ücretsiz hızlı teslimat.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ================= SAMPLE KIT CALLOUT (FREE SAMPLE PACK) ================= -->
+<section class="py-20 bg-primary-container text-on-primary relative overflow-hidden" id="sample-kit">
+    <div class="absolute -right-20 -bottom-20 w-96 h-96 bg-secondary/20 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div class="lg:col-span-7">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-lowest/10 border border-outline-variant/30 text-secondary-fixed text-[11px] font-label-numeric mb-6">
+                    <span class="material-symbols-outlined text-base">inventory_2</span>
+                    <span>Ücretsiz Kurumsal Tanıtım Seti</span>
+                </div>
+                <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-4">
+                    Dokunmadan Karar Vermeyin.
+                </h2>
+                <p class="text-sm sm:text-base text-slate-300 max-w-xl mb-8 leading-relaxed">
+                    18 farklı seçkin kağıt stoğu, Soft Touch ve Kumlu Mat selefonlar, kabartma lak, gofre ve folyo yaldız örneklerini içeren <strong>Kurumsal Numune Kitini</strong> şirketinize ücretsiz talep edin.
+                </p>
+                <form class="flex flex-col sm:flex-row gap-3 max-w-lg" onsubmit="event.preventDefault(); alert('Numune talebiniz başarıyla alındı! Kargo takip kodunuz SMS ile iletilecektir.');">
+                    <input class="px-4 py-3 bg-surface-container-lowest text-primary rounded-xl border border-outline-variant focus:outline-none focus:ring-2 focus:ring-secondary flex-1 text-sm font-medium" placeholder="Şirket e-posta veya telefon adresiniz..." required="" type="text"/>
+                    <button class="px-6 py-3 bg-secondary hover:bg-blue-600 text-white rounded-xl font-semibold text-sm transition-all active:scale-95 shadow-md flex items-center justify-center gap-2" type="submit">
+                        <span>Numune Kiti İste</span>
+                        <span class="material-symbols-outlined text-base">send</span>
+                    </button>
+                </form>
+                <div class="mt-4 flex flex-wrap items-center gap-6 text-[11px] font-label-numeric text-slate-400">
+                    <span>✓ Kurumsal firmalara 100% ücretsiz</span>
+                    <span>✓ Ertesi gün kurye teslimatı</span>
+                    <span>✓ CMYK &amp; Pantone kılavuzu dahil</span>
+                </div>
+            </div>
+            <div class="lg:col-span-5">
+                <div class="relative rounded-2xl overflow-hidden border border-outline-variant/30 shadow-2xl bg-surface-container-lowest/5 p-3 backdrop-blur-sm">
+                    <img class="w-full h-80 object-cover rounded-xl" alt="Numune Kiti Kutusu" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBhve8Q2UdDAqzPrSEYfDI1CbkOUUpgJ_GaQ3SGSpF-lVq-cOg3VO8p1Ku_m0NXWfL3Y3drWZx-yHGMp2H28_ObPJzjC0Ae-hibW3QdyvjqRHEnQt-irr_oho8tlvYWHhXnCPGjCE_oFB4ruY-ey4HWdxjltdVzGtK4XSg7yCxXZ0kd5BcOpXIkuKB-8I-gp5TZ70pL_qCMcv1LxOUJ93EXsAMC-OgETPGUYQ_QFib1zf8O6WnOD0hF"/>
+                    <div class="absolute bottom-6 left-6 right-6 frosted-glass p-3.5 rounded-xl text-primary flex items-center justify-between shadow-lg">
+                        <div>
+                            <p class="text-xs font-bold text-slate-900">2025 Master Swatch Book</p>
+                            <p class="text-[10px] font-label-numeric text-slate-600">18 Stok / 6 Bitiş Efekti</p>
+                        </div>
+                        <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded-lg">
+                            Stokta Var
+                        </span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

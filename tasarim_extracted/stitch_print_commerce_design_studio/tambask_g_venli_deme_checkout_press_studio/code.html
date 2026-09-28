@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+
+<html class="light" lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Güvenli Ödeme | Press &amp; Studio - TamBaskı</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary": "#ffffff",
+            "on-tertiary-fixed-variant": "#005236",
+            "error-container": "#ffdad6",
+            "surface-dim": "#d8dadc",
+            "secondary-container": "#316bf3",
+            "primary-container": "#131b2e",
+            "secondary-fixed-dim": "#b4c5ff",
+            "tertiary-fixed-dim": "#4edea3",
+            "surface-container-high": "#e6e8ea",
+            "on-secondary-container": "#fefcff",
+            "on-primary-fixed": "#131b2e",
+            "surface": "#f7f9fb",
+            "tertiary-fixed": "#6ffbbe",
+            "surface-bright": "#f7f9fb",
+            "secondary": "#0051d5",
+            "on-error-container": "#93000a",
+            "outline-variant": "#c6c6cd",
+            "tertiary": "#000000",
+            "inverse-surface": "#2d3133",
+            "on-secondary-fixed": "#00174b",
+            "primary-fixed-dim": "#bec6e0",
+            "surface-container-highest": "#e0e3e5",
+            "on-secondary-fixed-variant": "#003ea8",
+            "on-surface-variant": "#45464d",
+            "primary-fixed": "#dae2fd",
+            "on-primary-container": "#7c839b",
+            "on-tertiary-container": "#009668",
+            "primary": "#000000",
+            "on-error": "#ffffff",
+            "on-primary": "#ffffff",
+            "surface-container-low": "#f2f4f6",
+            "secondary-fixed": "#dbe1ff",
+            "tertiary-container": "#002113",
+            "on-surface": "#191c1e",
+            "error": "#ba1a1a",
+            "on-secondary": "#ffffff",
+            "on-background": "#191c1e",
+            "surface-container": "#eceef0",
+            "surface-variant": "#e0e3e5",
+            "outline": "#76777d",
+            "background": "#f7f9fb",
+            "on-tertiary-fixed": "#002113",
+            "on-primary-fixed-variant": "#3f465c",
+            "inverse-on-surface": "#eff1f3",
+            "surface-tint": "#565e74",
+            "surface-container-lowest": "#ffffff",
+            "inverse-primary": "#bec6e0"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-lg": "1.5rem",
+            "space-sm": "0.5rem",
+            "space-xl": "2.5rem",
+            "space-xs": "0.25rem",
+            "gutter": "1.5rem",
+            "space-md": "1rem",
+            "margin-mobile": "1rem",
+            "margin": "3rem",
+            "gutter-mobile": "0.75rem"
+          },
+          "fontFamily": {
+            "headline-lg-mobile": ["Inter"],
+            "body-lg": ["Inter"],
+            "body-sm": ["Inter"],
+            "body-md": ["Inter"],
+            "headline-sm": ["Inter"],
+            "headline-md": ["Inter"],
+            "headline-lg": ["Inter"],
+            "label-numeric": ["JetBrains Mono"],
+            "display-hero-mobile": ["Inter"],
+            "label-caps": ["Inter"],
+            "display-hero": ["Inter"]
+          },
+          "fontSize": {
+            "headline-lg-mobile": ["26px", {"lineHeight": "34px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+            "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400"}],
+            "body-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.005em", "fontWeight": "400"}],
+            "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+            "headline-sm": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+            "headline-md": ["22px", {"lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+            "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+            "label-numeric": ["11px", {"lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+            "display-hero-mobile": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "600"}],
+            "label-caps": ["11px", {"lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "600"}],
+            "display-hero": ["56px", {"lineHeight": "64px", "letterSpacing": "-0.03em", "fontWeight": "600"}]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-outlined.fill-icon {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen antialiased flex flex-col selection:bg-secondary-fixed selection:text-on-secondary-fixed">
+<!-- Header: Dedicated Streamlined Checkout Header with Security Lock -->
+<header class="sticky top-0 z-40 bg-surface-container-lowest/90 backdrop-blur-md border-b border-surface-container-high transition-all">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+<!-- Brand Anchor -->
+<div class="flex items-center gap-3">
+<a class="flex items-center gap-2 group" href="#">
+<div class="w-8 h-8 rounded-lg bg-primary text-on-primary flex items-center justify-center font-bold font-headline-sm text-headline-sm tracking-tighter shadow-sm">
+            P
+          </div>
+<span class="font-headline-sm text-headline-sm font-semibold tracking-tight text-primary">PRESS &amp; STUDIO</span>
+</a>
+<span class="text-outline-variant font-body-sm text-body-sm hidden sm:inline">|</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm hidden sm:inline">TamBaskı Ticari Üretim</span>
+</div>
+<!-- Trust Indicator (Apple & Stripe Clarity) -->
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-low border border-outline-variant/40 text-on-surface-variant font-label-caps text-label-caps">
+<span class="material-symbols-outlined text-secondary" style="font-size: 16px;">lock</span>
+<span>256-BIT SSL ŞİFRELİ GÜVENLİ ÖDEME</span>
+</div>
+<!-- Cart Return -->
+<a class="flex items-center gap-1 text-on-surface-variant hover:text-primary font-body-md text-body-md transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 18px;">arrow_back</span>
+<span class="hidden sm:inline font-medium">Sepete Dön</span>
+</a>
+</div>
+</header>
+<!-- Stepper Breadcrumb Track -->
+<nav aria-label="Sipariş Adımları" class="border-b border-surface-container-high bg-surface-container-lowest">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
+<ol class="flex items-center justify-center sm:justify-start gap-3 sm:gap-6 text-body-sm font-body-sm">
+<li class="flex items-center gap-2 text-on-tertiary-container font-medium">
+<span class="w-5 h-5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center font-label-numeric text-label-numeric">
+<span class="material-symbols-outlined" style="font-size: 14px;">check</span>
+</span>
+<span>1. Sepet</span>
+</li>
+<span class="text-outline-variant">/</span>
+<li class="flex items-center gap-2 text-on-tertiary-container font-medium">
+<span class="w-5 h-5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center font-label-numeric text-label-numeric">
+<span class="material-symbols-outlined" style="font-size: 14px;">check</span>
+</span>
+<span>2. Teslimat &amp; Fatura</span>
+</li>
+<span class="text-outline-variant">/</span>
+<li class="flex items-center gap-2 text-secondary font-semibold">
+<span class="w-5 h-5 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-label-numeric text-label-numeric">
+            3
+          </span>
+<span>3. Ödeme &amp; Onay</span>
+</li>
+</ol>
+</div>
+</nav>
+<!-- Main Canvas: 2-Column Split Studio Architecture -->
+<main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+<!-- LEFT COLUMN: Payment & Billing Form Engine (Col 1-7) -->
+<section class="lg:col-span-7 space-y-8">
+<!-- STEP 01: Fatura ve İletişim Tipi -->
+<div class="bg-surface-container-lowest p-6 sm:p-7 rounded-xl border border-surface-container-high shadow-sm">
+<div class="flex items-center justify-between mb-5">
+<div class="flex items-center gap-3">
+<span class="font-label-numeric text-label-numeric px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-bold">01</span>
+<h2 class="font-headline-sm text-headline-sm text-primary">Fatura Tipi ve Vergi Bilgileri</h2>
+</div>
+<span class="font-label-caps text-label-caps text-secondary font-semibold">GEREKLİ</span>
+</div>
+<!-- Tab Selector -->
+<div class="grid grid-cols-2 gap-2 p-1 bg-surface-container-low rounded-lg mb-5 border border-surface-container-high">
+<button class="py-2.5 px-4 text-center rounded-md bg-surface-container-lowest text-primary shadow-sm font-body-md text-body-md font-semibold transition-all" type="button">
+              Kurumsal Fatura (Şirket)
+            </button>
+<button class="py-2.5 px-4 text-center rounded-md text-on-surface-variant hover:text-primary font-body-md text-body-md transition-all" type="button">
+              Bireysel Fatura (Şahıs)
+            </button>
+</div>
+<!-- Corporate Input Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div class="sm:col-span-2">
+<label class="block font-body-sm text-body-sm font-medium text-on-surface-variant mb-1.5">Resmi Şirket Ünvanı</label>
+<input class="w-full px-3.5 py-2.5 rounded-lg border border-surface-container-high bg-surface-container-lowest text-primary font-body-md text-body-md focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-all" type="text" value="Studio Mono Tasarım ve Reklamcılık Ltd. Şti."/>
+</div>
+<div>
+<label class="block font-body-sm text-body-sm font-medium text-on-surface-variant mb-1.5">Vergi Dairesi</label>
+<input class="w-full px-3.5 py-2.5 rounded-lg border border-surface-container-high bg-surface-container-lowest text-primary font-body-md text-body-md focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-all" type="text" value="Beşiktaş Vergi Dairesi"/>
+</div>
+<div>
+<label class="block font-body-sm text-body-sm font-medium text-on-surface-variant mb-1.5">Vergi Numarası (VKN)</label>
+<input class="w-full px-3.5 py-2.5 rounded-lg border border-surface-container-high bg-surface-container-lowest text-primary font-label-numeric text-body-md focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-all" type="text" value="7840192834"/>
+</div>
+<div class="sm:col-span-2">
+<div class="flex items-center justify-between mb-1.5">
+<label class="font-body-sm text-body-sm font-medium text-on-surface-variant">E-Fatura Posta Kutusu (PK/GB Etiketi)</label>
+<span class="font-label-numeric text-label-numeric text-on-surface-variant">Opsiyonel</span>
+</div>
+<input class="w-full px-3.5 py-2.5 rounded-lg border border-surface-container-high bg-surface-container-lowest text-primary font-body-md text-body-md focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-all placeholder:text-outline-variant" placeholder="urn:mail:defaultpk@studiomono.com" type="text"/>
+</div>
+</div>
+</div>
+<!-- STEP 02: Teslimat Adresi & Lojistik Seçimi -->
+<div class="bg-surface-container-lowest p-6 sm:p-7 rounded-xl border border-surface-container-high shadow-sm">
+<div class="flex items-center justify-between mb-5">
+<div class="flex items-center gap-3">
+<span class="font-label-numeric text-label-numeric px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-bold">02</span>
+<h2 class="font-headline-sm text-headline-sm text-primary">Teslimat Adresi ve Kargo Planı</h2>
+</div>
+<button class="text-secondary hover:underline font-body-sm text-body-sm font-medium" type="button">Değiştir</button>
+</div>
+<!-- Saved Address Card -->
+<div class="p-4 rounded-lg bg-surface-container-low border border-surface-container-high flex items-start justify-between gap-4 mb-5">
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-body-md font-semibold text-primary">Mert Yılmaz</span>
+<span class="px-2 py-0.5 text-[10px] font-label-caps font-semibold rounded bg-surface-container-high text-on-surface-variant">OFİS / AJANS</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                Levent Loft Residence No:14 Kat:4 D:42 Büyükdere Cad. Beşiktaş / İstanbul
+              </p>
+<p class="font-label-numeric text-label-numeric text-on-surface-variant pt-1">+90 (532) 482 91 **</p>
+</div>
+<span class="material-symbols-outlined text-secondary" style="font-size: 22px;">verified</span>
+</div>
+<!-- Shipping Dispatch Options -->
+<div class="space-y-2.5">
+<label class="block font-body-sm text-body-sm font-medium text-on-surface-variant mb-2">Kargo Tercihi</label>
+<!-- Option 1: Selected Free Express -->
+<label class="relative flex items-center justify-between p-3.5 rounded-lg border-2 border-secondary bg-secondary-fixed/10 cursor-pointer transition-all">
+<div class="flex items-center gap-3">
+<input checked="" class="w-4 h-4 text-secondary border-outline focus:ring-secondary" name="shipping" type="radio"/>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-body-md font-semibold text-primary">Yurtiçi Kargo Ekspres</span>
+<span class="px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-numeric text-[10px] font-bold">ÜCRETSİZ</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Baskı ve kurutma sonrası 24 saatte adrese teslimat</p>
+</div>
+</div>
+<span class="font-label-numeric text-body-md font-semibold text-primary">0,00 ₺</span>
+</label>
+<!-- Option 2: Same Day VIP Courier -->
+<label class="relative flex items-center justify-between p-3.5 rounded-lg border border-surface-container-high bg-surface-container-lowest hover:border-outline-variant cursor-pointer transition-all">
+<div class="flex items-center gap-3">
+<input class="w-4 h-4 text-secondary border-outline focus:ring-secondary" name="shipping" type="radio"/>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-body-md font-semibold text-primary">İstanbul İçi Özel Kurye</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-numeric text-[10px] font-medium">AYNI GÜN VIP</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Üretim bittiği an özel motorlu kurye ile direkt teslim</p>
+</div>
+</div>
+<span class="font-label-numeric text-body-md font-semibold text-primary">+120,00 ₺</span>
+</label>
+</div>
+</div>
+<!-- STEP 03: Ödeme Yöntemi Seçimi -->
+<div class="bg-surface-container-lowest p-6 sm:p-7 rounded-xl border border-surface-container-high shadow-sm">
+<div class="flex items-center justify-between mb-5">
+<div class="flex items-center gap-3">
+<span class="font-label-numeric text-label-numeric px-2 py-0.5 rounded bg-secondary text-on-secondary font-bold">03</span>
+<h2 class="font-headline-sm text-headline-sm text-primary">Ödeme Yöntemi</h2>
+</div>
+<div class="flex items-center gap-1.5 text-on-surface-variant font-label-numeric text-label-numeric">
+<span class="material-symbols-outlined text-secondary" style="font-size: 16px;">verified_user</span>
+<span>3D SECURE ZORUNLU</span>
+</div>
+</div>
+<!-- Payment Method Accordion / Selector Tabs -->
+<div class="space-y-4">
+<!-- METHOD 1: Credit Card (Active) -->
+<div class="border-2 border-secondary rounded-xl p-5 bg-surface-container-lowest">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2.5">
+<input checked="" class="w-4 h-4 text-secondary border-outline focus:ring-secondary" name="payment_method" type="radio"/>
+<span class="font-headline-sm text-body-lg font-semibold text-primary">Kredi / Banka Kartı</span>
+</div>
+<!-- Card Network Logos -->
+<div class="flex items-center gap-1.5">
+<span class="px-2 py-1 rounded bg-surface-container-low border border-surface-container-high font-label-numeric text-[10px] font-bold tracking-wider text-primary">VISA</span>
+<span class="px-2 py-1 rounded bg-surface-container-low border border-surface-container-high font-label-numeric text-[10px] font-bold tracking-wider text-primary">MASTERCARD</span>
+<span class="px-2 py-1 rounded bg-surface-container-low border border-surface-container-high font-label-numeric text-[10px] font-bold tracking-wider text-primary">TROY</span>
+<span class="px-2 py-1 rounded bg-surface-container-low border border-surface-container-high font-label-numeric text-[10px] font-bold tracking-wider text-primary">AMEX</span>
+</div>
+</div>
+<!-- Card Input Form Fields (Stripe Cleanliness) -->
+<div class="space-y-4 pt-2">
+<div>
+<label class="block font-body-sm text-body-sm font-medium text-on-surface-variant mb-1">Kart Numarası</label>
+<div class="relative">
+<input class="w-full pl-3.5 pr-11 py-2.5 rounded-lg border border-surface-container-high bg-surface-container-lowest text-primary font-label-numeric text-body-md tracking-wider focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-all" placeholder="•••• •••• •••• ••••" type="text" value="5428 7291 0041 8492"/>
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-on-surface-variant" style="font-size: 20px;">credit_card</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block font-body-sm text-body-sm font-medium text-on-surface-variant mb-1">Son Kullanma Tarihi</label>
+<input class="w-full px-3.5 py-2.5 rounded-lg border border-surface-container-high bg-surface-container-lowest text-primary font-label-numeric text-body-md focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-all" placeholder="AA / YY" type="text" value="08 / 27"/>
+</div>
+<div>
+<div class="flex items-center justify-between mb-1">
+<label class="font-body-sm text-body-sm font-medium text-on-surface-variant">CVC / CVV</label>
+<span class="text-on-surface-variant material-symbols-outlined cursor-help" style="font-size: 15px;" title="Kartın arkasındaki son 3 hane">help</span>
+</div>
+<input class="w-full px-3.5 py-2.5 rounded-lg border border-surface-container-high bg-surface-container-lowest text-primary font-label-numeric text-body-md focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-all" maxlength="4" placeholder="•••" type="password" value="482"/>
+</div>
+</div>
+<div>
+<label class="block font-body-sm text-body-sm font-medium text-on-surface-variant mb-1">Kart Üzerindeki İsim</label>
+<input class="w-full px-3.5 py-2.5 rounded-lg border border-surface-container-high bg-surface-container-lowest text-primary font-body-md text-body-md tracking-wide focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-all" placeholder="MERT YILMAZ" type="text" value="MERT YILMAZ"/>
+</div>
+<!-- Installment Matrix (Taksit Seçenekleri Tablosu) -->
+<div class="pt-2">
+<div class="flex items-center justify-between mb-2">
+<span class="font-body-sm text-body-sm font-medium text-on-surface-variant">Taksit Seçenekleri (Axess, Bonus, World, Maximum)</span>
+<span class="font-label-numeric text-label-numeric text-tertiary-container bg-tertiary-fixed/30 px-2 py-0.5 rounded font-semibold">Vade Farksız 3 Taksit</span>
+</div>
+<div class="border border-surface-container-high rounded-lg overflow-hidden text-body-sm font-body-sm">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low text-on-surface-variant border-b border-surface-container-high font-label-caps text-[10px]">
+<tr>
+<th class="p-2.5 pl-3">Taksit Sayısı</th>
+<th class="p-2.5">Aylık Ödeme</th>
+<th class="p-2.5 text-right pr-3">Toplam Tutar</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container-high">
+<tr class="bg-secondary-fixed/15 font-semibold text-primary">
+<td class="p-2.5 pl-3 flex items-center gap-2">
+<input checked="" class="text-secondary focus:ring-secondary" name="installment" type="radio"/>
+<span>Tek Çekim</span>
+</td>
+<td class="p-2.5 font-label-numeric">2.874,00 ₺</td>
+<td class="p-2.5 text-right pr-3 font-label-numeric">2.874,00 ₺</td>
+</tr>
+<tr class="hover:bg-surface-container-low text-on-surface-variant">
+<td class="p-2.5 pl-3 flex items-center gap-2">
+<input class="text-secondary focus:ring-secondary" name="installment" type="radio"/>
+<span>3 Taksit (Peşin Fiyatına)</span>
+</td>
+<td class="p-2.5 font-label-numeric">958,00 ₺ / ay</td>
+<td class="p-2.5 text-right pr-3 font-label-numeric">2.874,00 ₺</td>
+</tr>
+<tr class="hover:bg-surface-container-low text-on-surface-variant">
+<td class="p-2.5 pl-3 flex items-center gap-2">
+<input class="text-secondary focus:ring-secondary" name="installment" type="radio"/>
+<span>6 Taksit (+%4.5 Vade)</span>
+</td>
+<td class="p-2.5 font-label-numeric">500,55 ₺ / ay</td>
+<td class="p-2.5 text-right pr-3 font-label-numeric">3.003,33 ₺</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<!-- METHOD 2: Bank Transfer / EFT -->
+<label class="flex items-center justify-between p-4 rounded-xl border border-surface-container-high hover:border-outline-variant bg-surface-container-lowest cursor-pointer transition-all">
+<div class="flex items-center gap-3">
+<input class="w-4 h-4 text-secondary border-outline focus:ring-secondary" name="payment_method" type="radio"/>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-body-md font-semibold text-primary">Havale / EFT ile Ödeme</span>
+<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-label-numeric text-[10px] font-bold">%3 EKSTRA İNDİRİM</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Garanti BBVA, Akbank, İş Bankası, Yapı Kredi hesaplarımıza transfer</p>
+</div>
+</div>
+<span class="font-label-numeric text-body-md font-semibold text-emerald-700">2.787,78 ₺</span>
+</label>
+<!-- METHOD 3: Corporate Current Account / Credit Term -->
+<label class="flex items-center justify-between p-4 rounded-xl border border-surface-container-high hover:border-outline-variant bg-surface-container-lowest cursor-pointer transition-all">
+<div class="flex items-center gap-3">
+<input class="w-4 h-4 text-secondary border-outline focus:ring-secondary" name="payment_method" type="radio"/>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-body-md font-semibold text-primary">Kurumsal Cari Hesap / Vadeli Sipariş</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-numeric text-[10px] font-medium">30 GÜN VADE</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Onaylı kurumsal sözleşmeli müşteriler için cari ekstreye yansıtılır</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline" style="font-size: 20px;">account_balance</span>
+</label>
+</div>
+</div>
+<!-- STEP 04: Legal Terms & Production Tolerances -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-surface-container-high space-y-3.5">
+<label class="flex items-start gap-3 cursor-pointer">
+<input checked="" class="mt-1 rounded text-secondary border-outline-variant focus:ring-secondary" type="checkbox"/>
+<span class="font-body-sm text-body-sm text-on-surface-variant leading-normal">
+<a class="text-primary font-medium underline" href="#">Mesafeli Satış Sözleşmesi</a>'ni ve <a class="text-primary font-medium underline" href="#">Ön Bilgilendirme Koşulları</a>'nı okudum, içeriğini eksiksiz kabul ediyorum.
+            </span>
+</label>
+<label class="flex items-start gap-3 cursor-pointer">
+<input checked="" class="mt-1 rounded text-secondary border-outline-variant focus:ring-secondary" type="checkbox"/>
+<span class="font-body-sm text-body-sm text-on-surface-variant leading-normal">
+<a class="text-secondary font-medium underline" href="#">Baskı Ön Onay ve Tolerans Şartları</a>'nı onaylıyorum. Özel kesim, lak ve renk prova onayının ekranda görünen CMYK kalibrasyon standartlarına uygun üretileceğini biliyorum.
+            </span>
+</label>
+</div>
+</section>
+<!-- RIGHT COLUMN: Compact Order & Print Spec Summary (Col 8-12) -->
+<aside class="lg:col-span-5 sticky top-24 space-y-6">
+<div class="bg-surface-container-lowest rounded-xl border border-surface-container-high shadow-lg p-6 sm:p-7 space-y-6">
+<div class="flex items-center justify-between pb-4 border-b border-surface-container-high">
+<h2 class="font-headline-sm text-headline-sm text-primary">Sipariş Özeti</h2>
+<span class="font-label-numeric text-label-numeric px-2 py-0.5 rounded bg-surface-container-high text-on-surface font-semibold">2 KALEM BASKI</span>
+</div>
+<!-- Production Items Micro Preview -->
+<div class="space-y-4">
+<!-- Item 1: Business Cards -->
+<div class="flex items-start gap-3.5 pb-4 border-b border-surface-container-low">
+<div class="w-14 h-14 rounded-lg bg-surface-container-low border border-surface-container-high flex flex-col items-center justify-center text-center p-1 shrink-0">
+<span class="material-symbols-outlined text-primary" style="font-size: 20px;">badge</span>
+<span class="font-label-numeric text-[9px] font-bold text-on-surface-variant mt-0.5">3.000 AD</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-start justify-between gap-2">
+<h3 class="font-headline-sm text-body-md font-semibold text-primary truncate">Ultra Prestij Kartvizit</h3>
+<span class="font-label-numeric text-body-md font-semibold text-primary">945,00 ₺</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">350gr Mat Kuşe • Çift Yön Mat Selefon + Kısmi Lak</p>
+<div class="flex items-center gap-1.5 mt-2">
+<span class="inline-flex items-center gap-1 font-label-numeric text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-medium border border-emerald-200">
+<span class="material-symbols-outlined text-emerald-600" style="font-size: 12px;">check_circle</span>
+                    Vektör PDF Onaylandı (300 DPI)
+                  </span>
+</div>
+</div>
+</div>
+<!-- Item 2: Presentation Folders -->
+<div class="flex items-start gap-3.5 pb-4 border-b border-surface-container-low">
+<div class="w-14 h-14 rounded-lg bg-surface-container-low border border-surface-container-high flex flex-col items-center justify-center text-center p-1 shrink-0">
+<span class="material-symbols-outlined text-primary" style="font-size: 20px;">folder</span>
+<span class="font-label-numeric text-[9px] font-bold text-on-surface-variant mt-0.5">500 AD</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-start justify-between gap-2">
+<h3 class="font-headline-sm text-body-md font-semibold text-primary truncate">A4 Kabartma Laklı Cepli Dosya</h3>
+<span class="font-label-numeric text-body-md font-semibold text-primary">1.450,00 ₺</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">350gr Amerikan Bristol • Tek Yön Baskı + Kartvizit Geçme Cebi</p>
+<div class="flex items-center gap-1.5 mt-2">
+<span class="inline-flex items-center gap-1 font-label-numeric text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-medium border border-emerald-200">
+<span class="material-symbols-outlined text-emerald-600" style="font-size: 12px;">check_circle</span>
+                    Bıçak İzi &amp; Taşırma Hazır
+                  </span>
+</div>
+</div>
+</div>
+</div>
+<!-- Pre-flight Verified Seal -->
+<div class="bg-surface-container-low p-3.5 rounded-lg border border-surface-container-high flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined" style="font-size: 18px;">verified</span>
+</div>
+<div>
+<p class="font-body-sm text-body-sm font-semibold text-primary">2 Baskı Dosyası Üretime Hazır Onaylandı</p>
+<p class="font-body-sm text-[11px] text-on-surface-variant">Otomatik preflight renk ayrımı &amp; 3mm taşma payı kontrol edildi.</p>
+</div>
+</div>
+<!-- Cost Breakdown Table -->
+<div class="space-y-2.5 pt-2 text-body-md font-body-md">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span>Ara Toplam</span>
+<span class="font-label-numeric">2.395,00 ₺</span>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant">
+<span>KDV (%20)</span>
+<span class="font-label-numeric">479,00 ₺</span>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant">
+<span>Kargo Ücreti</span>
+<span class="font-label-numeric text-emerald-700 font-medium">Ücretsiz (0,00 ₺)</span>
+</div>
+<div class="pt-3 border-t border-surface-container-high flex items-baseline justify-between">
+<div>
+<span class="font-headline-sm text-headline-sm font-bold text-primary">Ödenecek Tutar</span>
+<span class="block text-body-sm text-on-surface-variant font-label-numeric">KDV Dahil Toplam</span>
+</div>
+<span class="font-label-numeric text-2xl font-bold text-primary tracking-tight">2.874,00 ₺</span>
+</div>
+</div>
+<!-- Primary CTA Button (High Luminance Apple / Stripe Precision) -->
+<div class="pt-2">
+<button class="w-full py-4 px-6 rounded-lg bg-primary hover:bg-[#1E293B] text-on-primary font-headline-sm text-headline-sm font-semibold flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-[0.99]" type="button">
+<span class="material-symbols-outlined" style="font-size: 20px;">lock</span>
+<span>Siparişi Onayla ve Güvenle Öde (2.874,00 ₺)</span>
+</button>
+<p class="text-center font-body-sm text-body-sm text-on-surface-variant mt-2.5">
+              Kartınızdan 3D Secure onay kodu sonrası tahsilat yapılacaktır.
+            </p>
+</div>
+<!-- Bottom Assurance Badges -->
+<div class="pt-4 border-t border-surface-container-high grid grid-cols-1 gap-2.5">
+<div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-secondary" style="font-size: 18px;">security</span>
+<span>3D Secure ile BKM &amp; Banka Güvencesi</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-secondary" style="font-size: 18px;">autorenew</span>
+<span>%100 Memnuniyet &amp; Hatalı Baskıda Yeniden Üretim Garantisi</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-secondary" style="font-size: 18px;">mark_chat_read</span>
+<span>Anında SMS ve E-posta ile Üretim / Kargo Takip Bildirimi</span>
+</div>
+</div>
+</div>
+<!-- Help Desk Floating Pill -->
+<div class="p-4 rounded-xl bg-surface-container-low border border-surface-container-high flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" style="font-size: 20px;">support_agent</span>
+<div>
+<p class="font-body-md text-body-md font-medium text-primary">Baskı Uzmanına Danışın</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">0850 480 90 00 • Canlı Destek</p>
+</div>
+</div>
+<button class="px-3 py-1.5 rounded-lg border border-outline-variant hover:bg-surface-container-lowest text-primary font-body-sm text-body-sm font-medium transition-all" type="button">
+            Yardım Al
+          </button>
+</div>
+</aside>
+</div>
+</main>
+<!-- Footer Component strictly anchored from Shared Components JSON -->
+<footer class="bg-surface-container-low border-t border-outline-variant mt-16">
+<div class="w-full px-6 py-12 max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="flex flex-col gap-2 text-center md:text-left">
+<span class="text-headline-sm font-headline-sm font-semibold text-primary">PRESS &amp; STUDIO</span>
+<p class="text-body-sm font-body-sm text-on-surface-variant font-label-numeric">
+          © 2025 Press &amp; Studio Commercial Printworks Inc. Calibrated CMYK &amp; Pantone certified.
+        </p>
+</div>
+<div class="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-body-sm font-body-sm">
+<a class="text-on-surface-variant hover:underline hover:text-secondary transition-colors" href="#">Material Standards</a>
+<a class="text-on-surface-variant hover:underline hover:text-secondary transition-colors" href="#">Color Profile ICC</a>
+<a class="text-on-surface-variant hover:underline hover:text-secondary transition-colors" href="#">FSC Certified Stocks</a>
+<a class="text-on-surface-variant hover:underline hover:text-secondary transition-colors" href="#">Vector Studio API</a>
+<a class="text-on-surface-variant hover:underline hover:text-secondary transition-colors" href="#">Bleed &amp; Tolerances</a>
+<a class="text-on-surface-variant hover:underline hover:text-secondary transition-colors" href="#">Production SLA</a>
+<a class="text-on-surface-variant hover:underline hover:text-secondary transition-colors" href="#">Terms of Presswork</a>
+</div>
+</div>
+</footer>
+</body></html>

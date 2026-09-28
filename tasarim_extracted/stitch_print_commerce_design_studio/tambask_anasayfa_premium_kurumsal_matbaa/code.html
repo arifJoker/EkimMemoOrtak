@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PRESS &amp; STUDIO | Endüstriyel Baskı &amp; Kurumsal Matbaa Çözümleri</title>
+<!-- Google Fonts: Inter & JetBrains Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary": "#ffffff",
+            "on-tertiary-fixed-variant": "#005236",
+            "error-container": "#ffdad6",
+            "surface-dim": "#d8dadc",
+            "secondary-container": "#316bf3",
+            "primary-container": "#131b2e",
+            "secondary-fixed-dim": "#b4c5ff",
+            "tertiary-fixed-dim": "#4edea3",
+            "surface-container-high": "#e6e8ea",
+            "on-secondary-container": "#fefcff",
+            "on-primary-fixed": "#131b2e",
+            "surface": "#f7f9fb",
+            "tertiary-fixed": "#6ffbbe",
+            "surface-bright": "#f7f9fb",
+            "secondary": "#0051d5",
+            "on-error-container": "#93000a",
+            "outline-variant": "#c6c6cd",
+            "tertiary": "#000000",
+            "inverse-surface": "#2d3133",
+            "on-secondary-fixed": "#00174b",
+            "primary-fixed-dim": "#bec6e0",
+            "surface-container-highest": "#e0e3e5",
+            "on-secondary-fixed-variant": "#003ea8",
+            "on-surface-variant": "#45464d",
+            "primary-fixed": "#dae2fd",
+            "on-primary-container": "#7c839b",
+            "on-tertiary-container": "#009668",
+            "primary": "#000000",
+            "on-error": "#ffffff",
+            "on-primary": "#ffffff",
+            "surface-container-low": "#f2f4f6",
+            "secondary-fixed": "#dbe1ff",
+            "tertiary-container": "#002113",
+            "on-surface": "#191c1e",
+            "error": "#ba1a1a",
+            "on-secondary": "#ffffff",
+            "on-background": "#191c1e",
+            "surface-container": "#eceef0",
+            "surface-variant": "#e0e3e5",
+            "outline": "#76777d",
+            "background": "#f7f9fb",
+            "on-tertiary-fixed": "#002113",
+            "on-primary-fixed-variant": "#3f465c",
+            "inverse-on-surface": "#eff1f3",
+            "surface-tint": "#565e74",
+            "surface-container-lowest": "#ffffff",
+            "inverse-primary": "#bec6e0"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-lg": "1.5rem",
+            "space-sm": "0.5rem",
+            "space-xl": "2.5rem",
+            "space-xs": "0.25rem",
+            "gutter": "1.5rem",
+            "space-md": "1rem",
+            "margin-mobile": "1rem",
+            "margin": "3rem",
+            "gutter-mobile": "0.75rem"
+          },
+          "fontFamily": {
+            "headline-lg-mobile": ["Inter"],
+            "body-lg": ["Inter"],
+            "body-sm": ["Inter"],
+            "body-md": ["Inter"],
+            "headline-sm": ["Inter"],
+            "headline-md": ["Inter"],
+            "headline-lg": ["Inter"],
+            "label-numeric": ["JetBrains Mono"],
+            "display-hero-mobile": ["Inter"],
+            "label-caps": ["Inter"],
+            "display-hero": ["Inter"]
+          },
+          "fontSize": {
+            "headline-lg-mobile": ["26px", { lineHeight: "34px", letterSpacing: "-0.015em", fontWeight: "600" }],
+            "body-lg": ["16px", { lineHeight: "24px", letterSpacing: "-0.005em", fontWeight: "400" }],
+            "body-sm": ["12px", { lineHeight: "16px", letterSpacing: "0.005em", fontWeight: "400" }],
+            "body-md": ["14px", { lineHeight: "20px", letterSpacing: "0em", fontWeight: "400" }],
+            "headline-sm": ["18px", { lineHeight: "24px", letterSpacing: "-0.01em", fontWeight: "600" }],
+            "headline-md": ["22px", { lineHeight: "28px", letterSpacing: "-0.015em", fontWeight: "600" }],
+            "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600" }],
+            "label-numeric": ["11px", { lineHeight: "14px", letterSpacing: "0.02em", fontWeight: "500" }],
+            "display-hero-mobile": ["36px", { lineHeight: "44px", letterSpacing: "-0.025em", fontWeight: "600" }],
+            "label-caps": ["11px", { lineHeight: "14px", letterSpacing: "0.06em", fontWeight: "600" }],
+            "display-hero": ["56px", { lineHeight: "64px", letterSpacing: "-0.03em", fontWeight: "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .frosted-glass {
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(16px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+    .subtle-grid {
+      background-size: 32px 32px;
+      background-image: 
+        linear-gradient(to right, rgba(15, 23, 42, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased selection:bg-secondary-fixed-dim selection:text-primary">
+<!-- ================= TOP NAVBAR (SHARED COMPONENT) ================= -->
+<header class="bg-surface dark:bg-inverse-surface border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none docked full-width top-0 sticky z-40 transition-all duration-150 ease-out">
+<div class="flex justify-between items-center w-full px-6 py-3 max-w-7xl mx-auto">
+<!-- Brand & Search Bar -->
+<div class="flex items-center gap-6">
+<a class="text-headline-sm font-headline-sm font-semibold tracking-tight text-primary dark:text-inverse-primary flex items-center gap-2 group" href="#">
+<span class="w-8 h-8 rounded-lg bg-primary-container text-on-primary flex items-center justify-center font-label-numeric text-body-md font-semibold border border-outline-variant shadow-sm">P&amp;S</span>
+<span>PRESS &amp; STUDIO</span>
+</a>
+<!-- Left Search bar input -->
+<div class="hidden lg:flex items-center relative">
+<span class="material-symbols-outlined absolute left-3 text-outline text-body-lg pointer-events-none" data-icon="search">search</span>
+<input class="pl-9 pr-4 py-1.5 bg-surface-container-low text-body-sm font-body-sm rounded-lg border border-outline-variant/60 focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary w-64 transition-all" placeholder="Ürün, kağıt gramajı veya ICC kodu ara..." type="text"/>
+<span class="absolute right-2.5 px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-numeric text-[10px]">⌘K</span>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden md:flex items-center gap-7">
+<a class="text-secondary dark:text-secondary-fixed font-semibold border-b-2 border-secondary pb-1 text-label-caps font-label-caps tracking-wider transition-colors" href="#products">Products</a>
+<a class="text-on-surface-variant dark:text-outline-variant font-medium transition-colors hover:text-primary dark:hover:text-on-primary text-label-caps font-label-caps tracking-wider" href="#custom-studio">Custom Studio</a>
+<a class="text-on-surface-variant dark:text-outline-variant font-medium transition-colors hover:text-primary dark:hover:text-on-primary text-label-caps font-label-caps tracking-wider" href="#paper-stocks">Paper Stocks</a>
+<a class="text-on-surface-variant dark:text-outline-variant font-medium transition-colors hover:text-primary dark:hover:text-on-primary text-label-caps font-label-caps tracking-wider" href="#proofing">Proofing</a>
+<a class="text-on-surface-variant dark:text-outline-variant font-medium transition-colors hover:text-primary dark:hover:text-on-primary text-label-caps font-label-caps tracking-wider" href="#enterprise">Enterprise</a>
+</nav>
+<!-- Trailing Action Hub -->
+<div class="flex items-center gap-3">
+<a class="hidden sm:inline-flex items-center text-body-sm font-body-sm font-medium text-on-surface hover:text-secondary px-3 py-1.5 rounded-lg transition-all duration-150 ease-out active:scale-95 border border-outline-variant/60 bg-surface-container-lowest" href="#sample-kit">
+          Sample Kit
+        </a>
+<a class="inline-flex items-center gap-1.5 bg-primary text-on-primary text-body-sm font-body-sm font-medium px-4 py-1.5 rounded-lg shadow-sm hover:bg-primary-container transition-all duration-150 ease-out active:scale-95" href="#custom-studio">
+<span class="material-symbols-outlined text-[18px]" data-icon="brush">brush</span>
+<span>Launch Studio</span>
+</a>
+<!-- Trailing Icons -->
+<div class="flex items-center border-l border-outline-variant/60 pl-3 ml-1 gap-1 text-on-surface-variant">
+<button class="p-1.5 hover:text-primary hover:bg-surface-container rounded-lg transition-colors relative" title="Sepet">
+<span class="material-symbols-outlined text-[20px]" data-icon="shopping_bag">shopping_bag</span>
+<span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-secondary"></span>
+</button>
+<button class="p-1.5 hover:text-primary hover:bg-surface-container rounded-lg transition-colors" title="Baskı Ayarları">
+<span class="material-symbols-outlined text-[20px]" data-icon="tune">tune</span>
+</button>
+<button class="p-1.5 hover:text-primary hover:bg-surface-container rounded-lg transition-colors" title="Hesap">
+<span class="material-symbols-outlined text-[20px]" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</div>
+</div>
+</header>
+<!-- ================= HERO SECTION ================= -->
+<section class="relative pt-12 pb-20 overflow-hidden subtle-grid border-b border-outline-variant/40">
+<div class="max-w-7xl mx-auto px-6">
+<!-- Top Micro-Badge -->
+<div class="flex justify-center mb-6">
+<div class="inline-flex items-center gap-2.5 px-3.5 py-1 rounded-full bg-surface-container border border-outline-variant/60 shadow-xs">
+<span class="w-2 h-2 rounded-full bg-secondary-container animate-pulse"></span>
+<span class="font-label-numeric text-label-numeric text-on-surface tracking-wider uppercase">Heidelberg XL 106 10-Color Press Live</span>
+<span class="text-outline-variant">|</span>
+<span class="text-body-sm font-body-sm font-medium text-secondary">v4.2 Vector Studio Aktif</span>
+</div>
+</div>
+<!-- Headline & Subtitle -->
+<div class="text-center max-w-4xl mx-auto mb-10">
+<h1 class="text-display-hero-mobile md:text-display-hero font-display-hero text-primary tracking-tight mb-5">
+          Endüstriyel Baskı Hassasiyeti, Doğrudan Tarayıcınızda.
+        </h1>
+<p class="text-body-lg font-body-lg text-on-surface-variant max-w-2xl mx-auto">
+          Heidelberg Speedmaster ofset kalitesi, 420+ hazır kurumsal şablon ve anında online vektör prova imkanıyla prestijli kurumsal baskı çözümleri.
+        </p>
+<!-- CTA Buttons -->
+<div class="mt-8 flex flex-wrap items-center justify-center gap-4">
+<a class="inline-flex items-center gap-2 px-6 py-3.5 rounded-lg bg-primary-container text-on-primary text-body-md font-body-md font-medium shadow-md hover:bg-primary transition-all duration-150 ease-out active:scale-95 border border-primary-container" href="#products">
+<span>Ürünleri Keşfet</span>
+<span class="material-symbols-outlined text-body-md" data-icon="arrow_forward">arrow_forward</span>
+</a>
+<a class="inline-flex items-center gap-2 px-6 py-3.5 rounded-lg bg-surface-container-lowest text-on-surface text-body-md font-body-md font-medium border border-outline-variant shadow-sm hover:border-secondary hover:text-secondary transition-all duration-150 ease-out active:scale-95" href="#custom-studio">
+<span class="material-symbols-outlined text-body-lg text-secondary" data-icon="design_services">design_services</span>
+<span>Online Tasarım Editörünü Dene</span>
+</a>
+</div>
+<!-- Live Badges -->
+<div class="mt-10 flex flex-wrap items-center justify-center gap-6 text-on-surface-variant">
+<div class="flex items-center gap-2 text-body-sm font-body-sm font-medium bg-surface-container-lowest px-3 py-1.5 rounded-lg border border-outline-variant/60 shadow-xs">
+<span class="material-symbols-outlined text-secondary-container text-body-lg" data-icon="verified">verified</span>
+<span>300 DPI Ultra HD Ofset</span>
+</div>
+<div class="flex items-center gap-2 text-body-sm font-body-sm font-medium bg-surface-container-lowest px-3 py-1.5 rounded-lg border border-outline-variant/60 shadow-xs">
+<span class="material-symbols-outlined text-secondary-container text-body-lg" data-icon="timer">timer</span>
+<span>24 Saatte Üretim SLA</span>
+</div>
+<div class="flex items-center gap-2 text-body-sm font-body-sm font-medium bg-surface-container-lowest px-3 py-1.5 rounded-lg border border-outline-variant/60 shadow-xs">
+<span class="material-symbols-outlined text-secondary-container text-body-lg" data-icon="palette">palette</span>
+<span>%100 Renk Doğruluk (FOGRA 39/51)</span>
+</div>
+</div>
+</div>
+<!-- 3D Stationery Stage Container -->
+<div class="relative max-w-5xl mx-auto rounded-2xl bg-gradient-to-b from-surface-container-lowest to-surface-container-low p-2 md:p-3 border border-outline-variant shadow-xl">
+<div class="relative w-full rounded-xl overflow-hidden bg-surface-container-high aspect-[16/9] md:aspect-[21/9] flex items-center justify-center">
+<img class="w-full h-full object-cover" data-alt="An ultra-luxury corporate stationery showcase arranged in a crisp architectural studio setting. A set of premium matte black business cards with embossed gold foil edges, a tactile textured letterhead, and a minimalist presentation folder sit beneath dramatic high-aperture studio lighting. Deep navy shadows and crisp white reflections bounce across calibrated cotton paper textures, emphasizing tactile perfection and immaculate CMYK precision." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDz0TcydwvPaWv8eC5GJA0oh71XhZIcs0i4EBcwj15AZdXHUKeUhp2PgbxggR1pKRGLnw1gK3OSYfQ7Ne2UdoNjPjK2CC4N7l4fPxp0jEuN5OLA6pTnKQpwrZiHBGyhqCLGFFjPPWtkk4maQ-thaeyBKJaoKf4NI9uIK1of9QH2P8yxrKuT3vp6IoaeeaYBXv0WF6bOoJKoBcDZaFUVVA7uDh5xI2YtJ_yDznFwW7uCdj-kI0mVZ_IP"/>
+<!-- Floating Interactive Pill HUD -->
+<div class="absolute bottom-4 left-1/2 -translate-x-1/2 frosted-glass px-4 py-2 rounded-full shadow-lg flex items-center gap-4 text-body-sm font-body-sm text-primary">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px] text-secondary" data-icon="360">360</span>
+<span class="font-medium">3D Canlı Doku Önizleme</span>
+</div>
+<span class="text-outline-variant">|</span>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+<span class="font-label-numeric text-label-numeric text-on-surface-variant">Cotton Tuale 380 GSM</span>
+</div>
+<button class="ml-2 px-2.5 py-0.5 rounded-full bg-primary text-on-primary text-[11px] font-medium hover:bg-primary-container transition-colors">
+              Işık Açısını Değiştir
+            </button>
+</div>
+<!-- Top-Right Flight Status Tag -->
+<div class="absolute top-4 right-4 bg-surface-container-lowest/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-outline-variant/60 shadow-sm flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<span class="font-label-numeric text-label-numeric text-primary">Pre-flight: Ready for CTP Plate</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ================= POPULAR PRINT CATEGORIES ================= -->
+<section class="py-20 bg-surface-container-lowest border-b border-outline-variant/40" id="products">
+<div class="max-w-7xl mx-auto px-6">
+<!-- Section Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+<div>
+<div class="flex items-center gap-2 text-secondary font-label-numeric text-label-numeric tracking-wider uppercase mb-2">
+<span class="material-symbols-outlined text-[16px]" data-icon="layers">layers</span>
+<span>Standart &amp; Özel Üretim Portföyü</span>
+</div>
+<h2 class="text-headline-lg font-headline-lg text-primary tracking-tight">
+            Popüler Baskı Kategorileri
+          </h2>
+<p class="text-body-md font-body-md text-on-surface-variant mt-1">
+            Kurumsal kimliğinizi zirveye taşıyan sertifikalı matbaa ürünleri.
+          </p>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-body-sm font-body-sm text-on-surface-variant font-label-numeric">12 Ana Kategori / 48 Varyant</span>
+<a class="inline-flex items-center gap-1 text-body-sm font-body-sm font-medium text-secondary hover:underline" href="#">
+            Tüm Kataloğu İndir (PDF)
+            <span class="material-symbols-outlined text-[16px]" data-icon="download">download</span>
+</a>
+</div>
+</div>
+<!-- Categories 4-Column Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Card 1: Özel Kartvizitler -->
+<div class="group rounded-xl border border-outline-variant/70 bg-surface-container-lowest overflow-hidden hover:shadow-lg hover:border-secondary transition-all duration-200 flex flex-col">
+<div class="relative aspect-[4/3] bg-surface-container-low overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Close-up architectural macro shot of ultra-luxury edge-painted business cards made with 450 GSM black cotton paper. Elegant raised gold foil stamping shimmers under focused gallery spotlighting against a clean minimalist marble desk surface. Pristine precision trimming and sharp 90-degree corners demonstrate state-of-the-art die cutting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLEpiRfEU7EJiQRDuxS10Jg2sEb0R7SucCnK-B7JvT2hl8zjtCaos34Rlol0SfIfRbZ1CrK7gylZh935mH_yC6UK06xRG78FViLw2-BQVFveQK-LmBxi9y4-M2mFuYzhLP_GYJA9msUaUUJ9rz20lvhkNHLbBfWRXVlmPwOs2_m1ADyGeSbnl8TL17zn3H4zb3s-MAnlAZx3oYpLD-owfJkz_Y_WnRxcPPsvjpjc6MeATBAxfy7Gpj"/>
+<div class="absolute top-3 left-3 bg-surface-container-lowest/90 backdrop-blur-md px-2.5 py-1 rounded text-primary font-label-numeric text-label-numeric font-medium">
+              Ultra Prestij
+            </div>
+<div class="absolute bottom-3 right-3 bg-primary-container text-on-primary px-2 py-0.5 rounded text-[11px] font-label-numeric">
+              Lak &amp; Varak Uyumlu
+            </div>
+</div>
+<div class="p-5 flex-1 flex flex-col justify-between">
+<div>
+<h3 class="text-headline-sm font-headline-sm text-primary mb-1 group-hover:text-secondary transition-colors">
+                Özel Kartvizitler
+              </h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-4">
+                Kabartma lak, altın/gümüş varak, PVC ve dokulu tuale kağıt seçenekleriyle kusursuz ilk izlenim.
+              </p>
+<div class="space-y-1.5 pb-4 border-b border-outline-variant/40">
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-on-surface-variant">Stok Gramajı:</span>
+<span class="font-label-numeric font-medium text-primary">350 - 600 GSM</span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-on-surface-variant">Min. Sipariş:</span>
+<span class="font-label-numeric font-medium text-primary">100 Adet</span>
+</div>
+</div>
+</div>
+<div class="pt-4 flex items-center justify-between mt-auto">
+<div>
+<span class="text-[11px] text-on-surface-variant font-label-numeric uppercase block">Başlangıç</span>
+<span class="text-headline-sm font-headline-sm text-primary font-bold">480 ₺</span>
+</div>
+<a class="px-3.5 py-1.5 bg-surface-container text-on-surface hover:bg-secondary hover:text-on-secondary rounded-lg text-body-sm font-body-sm font-medium transition-colors" href="#custom-studio">
+                Konfigüre Et
+              </a>
+</div>
+</div>
+</div>
+<!-- Card 2: Kurumsal Kimlik -->
+<div class="group rounded-xl border border-outline-variant/70 bg-surface-container-lowest overflow-hidden hover:shadow-lg hover:border-secondary transition-all duration-200 flex flex-col">
+<div class="relative aspect-[4/3] bg-surface-container-low overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="An aligned corporate identity stationery mockup including a pristine letterhead, branded executive envelopes, a foiled presentation pocket folder, and custom desk memo pads. High-key natural daylight floods the scene from an architectural studio window, highlighting subtle paper ribbing and spot UV gloss accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuATVhSAYambtmmhjHuz-047VBk1PuNa5TOCs11s0hUwpnFt-cNRcn65o4cyrqWDOwJ5L3cMk4240bmsttYsu8I5iJyE6qMaoxaxcEaj4aX1I_n4v_QEblLW3Lr-VCLYgXkduhsFKnzENQhPU6Ugi-LZ4FvGmthlPk-ylteZ2AQzqzMXPCPlNqIXrU3YUqETSfABMYR3vhqqEl2RtjbRe10oAYwp-Kj3AtGmfXUtrN4D4NAy2bMzLk5q"/>
+<div class="absolute top-3 left-3 bg-surface-container-lowest/90 backdrop-blur-md px-2.5 py-1 rounded text-primary font-label-numeric text-label-numeric font-medium">
+              Ofset Serisi
+            </div>
+<div class="absolute bottom-3 right-3 bg-surface-container-lowest/90 text-primary px-2 py-0.5 rounded text-[11px] font-label-numeric border border-outline-variant/40">
+              Pantone Calibrated
+            </div>
+</div>
+<div class="p-5 flex-1 flex flex-col justify-between">
+<div>
+<h3 class="text-headline-sm font-headline-sm text-primary mb-1 group-hover:text-secondary transition-colors">
+                Kurumsal Kimlik
+              </h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-4">
+                Antetli kağıt, pencereli/penceresiz cepli dosya, diplomat zarf ve bloknot takımları.
+              </p>
+<div class="space-y-1.5 pb-4 border-b border-outline-variant/40">
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-on-surface-variant">Kağıt Tipi:</span>
+<span class="font-label-numeric font-medium text-primary">110g 1. Hamur / Kuşe</span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-on-surface-variant">Standart:</span>
+<span class="font-label-numeric font-medium text-primary">DIN A4 / A5</span>
+</div>
+</div>
+</div>
+<div class="pt-4 flex items-center justify-between mt-auto">
+<div>
+<span class="text-[11px] text-on-surface-variant font-label-numeric uppercase block">Başlangıç</span>
+<span class="text-headline-sm font-headline-sm text-primary font-bold">1.250 ₺</span>
+</div>
+<a class="px-3.5 py-1.5 bg-surface-container text-on-surface hover:bg-secondary hover:text-on-secondary rounded-lg text-body-sm font-body-sm font-medium transition-colors" href="#custom-studio">
+                Konfigüre Et
+              </a>
+</div>
+</div>
+</div>
+<!-- Card 3: Tanıtım & Reklam -->
+<div class="group rounded-xl border border-outline-variant/70 bg-surface-container-lowest overflow-hidden hover:shadow-lg hover:border-secondary transition-all duration-200 flex flex-col">
+<div class="relative aspect-[4/3] bg-surface-container-low overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Editorial multi-page brochure and accordion fold brochure displayed half-open on a modern neutral platform. Vibrant color reproduction with crisp typography, deep solid rich blacks, and satin matte lamination. Clean architectural lines and balanced diffuse studio shadows emphasize high-end printing craftsmanship." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6ZD3XE0DcDiaujkXPlFPBZtT74Fbaqcx7koOtoFznCZ99tKHrCY7usEYfKLrNPPZBf06MnZfjLHJTJyEfry2cIFHVVD_ktNE0bG2bSJSskD-rcsVio2pdsmBA7TxASVJuh_Y3-3auNV0GLxHqChsNvX8-TlD6hKs8eIfEJV44J7W1Ev-YFPOTRCH2aUoKXG2ALZcgQdHhbeZB3Lc2Ce_UWICdz38QNawlDtIEs5qBx3_v8_3xFRWQ"/>
+<div class="absolute top-3 left-3 bg-surface-container-lowest/90 backdrop-blur-md px-2.5 py-1 rounded text-primary font-label-numeric text-label-numeric font-medium">
+              Çok Sayfalı
+            </div>
+<div class="absolute bottom-3 right-3 bg-surface-container-lowest/90 text-primary px-2 py-0.5 rounded text-[11px] font-label-numeric border border-outline-variant/40">
+              Tel Dikiş / Pur Cilt
+            </div>
+</div>
+<div class="p-5 flex-1 flex flex-col justify-between">
+<div>
+<h3 class="text-headline-sm font-headline-sm text-primary mb-1 group-hover:text-secondary transition-colors">
+                Tanıtım &amp; Reklam
+              </h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-4">
+                Kırım broşür, lüks ürün katalogları, el ilanları ve restoran menüleri.
+              </p>
+<div class="space-y-1.5 pb-4 border-b border-outline-variant/40">
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-on-surface-variant">Selefon:</span>
+<span class="font-label-numeric font-medium text-primary">Mat / Parlak / Soft Touch</span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-on-surface-variant">Baskı Türü:</span>
+<span class="font-label-numeric font-medium text-primary">8 Renk UV Ofset</span>
+</div>
+</div>
+</div>
+<div class="pt-4 flex items-center justify-between mt-auto">
+<div>
+<span class="text-[11px] text-on-surface-variant font-label-numeric uppercase block">Başlangıç</span>
+<span class="text-headline-sm font-headline-sm text-primary font-bold">890 ₺</span>
+</div>
+<a class="px-3.5 py-1.5 bg-surface-container text-on-surface hover:bg-secondary hover:text-on-secondary rounded-lg text-body-sm font-body-sm font-medium transition-colors" href="#custom-studio">
+                Konfigüre Et
+              </a>
+</div>
+</div>
+</div>
+<!-- Card 4: Tabela & İç Mekan -->
+<div class="group rounded-xl border border-outline-variant/70 bg-surface-container-lowest overflow-hidden hover:shadow-lg hover:border-secondary transition-all duration-200 flex flex-col">
+<div class="relative aspect-[4/3] bg-surface-container-low overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Interior architectural corporate signage including direct UV print on clear plexiglass acrylic, a premium matte dekota PVC board, and an aluminum roll-up exhibition banner. Crisp studio light reveals refined laser-polished edges, vivid color saturation, and anti-glare exhibition finish against a sleek contemporary background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsc4wYzNFA7DwYwfOwJCJOnyGa9HvueoWmGuRWdvLJnLzGrrp--cRAex3VNasYu13AfoIYq9wvyesEtMIqkgwYBKEM1VVkc722pGtAYODJWyOYxkDYAqWJnUJYt2VGGGR9oxk983q4eCRo0bxiMzYj5FzNlq4sDsUK9EsSWycbSwzo8dvZo2CewCpDua9eojeQV6qqTaxq_CB_rE5zd-xq6RCrImMGBziObbJVpGHgBXh_rrcv_79k"/>
+<div class="absolute top-3 left-3 bg-surface-container-lowest/90 backdrop-blur-md px-2.5 py-1 rounded text-primary font-label-numeric text-label-numeric font-medium">
+              Geniş Format
+            </div>
+<div class="absolute bottom-3 right-3 bg-surface-container-lowest/90 text-primary px-2 py-0.5 rounded text-[11px] font-label-numeric border border-outline-variant/40">
+              Direkt UV Baskı
+            </div>
+</div>
+<div class="p-5 flex-1 flex flex-col justify-between">
+<div>
+<h3 class="text-headline-sm font-headline-sm text-primary mb-1 group-hover:text-secondary transition-colors">
+                Tabela &amp; İç Mekan
+              </h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-4">
+                Dekota foreks, şeffaf pleksi, vinil germe branda ve kurumsal roll-up banner sistemleri.
+              </p>
+<div class="space-y-1.5 pb-4 border-b border-outline-variant/40">
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-on-surface-variant">Dayanıklılık:</span>
+<span class="font-label-numeric font-medium text-primary">5 Yıl Solmazlık</span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-on-surface-variant">Çözünürlük:</span>
+<span class="font-label-numeric font-medium text-primary">1440 DPI Piezo</span>
+</div>
+</div>
+</div>
+<div class="pt-4 flex items-center justify-between mt-auto">
+<div>
+<span class="text-[11px] text-on-surface-variant font-label-numeric uppercase block">Başlangıç</span>
+<span class="text-headline-sm font-headline-sm text-primary font-bold">640 ₺</span>
+</div>
+<a class="px-3.5 py-1.5 bg-surface-container text-on-surface hover:bg-secondary hover:text-on-secondary rounded-lg text-body-sm font-body-sm font-medium transition-colors" href="#custom-studio">
+                Konfigüre Et
+              </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ================= WHY PRESS & STUDIO (VALUE PROPOSITIONS) ================= -->
+<section class="py-20 bg-surface border-b border-outline-variant/40">
+<div class="max-w-7xl mx-auto px-6">
+<div class="text-center max-w-2xl mx-auto mb-16">
+<span class="font-label-numeric text-label-numeric uppercase tracking-wider text-secondary font-semibold">Endüstri Standartları</span>
+<h2 class="text-headline-lg font-headline-lg text-primary tracking-tight mt-1 mb-3">
+          Neden Press &amp; Studio?
+        </h2>
+<p class="text-body-md font-body-md text-on-surface-variant">
+          Geleneksel matbaacılığın hata payını ortadan kaldıran yapay zeka denetimli dijital üretim altyapısı.
+        </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+<!-- Prop 1 -->
+<div class="p-6 rounded-xl bg-surface-container-lowest border border-outline-variant/60 shadow-xs hover:shadow-md transition-shadow">
+<div class="w-12 h-12 rounded-lg bg-surface-container-low flex items-center justify-center text-secondary mb-5 border border-outline-variant/40">
+<span class="material-symbols-outlined text-[28px]" data-icon="auto_fix_high">auto_fix_high</span>
+</div>
+<div class="font-label-numeric text-label-numeric text-secondary mb-1">01 / PRE-FLIGHT</div>
+<h3 class="text-headline-sm font-headline-sm text-primary mb-2">Otomatik AI Vektör Denetimi</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant leading-relaxed">
+            Yüklediğiniz PDF ve AI dosyaları 3mm taşma payı, RGB/CMYK dönüşümü ve 300 DPI çözünürlük açısından milisaniyeler içinde taranır.
+          </p>
+</div>
+<!-- Prop 2 -->
+<div class="p-6 rounded-xl bg-surface-container-lowest border border-outline-variant/60 shadow-xs hover:shadow-md transition-shadow">
+<div class="w-12 h-12 rounded-lg bg-surface-container-low flex items-center justify-center text-secondary mb-5 border border-outline-variant/40">
+<span class="material-symbols-outlined text-[28px]" data-icon="precision_manufacturing">precision_manufacturing</span>
+</div>
+<div class="font-label-numeric text-label-numeric text-secondary mb-1">02 / OFFSET MASTERY</div>
+<h3 class="text-headline-sm font-headline-sm text-primary mb-2">Mikron Düzeyinde Baskı</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant leading-relaxed">
+            Heidelberg Speedmaster XL 106 parkurumuz, lazerle pozlandırılmış CTP kalıplarıyla ±0.02 mm kros hassasiyeti sunar.
+          </p>
+</div>
+<!-- Prop 3 -->
+<div class="p-6 rounded-xl bg-surface-container-lowest border border-outline-variant/60 shadow-xs hover:shadow-md transition-shadow">
+<div class="w-12 h-12 rounded-lg bg-surface-container-low flex items-center justify-center text-secondary mb-5 border border-outline-variant/40">
+<span class="material-symbols-outlined text-[28px]" data-icon="view_in_ar">view_in_ar</span>
+</div>
+<div class="font-label-numeric text-label-numeric text-secondary mb-1">03 / AR &amp; 3D PROVA</div>
+<h3 class="text-headline-sm font-headline-sm text-primary mb-2">Gerçek Zamanlı 3D Simülasyon</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant leading-relaxed">
+            Baskıya onay vermeden önce kabartma lakın ışık kırılmasını, kağıt dokusunu ve kırım çizgilerini 3D ortamda döndürerek inceleyin.
+          </p>
+</div>
+<!-- Prop 4 -->
+<div class="p-6 rounded-xl bg-surface-container-lowest border border-outline-variant/60 shadow-xs hover:shadow-md transition-shadow">
+<div class="w-12 h-12 rounded-lg bg-surface-container-low flex items-center justify-center text-secondary mb-5 border border-outline-variant/40">
+<span class="material-symbols-outlined text-[28px]" data-icon="local_shipping">local_shipping</span>
+</div>
+<div class="font-label-numeric text-label-numeric text-secondary mb-1">04 / EXPRESS LOGISTICS</div>
+<h3 class="text-headline-sm font-headline-sm text-primary mb-2">VIP Kurumsal Sevkiyat</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant leading-relaxed">
+            1.500 ₺ üzeri siparişlerde neme ve darbelere dayanıklı kraft korumalı ambalajlarla Türkiye genelinde ücretsiz hızlı teslimat.
+          </p>
+</div>
+</div>
+</div>
+</section>
+<!-- ================= VECTOR STUDIO INTERACTIVE DEMO ACCORDION / PREVIEW ================= -->
+<section class="py-20 bg-surface-container-lowest border-b border-outline-variant/40" id="custom-studio">
+<div class="max-w-7xl mx-auto px-6">
+<div class="rounded-2xl border border-outline-variant bg-surface-container-low overflow-hidden">
+<!-- Studio Chrome Header -->
+<div class="px-6 py-3.5 bg-surface-container-lowest border-b border-outline-variant/60 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-3 rounded-full bg-red-400"></span>
+<span class="w-3 h-3 rounded-full bg-amber-400"></span>
+<span class="w-3 h-3 rounded-full bg-emerald-400"></span>
+</div>
+<span class="text-body-sm font-body-sm font-semibold text-primary pl-2 border-l border-outline-variant/60">Press &amp; Studio Vector Engine v4.2</span>
+<span class="px-2 py-0.5 rounded bg-surface-container text-[11px] font-label-numeric text-secondary">Artboard: 85 × 55 mm (Business Card)</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-label-numeric text-label-numeric text-on-surface-variant">Zoom: 100% | CMYK / ISO Coated v2</span>
+<button class="px-3 py-1 bg-secondary text-on-secondary rounded text-body-sm font-body-sm font-medium hover:bg-secondary-container transition-colors">
+              Tam Ekran Başlat
+            </button>
+</div>
+</div>
+<!-- Studio Workspace Viewport Mockup -->
+<div class="relative bg-surface-container p-6 md:p-12 flex items-center justify-center min-h-[460px] subtle-grid">
+<!-- Left Floating Toolstrip -->
+<div class="absolute left-6 top-1/2 -translate-y-1/2 frosted-glass p-1.5 rounded-xl shadow-md hidden sm:flex flex-col gap-1 border border-outline-variant/60">
+<button class="p-2 rounded-lg bg-primary text-on-primary" title="Seçim Aracı (V)">
+<span class="material-symbols-outlined text-[20px]" data-icon="near_me">near_me</span>
+</button>
+<button class="p-2 rounded-lg hover:bg-surface-container-high text-on-surface" title="Metin (T)">
+<span class="material-symbols-outlined text-[20px]" data-icon="title">title</span>
+</button>
+<button class="p-2 rounded-lg hover:bg-surface-container-high text-on-surface" title="Şekiller (U)">
+<span class="material-symbols-outlined text-[20px]" data-icon="crop_square">crop_square</span>
+</button>
+<button class="p-2 rounded-lg hover:bg-surface-container-high text-on-surface" title="Görsel Yükle (O)">
+<span class="material-symbols-outlined text-[20px]" data-icon="cloud_upload">cloud_upload</span>
+</button>
+<button class="p-2 rounded-lg hover:bg-surface-container-high text-on-surface" title="Lak / Varak Katmanı">
+<span class="material-symbols-outlined text-[20px]" data-icon="format_color_fill">format_color_fill</span>
+</button>
+</div>
+<!-- Centered Artboard with Bleed, Cut, and Live Margin Lines -->
+<div class="relative w-[340px] sm:w-[420px] aspect-[85/55] bg-surface-container-lowest rounded shadow-2xl p-4 border border-outline-variant/50">
+<!-- Red Bleed Line (Outer) -->
+<div class="absolute inset-1 border border-dashed border-red-500/80 pointer-events-none">
+<span class="absolute -top-2.5 left-2 bg-red-100 text-red-700 font-label-numeric text-[9px] px-1 rounded">Taşma Payı (Bleed +3mm)</span>
+</div>
+<!-- Black Trim Line (Middle) -->
+<div class="absolute inset-3 border border-primary/40 pointer-events-none">
+<span class="absolute -top-2.5 right-2 bg-slate-100 text-primary font-label-numeric text-[9px] px-1 rounded">Kesim Çizgisi (Trim)</span>
+</div>
+<!-- Cyan Safe Area (Inner) -->
+<div class="absolute inset-6 border border-dotted border-blue-400 pointer-events-none">
+<span class="absolute -bottom-2.5 left-2 bg-blue-100 text-blue-700 font-label-numeric text-[9px] px-1 rounded">Güvenli Alan (Safe Zone)</span>
+</div>
+<!-- Sample Card Artwork Content -->
+<div class="h-full flex flex-col justify-between p-3 select-none">
+<div class="flex justify-between items-start">
+<span class="font-headline-sm font-semibold tracking-wider text-primary text-[14px]">ARCH &amp; PARTNERS</span>
+<span class="material-symbols-outlined text-secondary text-[20px]" data-icon="architecture">architecture</span>
+</div>
+<div>
+<p class="text-[12px] font-semibold text-primary">Levent Karadağ</p>
+<p class="text-[10px] text-on-surface-variant">Yönetici Mimar / Partner</p>
+<p class="text-[9px] font-label-numeric text-outline mt-1">levent@archpartners.studio • +90 212 890 20 00</p>
+</div>
+</div>
+</div>
+<!-- Right Floating Property Inspector -->
+<div class="absolute right-6 top-8 bottom-8 w-72 frosted-glass p-4 rounded-xl shadow-lg border border-outline-variant/60 hidden xl:flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between pb-3 border-b border-outline-variant/40 mb-3">
+<span class="font-body-sm font-body-sm font-semibold text-primary">Canlı Özellikler</span>
+<span class="font-label-numeric text-emerald-600 text-[10px] bg-emerald-50 px-2 py-0.5 rounded-full font-bold">Hatasız (0 Uyarı)</span>
+</div>
+<div class="space-y-3">
+<div>
+<label class="text-[11px] font-label-numeric text-on-surface-variant block mb-1">SEÇİLİ KATMAN</label>
+<div class="px-2.5 py-1.5 bg-surface-container rounded border border-outline-variant/60 text-body-sm font-body-sm text-primary flex justify-between items-center">
+<span>Vektör Logo (#Vector1)</span>
+<span class="material-symbols-outlined text-[16px] text-secondary" data-icon="check_circle">check_circle</span>
+</div>
+</div>
+<div>
+<label class="text-[11px] font-label-numeric text-on-surface-variant block mb-1">RENK ALANI &amp; PROFİL</label>
+<div class="px-2.5 py-1.5 bg-surface-container rounded border border-outline-variant/60 text-body-sm font-body-sm text-primary">
+<span class="font-label-numeric text-body-sm">C:0 M:0 Y:0 K:100 (Deep Black)</span>
+</div>
+</div>
+<div>
+<label class="text-[11px] font-label-numeric text-on-surface-variant block mb-1">ÖZEL BİTİRME EFEKTİ</label>
+<select class="w-full px-2 py-1.5 bg-surface-container rounded border border-outline-variant/60 text-body-sm font-body-sm text-primary focus:outline-none">
+<option>Kabartma Kısmi Lak (Spot UV)</option>
+<option>Sıcak Altın Varak Baskı</option>
+<option>Gofre (Kör Kabartma)</option>
+</select>
+</div>
+</div>
+</div>
+<div class="pt-3 border-t border-outline-variant/40">
+<button class="w-full py-2 bg-primary text-on-primary rounded-lg text-body-sm font-body-sm font-medium hover:bg-primary-container transition-colors flex items-center justify-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]" data-icon="cloud_done">cloud_done</span>
+<span>Vektör Dosyayı Onayla</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ================= TESTIMONIALS & TRUST SHOWCASE ================= -->
+<section class="py-20 bg-surface border-b border-outline-variant/40">
+<div class="max-w-7xl mx-auto px-6">
+<div class="flex flex-col md:flex-row items-start md:items-end justify-between mb-12 gap-6">
+<div>
+<div class="flex items-center gap-1.5 text-amber-500 mb-2">
+<span class="material-symbols-outlined text-[20px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[20px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[20px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[20px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[20px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-numeric text-body-md font-bold text-primary ml-1">4.9 / 5.0</span>
+</div>
+<h2 class="text-headline-lg font-headline-lg text-primary tracking-tight">
+            Kurumsal Markaların ve Tasarımcıların Tercihi
+          </h2>
+<p class="text-body-md font-body-md text-on-surface-variant mt-1">
+            25.000+ kurumsal sipariş, kusursuz renk tutarlılığı ve tam zamanında teslimat güveni.
+          </p>
+</div>
+<div class="flex items-center gap-4 bg-surface-container-lowest px-4 py-2 rounded-xl border border-outline-variant/60 shadow-xs">
+<div class="text-right">
+<div class="font-label-numeric text-headline-sm font-headline-sm font-bold text-primary">25.400+</div>
+<div class="text-body-sm font-body-sm text-on-surface-variant">Tamamlanan İş</div>
+</div>
+<div class="w-px h-8 bg-outline-variant/60"></div>
+<div>
+<div class="font-label-numeric text-headline-sm font-headline-sm font-bold text-emerald-600">%99.4</div>
+<div class="text-body-sm font-body-sm text-on-surface-variant">İlk Baskıda Onay</div>
+</div>
+</div>
+</div>
+<!-- Testimonial Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Review 1 -->
+<div class="p-6 rounded-xl bg-surface-container-lowest border border-outline-variant/60 shadow-xs flex flex-col justify-between">
+<div>
+<div class="flex items-center gap-1 text-amber-500 mb-3">
+<span class="material-symbols-outlined text-[16px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<p class="text-body-md font-body-md text-on-surface leading-relaxed mb-6">
+              "Mimarlık ofisimiz için bastırdığımız monokrom kataloglarda siyahın doygunluğu ve Soft Touch lamine kaplama tam hayal ettiğimiz gibiydi. Tarayıcı üzerinden taşma paylarını doğrudan görmek inanılmaz zaman kazandırdı."
+            </p>
+</div>
+<div class="pt-4 border-t border-outline-variant/40 flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center font-semibold text-primary font-label-numeric">
+              EA
+            </div>
+<div>
+<div class="text-body-sm font-body-sm font-semibold text-primary">Emre Altınay</div>
+<div class="text-[11px] font-label-numeric text-on-surface-variant">Kreatif Direktör, Studio Mono</div>
+</div>
+</div>
+</div>
+<!-- Review 2 -->
+<div class="p-6 rounded-xl bg-surface-container-lowest border border-outline-variant/60 shadow-xs flex flex-col justify-between">
+<div>
+<div class="flex items-center gap-1 text-amber-500 mb-3">
+<span class="material-symbols-outlined text-[16px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<p class="text-body-md font-body-md text-on-surface leading-relaxed mb-6">
+              "600 GSM pamuklu dokulu tuale kartvizitlerdeki kabartma varak netliği ve bıçak kesimi kusursuz. VIP numune kiti sayesinde tüm yönetim kuruluna önceden fiziksel onaylatabildik."
+            </p>
+</div>
+<div class="pt-4 border-t border-outline-variant/40 flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center font-semibold text-primary font-label-numeric">
+              SD
+            </div>
+<div>
+<div class="text-body-sm font-body-sm font-semibold text-primary">Selin Demirtaş</div>
+<div class="text-[11px] font-label-numeric text-on-surface-variant">Marka Yöneticisi, FinTech Global</div>
+</div>
+</div>
+</div>
+<!-- Review 3 -->
+<div class="p-6 rounded-xl bg-surface-container-lowest border border-outline-variant/60 shadow-xs flex flex-col justify-between">
+<div>
+<div class="flex items-center gap-1 text-amber-500 mb-3">
+<span class="material-symbols-outlined text-[16px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<p class="text-body-md font-body-md text-on-surface leading-relaxed mb-6">
+              "Kurumsal kimlik paketimizin tamamını 48 saat gibi rekor bir sürede sıfır hata ile teslim aldık. FOGRA renk profili uyumluluğu ambalaj ve basılı materyal arasındaki renk farkını tamamen yok etti."
+            </p>
+</div>
+<div class="pt-4 border-t border-outline-variant/40 flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center font-semibold text-primary font-label-numeric">
+              BY
+            </div>
+<div>
+<div class="text-body-sm font-body-sm font-semibold text-primary">Burak Yılmaz</div>
+<div class="text-[11px] font-label-numeric text-on-surface-variant">Operasyon Direktörü, Vera Holding</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ================= SAMPLE KIT CALLOUT (FREE SAMPLE PACK) ================= -->
+<section class="py-20 bg-primary-container text-on-primary relative overflow-hidden" id="sample-kit">
+<!-- Subtle backdrop lighting accent -->
+<div class="absolute -right-20 -bottom-20 w-96 h-96 bg-secondary/20 rounded-full blur-3xl pointer-events-none"></div>
+<div class="max-w-7xl mx-auto px-6 relative z-10">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+<div class="lg:col-span-7">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-lowest/10 border border-outline-variant/30 text-secondary-fixed text-label-numeric font-label-numeric mb-6">
+<span class="material-symbols-outlined text-[16px]" data-icon="inventory_2">inventory_2</span>
+<span>Ücretsiz Kurumsal Tanıtım Seti</span>
+</div>
+<h2 class="text-headline-lg md:text-display-hero-mobile font-headline-lg font-bold tracking-tight text-on-primary mb-4">
+            Dokunmadan Karar Vermeyin.
+          </h2>
+<p class="text-body-lg font-body-lg text-outline-variant max-w-xl mb-8 leading-relaxed">
+            18 farklı seçkin kağıt stoğu, Soft Touch ve Kumlu Mat selefonlar, kabartma lak, gofre ve folyo yaldız örneklerini içeren <strong>Kurumsal Numune Kitini</strong> şirketinize ücretsiz talep edin.
+          </p>
+<form class="flex flex-col sm:flex-row gap-3 max-w-lg" onsubmit="event.preventDefault(); alert('Numune talebiniz alındı! Kargo takip kodunuz e-posta ile iletilecektir.');">
+<input class="px-4 py-3 bg-surface-container-lowest text-primary rounded-lg border border-outline-variant focus:outline-none focus:ring-2 focus:ring-secondary flex-1 text-body-md font-body-md" placeholder="Şirket e-posta adresiniz..." required="" type="email"/>
+<button class="px-6 py-3 bg-secondary text-on-secondary hover:bg-secondary-container rounded-lg font-body-md font-body-md font-semibold transition-all duration-150 ease-out active:scale-95 shadow-md flex items-center justify-center gap-2" type="submit">
+<span>Numune Kiti İste</span>
+<span class="material-symbols-outlined text-[18px]" data-icon="send">send</span>
+</button>
+</form>
+<div class="mt-4 flex items-center gap-6 text-[11px] font-label-numeric text-outline-variant">
+<span>✓ Kurumsal firmalara 100% ücretsiz</span>
+<span>✓ Ertesi gün kurye teslimatı</span>
+<span>✓ CMYK &amp; Pantone kılavuzu dahil</span>
+</div>
+</div>
+<div class="lg:col-span-5">
+<div class="relative rounded-2xl overflow-hidden border border-outline-variant/30 shadow-2xl bg-surface-container-lowest/5 p-3 backdrop-blur-sm">
+<img class="w-full h-80 object-cover rounded-xl" data-alt="An open luxury sample kit box containing stacked paper swatch decks with gold foil, copper stamping, textured cotton cardstocks, and holographic laminate strips. Pristinely organized in high-contrast architectural studio lighting with deep charcoal background and crisp white highlight edges." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBhve8Q2UdDAqzPrSEYfDI1CbkOUUpgJ_GaQ3SGSpF-lVq-cOg3VO8p1Ku_m0NXWfL3Y3drWZx-yHGMp2H28_ObPJzjC0Ae-hibW3QdyvjqRHEnQt-irr_oho8tlvYWHhXnCPGjCE_oFB4ruY-ey4HWdxjltdVzGtK4XSg7yCxXZ0kd5BcOpXIkuKB-8I-gp5TZ70pL_qCMcv1LxOUJ93EXsAMC-OgETPGUYQ_QFib1zf8O6WnOD0hF"/>
+<div class="absolute bottom-6 left-6 right-6 frosted-glass p-3 rounded-lg text-primary flex items-center justify-between shadow-lg">
+<div>
+<p class="text-body-sm font-body-sm font-semibold">2025 Master Swatch Book</p>
+<p class="text-[11px] font-label-numeric text-on-surface-variant">18 Stok / 6 Bitiş Efekti</p>
+</div>
+<span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-[11px] font-bold rounded">
+                Stokta Var
+              </span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ================= FOOTER (SHARED COMPONENT) ================= -->
+<footer class="bg-surface-container-low dark:bg-surface-container-highest border-t border-outline-variant dark:border-outline docked full-width bottom flat no shadows transition-colors duration-150">
+<div class="w-full px-6 py-12 max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+<!-- Brand & Technical Specs -->
+<div class="flex flex-col md:flex-row items-center gap-4 text-center md:text-left">
+<a class="text-headline-sm font-headline-sm font-semibold text-primary dark:text-inverse-primary tracking-tight" href="#">
+          PRESS &amp; STUDIO
+        </a>
+<span class="hidden md:inline text-outline-variant">|</span>
+<p class="text-body-sm font-body-sm text-on-surface-variant dark:text-outline-variant">
+          © 2025 Press &amp; Studio Commercial Printworks Inc. Calibrated CMYK &amp; Pantone certified.
+        </p>
+</div>
+<!-- Footer Navigation Links -->
+<nav class="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-body-sm font-body-sm">
+<a class="text-on-surface-variant dark:text-outline-variant hover:underline hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-150" href="#">Material Standards</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:underline hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-150" href="#">Color Profile ICC</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:underline hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-150" href="#">FSC Certified Stocks</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:underline hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-150" href="#">Vector Studio API</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:underline hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-150" href="#">Bleed &amp; Tolerances</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:underline hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-150" href="#">Production SLA</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:underline hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-150" href="#">Terms of Presswork</a>
+</nav>
+</div>
+</footer>
+</body></html>
