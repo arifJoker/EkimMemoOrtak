@@ -3,25 +3,25 @@
    ========================================================================== */
 
 :root {
-    --apple-bg: #f5f5f7;
+    --apple-bg: #f8fafc;
     --apple-card-bg: #ffffff;
     --apple-dark: #1d1d1f;
-    --apple-darker: #111113;
+    --apple-darker: #0f172a;
     --apple-blue: #0071e3;
     --apple-blue-hover: #0077ed;
     --apple-orange: #f15a24;
     --apple-orange-hover: #e04e18;
-    --apple-text: #1d1d1f;
-    --apple-subtext: #86868b;
+    --apple-text: #1e293b;
+    --apple-subtext: #64748b;
     --apple-border: rgba(0, 0, 0, 0.08);
-    --apple-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
-    --apple-shadow-hover: 0 12px 36px rgba(0, 0, 0, 0.08);
-    --apple-radius: 18px;
-    --apple-radius-sm: 12px;
+    --apple-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    --apple-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.08);
+    --apple-radius: 20px;
+    --apple-radius-sm: 14px;
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     background-color: var(--apple-bg);
     color: var(--apple-text);
     margin: 0;
@@ -40,7 +40,7 @@ a {
     background: #111113;
     color: #e5e5ea;
     font-size: 13px;
-    padding: 8px 0;
+    padding: 9px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 .top-announcement a {
@@ -54,7 +54,7 @@ a {
 
 /* Apple Tarzı Header */
 .apple-header {
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.92);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     position: sticky;
@@ -164,103 +164,114 @@ a {
     border-radius: 10px;
 }
 
-/* Mobil Alt Kategori Barı */
-.category-subbar {
-    background: #ffffff;
-    border-top: 1px solid var(--apple-border);
-    padding: 8px 0;
-    overflow-x: auto;
-    white-space: nowrap;
-}
-.category-subbar-inner {
-    display: flex;
-    gap: 8px;
-    padding: 0 8px;
-}
-.cat-chip {
-    font-size: 12px;
-    font-weight: 500;
-    padding: 5px 12px;
-    border-radius: 16px;
-    background: rgba(0, 0, 0, 0.04);
-    color: var(--apple-dark);
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-}
-.cat-chip.urgent {
-    background: #fee2e2;
-    color: #dc2626;
-    font-weight: 700;
-}
-
-/* Hero Carousel & Slider */
-.hero-slider-section {
-    background: radial-gradient(circle at 50% 30%, #ffffff 0%, #ececed 100%);
-    padding: 60px 0 80px 0;
-    min-height: 520px;
-}
-.hero-ambient-glow {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.5;
-    pointer-events: none;
-}
-.orb-1 { width: 350px; height: 350px; background: rgba(241, 90, 36, 0.2); top: 10%; right: 15%; }
-.orb-2 { width: 400px; height: 400px; background: rgba(0, 113, 227, 0.15); bottom: 5%; left: 10%; }
-
-.slide-headline {
-    font-size: 42px;
-    font-weight: 800;
-    letter-spacing: -1.2px;
-    line-height: 1.15;
-    color: #111113;
-    margin-bottom: 18px;
-}
-.slide-grad-kartvizit {
-    background: linear-gradient(135deg, #f15a24 0%, #ff8c00 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-.slide-grad-brosur {
-    background: linear-gradient(135deg, #0071e3 0%, #4facfe 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-.slide-grad-kesim {
-    background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-.slide-description {
-    font-size: 16px;
-    color: #6e6e73;
-    line-height: 1.5;
-    margin-bottom: 24px;
-}
-
-.hero-pill-badge {
-    background: rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    font-size: 13px;
-    font-weight: 600;
-    padding: 6px 14px;
-    border-radius: 20px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 14px;
-}
-.slide-price-pill {
-    background: #ffffff;
+/* Apple Kartları */
+.apple-card {
+    background: var(--apple-card-bg);
+    border-radius: var(--apple-radius);
     border: 1px solid var(--apple-border);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
-    padding: 10px 18px;
-    border-radius: 30px;
-    font-size: 14px;
+    box-shadow: var(--apple-shadow);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+}
+.apple-card:hover {
+    box-shadow: var(--apple-shadow-hover);
+}
+
+/* =========================================================================
+   🎨 3D DİNAMİK MOCKUP SAHNESİ & ETKİLEŞİMLİ GÖRSELLEŞTİRİCİ
+   ========================================================================= */
+.mockup-stage-box {
+    background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+    border: 1px solid #334155;
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    min-height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.interactive-showcase-card {
+    width: 300px;
+    height: 175px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 12px;
+    transition: transform 0.15s ease-out;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.2);
+    position: relative;
+    overflow: hidden;
+    cursor: grab;
+}
+.interactive-showcase-card:active {
+    cursor: grabbing;
+}
+
+.card-glare {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 65%);
+    pointer-events: none;
+    mix-blend-mode: screen;
+}
+
+/* ÜRÜN YAPILANDIRICI & SEÇENEK KARTLARI */
+.order-path-card {
+    border: 2px solid var(--apple-border);
+    border-radius: var(--apple-radius-sm);
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    background: #ffffff;
+    position: relative;
+}
+.order-path-card:hover {
+    border-color: rgba(241, 90, 36, 0.4);
+    background: #fffbf9;
+    transform: translateY(-2px);
+}
+.order-path-card.active {
+    border-color: var(--apple-orange);
+    background: #fff8f5;
+    box-shadow: 0 6px 20px rgba(241, 90, 36, 0.15);
+}
+
+.package-pill-card {
+    border: 2px solid var(--apple-border);
+    border-radius: 14px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.package-pill-card:hover {
+    border-color: rgba(241, 90, 36, 0.4);
+    background: #fffbf9;
+}
+.package-pill-card.active {
+    border-color: var(--apple-orange);
+    background: #fff8f5;
+    box-shadow: 0 0 0 1px var(--apple-orange);
+}
+
+/* SÜRGÜLÜ VE CANLI TASARIMCI TUVALİ */
+.designer-canvas-box {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    position: relative;
     display: inline-block;
-    margin-bottom: 24px;
 }
 
 /* Butonlar */
@@ -297,129 +308,6 @@ a {
 }
 .btn-apple-secondary:hover {
     background: rgba(0, 0, 0, 0.12);
-}
-
-/* Apple Kartları */
-.apple-card {
-    background: var(--apple-card-bg);
-    border-radius: var(--apple-radius);
-    border: 1px solid var(--apple-border);
-    box-shadow: var(--apple-shadow);
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    position: relative;
-    overflow: hidden;
-}
-.apple-card:hover {
-    box-shadow: var(--apple-shadow-hover);
-    transform: translateY(-3px);
-}
-
-/* Ürün Kartı */
-.product-card {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    padding: 16px;
-}
-.product-img-wrapper {
-    background: #fbfbfd;
-    border-radius: var(--apple-radius-sm);
-    height: 200px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 14px;
-    overflow: hidden;
-    position: relative;
-}
-.product-img-wrapper img {
-    max-height: 85%;
-    max-width: 85%;
-    object-fit: contain;
-    transition: transform 0.4s ease;
-}
-.product-card:hover .product-img-wrapper img {
-    transform: scale(1.06);
-}
-.product-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: #111113;
-    margin-bottom: 6px;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    min-height: 44px;
-}
-.product-desc {
-    font-size: 13px;
-    color: var(--apple-subtext);
-    margin-bottom: 14px;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    min-height: 38px;
-}
-.product-price-row {
-    margin-top: auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-top: 12px;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
-}
-.product-price {
-    font-size: 19px;
-    font-weight: 800;
-    color: #111113;
-}
-.product-price-sub {
-    font-size: 11px;
-    color: var(--apple-subtext);
-    display: block;
-}
-
-/* Canlı Fiyatlandırma & Paket Seçici Kartları */
-.package-select-card {
-    border: 2px solid var(--apple-border);
-    border-radius: var(--apple-radius-sm);
-    padding: 14px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    background: #ffffff;
-}
-.package-select-card:hover {
-    border-color: rgba(241, 90, 36, 0.5);
-    background: #fffbf9;
-}
-.package-select-card.active {
-    border-color: var(--apple-orange);
-    background: #fff8f5;
-    box-shadow: 0 0 0 1px var(--apple-orange);
-}
-
-.custom-qty-box {
-    background: #ffffff;
-    border: 1px solid var(--apple-border);
-    border-radius: var(--apple-radius-sm);
-    padding: 16px;
-}
-
-/* Dosya Yükleme Alanı */
-.upload-drop-zone {
-    border: 2px dashed #d1d5db;
-    border-radius: var(--apple-radius-sm);
-    padding: 30px;
-    text-align: center;
-    background: #f9fafb;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-.upload-drop-zone:hover {
-    border-color: var(--apple-orange);
-    background: #fffbf9;
 }
 
 /* Footer */
