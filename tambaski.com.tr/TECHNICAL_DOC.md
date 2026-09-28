@@ -29,7 +29,14 @@ tambaski.com.tr/
 │   ├── designs/               # Yüklenen müşteri tasarım dosyaları (PDF, AI, PSD, CDR, TIFF)
 │   └── products/              # Ürün kapak görselleri
 ├── admin/
-│   └── index.php              # Admin paneli (Siparişler, tasarım indirme, üretim durumu, bayiler)
+│   ├── auth_check.php         # Güvenlik ve oturum kontrolü
+│   ├── login.php              # Şifreli admin giriş ekranı
+│   ├── logout.php             # Güvenli çıkış işlemi
+│   ├── header.php             # Admin ortak navigasyon ve menü
+│   ├── footer.php             # Admin ortak altbilgi
+│   ├── index.php              # Sipariş yönetimi, tasarım indirme, ciro ve durum takibi
+│   ├── campaigns.php          # İndirim kuponları, otomatik sepet kurguları, duyuru bandı
+│   └── settings.php           # Telefon, WhatsApp, adres, PayTR, banka hesapları, analitik
 ├── index.php                  # Anasayfa (Hero slider, çok satanlar, kategori grid, B2B alanı)
 ├── category.php               # Kategori ve arama filtreleme sayfası
 ├── product.php                # İnteraktif ürün yapılandırıcı & canlı hesaplayıcı
@@ -43,7 +50,7 @@ tambaski.com.tr/
 └── TECHNICAL_DOC.md           # Teknik dizin kılavuzu
 ```
 
-## 3. Fiyatlandırma Motoru Mantığı
-1. **Standart Hazır Paketler:** `product_packages` tablosundan admin tarafından tanımlanan net fiyatlar.
-2. **Özel Adet Girişi:** `Taban Kurulum Bedeli + (Özel Adet * Birim Maliyet * Tiraj İndirimi Katsayısı)`.
-3. **m² Boyutlu Ürünler (Dekota, Pleksi, Folyo, Branda):** `(Genişlik x Yükseklik / 10000) * m² Fiyatı * Kalınlık Çarpanı + Kesim Bedeli`.
+## 3. Yönetim Paneli Giriş Bilgileri (Varsayılan)
+- **Giriş URL:** `/admin/login.php`
+- **Kullanıcı Adı:** `admin` (veya `arif`)
+- **Şifre:** `admin123` (veya `tambaski2026`)

@@ -18,15 +18,11 @@ flowchart TD
         SqmCalc["📐 m² Boyut Hesaplayıcı (Dekota, Pleksi Kesim, Folyo, Branda)"]
     end
 
-    subgraph DesignAndUpload ["📁 Tasarım & Dosya Yükleme"]
-        UploadZone["📤 Hazır Tasarım Yükleme (PDF, AI, PSD, CDR, TIFF)"]
-        GraphicSupport["✍️ Profesyonel Grafik Destek Talebi"]
-    end
-
-    subgraph AdminPanel ["⚙️ Admin Yönetim Paneli (admin/index.php)"]
-        OrderManage["📋 Sipariş & Tasarım İndirme"]
-        DealerManage["🤝 Bayi Başvuru Onayı"]
-        PriceMatrix["🏷️ Ürün & Paket Fiyat Yönetimi"]
+    subgraph AdminPanel ["⚙️ Admin Yönetim Paneli (admin/)"]
+        AdminAuth["🔒 login.php & auth_check.php (Güvenli Şifreli Giriş)"]
+        AdminDashboard["📊 index.php (Siparişler & Tasarım İndirme)"]
+        CampaignManager["🎟️ campaigns.php (Kuponlar, Otomatik Sepet İndirimi & Flash Bar)"]
+        SettingsManager["⚙️ settings.php (İletişim, WhatsApp, Harita, PayTR, Banka Hesapları)"]
     end
 
     subgraph Storage ["🗄️ Veri & Depolama"]
@@ -37,11 +33,12 @@ flowchart TD
     Home --> Categories
     Categories --> ProductPage
     ProductPage --> PricingEngine
-    ProductPage --> DesignAndUpload
     ProductPage --> CartPage
     CartPage --> CheckoutPage
     CheckoutPage --> DB
-    DesignAndUpload --> Uploads
-    AdminPanel --> DB
-    AdminPanel --> Uploads
+    AdminAuth --> AdminDashboard
+    AdminDashboard --> CampaignManager
+    AdminDashboard --> SettingsManager
+    AdminDashboard --> DB
+    AdminDashboard --> Uploads
 ```
