@@ -1,252 +1,286 @@
 <?php
-/**
- * TAMBASKI.COM.TR - Admin Paneli Header (Sol Sabit Sidebar Menü Mimarisi)
- */
-require_once __DIR__ . '/auth_check.php';
-require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../config/config.php';
+Auth::requireAdmin();
 
-$current_page = basename($_SERVER['PHP_SELF']);
+$currentAdmin = Auth::user();
+$dbConn = Database::getInstance()->getConnection();
+
+$pendingOrdersCount = $dbConn ? $dbConn->query("SELECT COUNT(*) FROM orders WHERE order_status = 'pending_payment' OR order_status = 'payment_received'")->fetchColumn() : 0;
+$pendingDealersCount = $dbConn ? $dbConn->query("SELECT COUNT(*) FROM users WHERE role = 'dealer' AND dealer_status = 'pending'")->fetchColumn() : 0;
+
+$activePage = basename($_SERVER['PHP_SELF']);
+$currentAction = $_GET['action'] ?? 'list';
+
+$isProductMenuOpen = in_array($activePage, ['products.php', 'categories.php', 'variants.php', 'pricing_engine.php']);
+$isSettingsMenuOpen = in_array($activePage, ['payment_settings.php', 'cargo_settings.php', 'ai_api.php']);
 ?>
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($page_title ?? 'Yönetim Paneli') ?> – TamBaskı</title>
-    
-    <!-- Bootstrap 5 CSS & Icons -->
+    <title><?= htmlspecialchars($pageTitle ?? 'Yönetim Paneli') ?> – TamBaskı Admin</title>
+
+    <!-- Favicon & App Icons -->
+    <link rel="icon" type="image/svg+xml" href="<?= SITE_URL ?>/assets/img/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="<?= SITE_URL ?>/assets/img/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="<?= SITE_URL ?>/assets/img/favicon-16x16.png">
+    <link rel="shortcut icon" href="<?= SITE_URL ?>/assets/img/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="<?= SITE_URL ?>/assets/img/apple-touch-icon.png">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="../assets/css/style.css">
-
+    <link rel="stylesheet" href="<?= SITE_URL ?>/assets/css/style.css">
     <style>
-        :root {
-            --sidebar-width: 260px;
-            --sidebar-bg: #111113;
-            --sidebar-hover: rgba(255, 255, 255, 0.08);
-            --sidebar-active: #f15a24;
-        }
         body {
-            background-color: #f8fafc;
-            min-height: 100vh;
-        }
-        .admin-wrapper {
-            display: flex;
-            width: 100%;
-            min-height: 100vh;
+            overflow-x: hidden;
+            background: #f8fafc;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
         }
         .admin-sidebar {
-            width: var(--sidebar-width);
-            background: var(--sidebar-bg);
-            color: #94a3b8;
-            flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
+            width: 260px;
+            height: 100vh;
+            background: #0f172a;
+            color: #e2e8f0;
             position: fixed;
             top: 0;
-            bottom: 0;
             left: 0;
-            z-index: 1040;
+            bottom: 0;
+            z-index: 1000;
             overflow-y: auto;
-            border-right: 1px solid rgba(255, 255, 255, 0.08);
-            transition: all 0.3s ease;
+            border-right: 1px solid rgba(255, 255, 255, 0.07);
         }
-        .sidebar-brand {
-            padding: 24px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        .admin-main {
+            margin-left: 260px;
+            padding: 25px 30px;
+            min-height: 100vh;
+            width: calc(100% - 260px);
+            max-width: calc(100% - 260px);
+            box-sizing: border-box;
+            background: #f8fafc;
         }
-        .sidebar-menu {
-            padding: 16px 12px;
-            list-style: none;
-            margin: 0;
-            flex-grow: 1;
-        }
-        .sidebar-heading {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
+        .admin-nav-group-title {
+            font-size: 10.5px;
             font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
             color: #64748b;
-            padding: 12px 14px 6px 14px;
+            padding: 12px 14px 4px 14px;
         }
-        .sidebar-item {
-            margin-bottom: 4px;
-        }
-        .sidebar-link {
+        .admin-nav-link {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 10px 14px;
-            border-radius: 12px;
-            color: #cbd5e1;
-            font-size: 14px;
+            gap: 10px;
+            padding: 9px 14px;
+            color: #94a3b8;
+            font-size: 13.5px;
             font-weight: 500;
             text-decoration: none;
-            transition: all 0.2s ease;
+            border-radius: 8px;
+            margin-bottom: 2px;
+            transition: all 0.15s ease-in-out;
+            cursor: pointer;
         }
-        .sidebar-link:hover {
-            background: var(--sidebar-hover);
+        .admin-nav-link:hover {
             color: #ffffff;
+            background: rgba(255, 255, 255, 0.07);
         }
-        .sidebar-link.active {
-            background: var(--sidebar-active);
+        .admin-nav-link.active {
+            background: #2563eb;
             color: #ffffff;
             font-weight: 600;
-            box-shadow: 0 4px 14px rgba(241, 90, 36, 0.35);
+            box-shadow: 0 4px 12px rgba(37,99,235,0.3);
         }
-        .sidebar-link i {
-            font-size: 18px;
-        }
-        .sidebar-footer {
-            padding: 16px 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(0, 0, 0, 0.2);
-        }
-        .admin-main-content {
-            flex-grow: 1;
-            margin-left: var(--sidebar-width);
-            min-width: 0;
+        .admin-sub-link {
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 12px 7px 32px;
+            color: #94a3b8;
+            font-size: 12.8px;
+            font-weight: 500;
+            text-decoration: none;
+            border-radius: 6px;
+            margin-bottom: 2px;
+            transition: all 0.15s;
+            position: relative;
         }
-        .admin-topbar {
-            background: #ffffff;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-            padding: 14px 28px;
-            position: sticky;
-            top: 0;
-            z-index: 1030;
+        .admin-sub-link::before {
+            content: '';
+            position: absolute;
+            left: 18px;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #475569;
+            transition: all 0.15s;
+        }
+        .admin-sub-link:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .admin-sub-link:hover::before {
+            background: #38bdf8;
+            transform: scale(1.4);
+        }
+        .admin-sub-link.active {
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.1);
+            font-weight: 600;
+        }
+        .admin-sub-link.active::before {
+            background: #38bdf8;
+            box-shadow: 0 0 6px #38bdf8;
+        }
+        .admin-menu-toggle {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            width: 100%;
+        }
+        .admin-menu-toggle .chevron-icon {
+            transition: transform 0.2s ease;
+            font-size: 11px;
+        }
+        .admin-menu-toggle[aria-expanded="true"] .chevron-icon {
+            transform: rotate(180deg);
         }
         @media (max-width: 991px) {
-            .admin-sidebar {
-                margin-left: calc(-1 * var(--sidebar-width));
-            }
-            .admin-sidebar.show {
-                margin-left: 0;
-            }
-            .admin-main-content {
-                margin-left: 0;
-            }
+            .admin-sidebar { position: relative; width: 100%; height: auto; }
+            .admin-main { margin-left: 0; width: 100%; max-width: 100%; padding: 15px; }
+        }
+        @media print {
+            .admin-sidebar, .btn, .alert, .dropdown, a.btn, form button, .sticky-top { display: none !important; }
+            .admin-main { margin-left: 0 !important; padding: 0 !important; width: 100% !important; max-width: 100% !important; background: #fff !important; }
+            .apple-card { box-shadow: none !important; border: 1px solid #ccc !important; }
+            body { background: #fff !important; }
         }
     </style>
 </head>
 <body>
 
-<div class="admin-wrapper">
-    <!-- SOL SABİT SİDEBAR MENÜ -->
-    <aside class="admin-sidebar" id="adminSidebar">
-        <div class="sidebar-brand">
-            <a href="index.php" class="d-flex align-items-center gap-2 text-decoration-none">
-                <img src="../assets/img/logo.svg" alt="TamBaskı" style="height: 32px; filter: brightness(0) invert(1);">
+<div class="d-flex flex-column flex-lg-row">
+    
+    <!-- Sol Sidebar -->
+    <aside class="admin-sidebar p-3 d-flex flex-column">
+        <!-- Logo & Başlık -->
+        <div class="d-flex align-items-center gap-2 mb-3 px-2 pt-2 pb-2 border-bottom border-secondary border-opacity-25">
+            <a href="<?= SITE_URL ?>/admin/index.php" class="d-flex align-items-center gap-2 text-decoration-none">
+                <img src="<?= SITE_URL ?>/assets/img/logo-badge.svg" alt="TamBaskı" style="height: 38px; width: auto; border-radius: 8px;">
+                <div>
+                    <div class="fw-bold text-white fs-6 lh-1">TamBaskı</div>
+                    <div class="text-muted small mt-1" style="font-size: 11px;">Yönetim & Operasyon</div>
+                </div>
             </a>
-            <span class="badge bg-danger rounded-pill px-2 py-1" style="font-size: 10px;">V2.0</span>
         </div>
 
-        <ul class="sidebar-menu">
-            <li class="sidebar-heading">Genel Panel</li>
-            <li class="sidebar-item">
-                <a href="index.php" class="sidebar-link <?= $current_page === 'index.php' ? 'active' : '' ?>">
-                    <i class="bi bi-speedometer2"></i>
-                    <span>Siparişler & Özet</span>
-                </a>
-            </li>
+        <!-- Gezinme Menüsü -->
+        <nav class="flex-grow-1 overflow-y-auto" style="max-height: calc(100vh - 150px);">
+            
+            <div class="admin-nav-group-title">Genel</div>
+            <a href="<?= SITE_URL ?>/admin/index.php" class="admin-nav-link <?= $activePage == 'index.php' ? 'active' : '' ?>">
+                <i class="bi bi-speedometer2 text-info"></i> Dashboard
+            </a>
+            
+            <a href="<?= SITE_URL ?>/admin/orders.php" class="admin-nav-link <?= $activePage == 'orders.php' ? 'active' : '' ?>">
+                <i class="bi bi-bag-check text-warning"></i> Siparişler
+                <?php if ($pendingOrdersCount > 0): ?>
+                    <span class="badge bg-danger rounded-pill ms-auto px-2 py-1" style="font-size: 10px;"><?= $pendingOrdersCount ?></span>
+                <?php endif; ?>
+            </a>
 
-            <li class="sidebar-heading">Ürün & Fiyat Yönetimi</li>
-            <li class="sidebar-item">
-                <a href="products.php" class="sidebar-link <?= $current_page === 'products.php' ? 'active' : '' ?>">
-                    <i class="bi bi-box-seam"></i>
-                    <span>Tüm Ürünler</span>
-                </a>
-            </li>
-            <li class="sidebar-item">
-                <a href="product_add.php" class="sidebar-link <?= $current_page === 'product_add.php' ? 'active' : '' ?>">
-                    <i class="bi bi-plus-circle-fill text-warning"></i>
-                    <span>Yeni Ürün Ekle</span>
-                </a>
-            </li>
-            <li class="sidebar-item">
-                <a href="categories.php" class="sidebar-link <?= $current_page === 'categories.php' ? 'active' : '' ?>">
-                    <i class="bi bi-grid-fill"></i>
-                    <span>Kategoriler</span>
-                </a>
-            </li>
-            <li class="sidebar-item">
-                <a href="mockups.php" class="sidebar-link <?= $current_page === 'mockups.php' ? 'active' : '' ?>">
-                    <i class="bi bi-layers-half text-info"></i>
-                    <span>Mockup & Şablonlar</span>
-                </a>
-            </li>
-
-            <li class="sidebar-heading">Pazarlama & B2B</li>
-            <li class="sidebar-item">
-                <a href="campaigns.php" class="sidebar-link <?= $current_page === 'campaigns.php' ? 'active' : '' ?>">
-                    <i class="bi bi-percent"></i>
-                    <span>Kampanya & Kuponlar</span>
-                </a>
-            </li>
-            <li class="sidebar-item">
-                <a href="dealers.php" class="sidebar-link <?= $current_page === 'dealers.php' ? 'active' : '' ?>">
-                    <i class="bi bi-briefcase-fill text-success"></i>
-                    <span>E-Bayi Yönetimi</span>
-                </a>
-            </li>
-
-            <li class="sidebar-heading">Sistem & Yapılandırma</li>
-            <li class="sidebar-item">
-                <a href="settings.php" class="sidebar-link <?= $current_page === 'settings.php' ? 'active' : '' ?>">
-                    <i class="bi bi-gear-fill"></i>
-                    <span>İletişim & Ayarlar</span>
-                </a>
-            </li>
-            <li class="sidebar-item">
-                <a href="../index.php" target="_blank" class="sidebar-link">
-                    <i class="bi bi-box-arrow-up-right"></i>
-                    <span>Mağazayı Gör</span>
-                </a>
-            </li>
-        </ul>
-
-        <div class="sidebar-footer d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center gap-2">
-                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;">
-                    <i class="bi bi-person-fill"></i>
+            <!-- ÜRÜN İŞLEMLERİ (Açılır / Alt Menülü Grup) -->
+            <div class="admin-nav-group-title">Katalog & Üretim</div>
+            
+            <a class="admin-nav-link admin-menu-toggle <?= $isProductMenuOpen ? 'text-white' : '' ?>" data-bs-toggle="collapse" href="#submenuProducts" role="button" aria-expanded="<?= $isProductMenuOpen ? 'true' : 'false' ?>">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-box-seam text-primary"></i>
+                    <span>Ürün İşlemleri</span>
                 </div>
-                <div class="small">
-                    <div class="text-white fw-semibold"><?= htmlspecialchars($_SESSION['admin_user'] ?? 'Yönetici') ?></div>
-                    <div class="text-muted" style="font-size: 11px;">Süper Admin</div>
+                <i class="bi bi-chevron-down chevron-icon text-muted"></i>
+            </a>
+
+            <div class="collapse <?= $isProductMenuOpen ? 'show' : '' ?>" id="submenuProducts">
+                <div class="py-1">
+                    <a href="<?= SITE_URL ?>/admin/products.php" class="admin-sub-link <?= ($activePage == 'products.php' && $currentAction != 'create') ? 'active' : '' ?>">
+                        <i class="bi bi-list-ul"></i> Tüm Ürünler
+                    </a>
+                    <a href="<?= SITE_URL ?>/admin/products.php?action=create" class="admin-sub-link <?= ($activePage == 'products.php' && $currentAction == 'create') ? 'active' : '' ?>">
+                        <i class="bi bi-plus-circle text-success"></i> Yeni Ürün Ekle
+                    </a>
+                    <a href="<?= SITE_URL ?>/admin/categories.php" class="admin-sub-link <?= $activePage == 'categories.php' ? 'active' : '' ?>">
+                        <i class="bi bi-grid"></i> Kategoriler
+                    </a>
+                    <a href="<?= SITE_URL ?>/admin/variants.php" class="admin-sub-link <?= $activePage == 'variants.php' ? 'active' : '' ?>">
+                        <i class="bi bi-diagram-3 text-info"></i> Varyant & Kağıt Havuzu
+                    </a>
+                    <a href="<?= SITE_URL ?>/admin/pricing_engine.php" class="admin-sub-link <?= $activePage == 'pricing_engine.php' ? 'active' : '' ?>">
+                        <i class="bi bi-calculator text-warning"></i> 70x100 Tabaka Motoru
+                    </a>
                 </div>
             </div>
-            <a href="logout.php" class="text-danger fs-5" title="Çıkış Yap" onclick="return confirm('Çıkış yapmak istediğinize emin misiniz?');">
-                <i class="bi bi-box-arrow-right"></i>
+
+            <div class="admin-nav-group-title">Tasarım & Müşteri</div>
+            <a href="<?= SITE_URL ?>/admin/templates.php" class="admin-nav-link <?= $activePage == 'templates.php' ? 'active' : '' ?>">
+                <i class="bi bi-vector-pen text-primary"></i> Sektörel Şablonlar
+            </a>
+
+            <a href="<?= SITE_URL ?>/admin/dealers.php" class="admin-nav-link <?= $activePage == 'dealers.php' ? 'active' : '' ?>">
+                <i class="bi bi-people text-info"></i> Müşteriler & E-Bayiler
+                <?php if ($pendingDealersCount > 0): ?>
+                    <span class="badge bg-warning text-dark rounded-pill ms-auto px-2 py-1" style="font-size: 10px;"><?= $pendingDealersCount ?> Bekleyen</span>
+                <?php endif; ?>
+            </a>
+
+            <a href="<?= SITE_URL ?>/admin/campaigns.php" class="admin-nav-link <?= $activePage == 'campaigns.php' ? 'active' : '' ?>">
+                <i class="bi bi-ticket-perforated text-success"></i> Kampanyalar & Kuponlar
+            </a>
+
+            <!-- SİSTEM & ENTEGRASYON (Açılır Alt Menü) -->
+            <div class="admin-nav-group-title">Sistem & Entegrasyon</div>
+            <a class="admin-nav-link admin-menu-toggle <?= $isSettingsMenuOpen ? 'text-white' : '' ?>" data-bs-toggle="collapse" href="#submenuSettings" role="button" aria-expanded="<?= $isSettingsMenuOpen ? 'true' : 'false' ?>">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-sliders text-secondary"></i>
+                    <span>Sistem Ayarları</span>
+                </div>
+                <i class="bi bi-chevron-down chevron-icon text-muted"></i>
+            </a>
+
+            <div class="collapse <?= $isSettingsMenuOpen ? 'show' : '' ?>" id="submenuSettings">
+                <div class="py-1">
+                    <a href="<?= SITE_URL ?>/admin/payment_settings.php" class="admin-sub-link <?= $activePage == 'payment_settings.php' ? 'active' : '' ?>">
+                        <i class="bi bi-credit-card"></i> PayTR / iyzico Ödeme
+                    </a>
+                    <a href="<?= SITE_URL ?>/admin/cargo_settings.php" class="admin-sub-link <?= $activePage == 'cargo_settings.php' ? 'active' : '' ?>">
+                        <i class="bi bi-truck"></i> Kargo Anlaşmaları
+                    </a>
+                    <a href="<?= SITE_URL ?>/admin/ai_api.php" class="admin-sub-link <?= $activePage == 'ai_api.php' ? 'active' : '' ?>">
+                        <i class="bi bi-robot text-warning"></i> AI & REST API
+                    </a>
+                </div>
+            </div>
+
+        </nav>
+
+        <!-- Kullanıcı & Çıkış -->
+        <div class="pt-3 border-top border-secondary border-opacity-25 px-1 mt-auto">
+            <div class="d-flex align-items-center justify-content-between text-muted small px-1">
+                <span class="text-truncate fw-medium text-light" style="max-width: 140px;">
+                    <i class="bi bi-person-circle me-1 text-primary"></i> <?= htmlspecialchars($currentAdmin['full_name']) ?>
+                </span>
+                <a href="<?= SITE_URL ?>/logout.php" class="text-danger text-decoration-none small fw-bold"><i class="bi bi-power"></i> Çıkış</a>
+            </div>
+            <a href="<?= SITE_URL ?>/" target="_blank" class="btn btn-sm btn-outline-light w-100 mt-2 py-1 small rounded-3">
+                <i class="bi bi-box-arrow-up-right me-1"></i> Siteyi Görüntüle
             </a>
         </div>
     </aside>
 
-    <!-- SAĞ ANA İÇERİK ALANI -->
-    <main class="admin-main-content">
-        <!-- TOPBAR -->
-        <header class="admin-topbar">
-            <div class="d-flex align-items-center gap-3">
-                <button class="btn btn-sm btn-light d-lg-none" id="sidebarToggleBtn">
-                    <i class="bi bi-list fs-5"></i>
-                </button>
-                <h5 class="fw-bold mb-0 text-dark"><?= htmlspecialchars($page_title ?? 'Yönetim Paneli') ?></h5>
+    <!-- Sağ Ana İçerik -->
+    <main class="admin-main flex-grow-1">
+        <?php if ($flash = Helper::getFlash()): ?>
+            <div class="alert alert-<?= $flash['type'] ?> alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert">
+                <?= htmlspecialchars($flash['message']) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
-
-            <div class="d-flex align-items-center gap-3">
-                <a href="product_add.php" class="btn btn-sm btn-apple btn-apple-orange d-none d-sm-inline-flex align-items-center gap-1">
-                    <i class="bi bi-plus-lg"></i> Yeni Ürün Ekle
-                </a>
-                <a href="../index.php" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
-                    <i class="bi bi-globe me-1"></i> Siteyi Aç
-                </a>
-            </div>
-        </header>
-
-        <div class="p-4 p-md-4">
+        <?php endif; ?>

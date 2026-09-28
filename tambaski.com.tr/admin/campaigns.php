@@ -1,259 +1,175 @@
 <?php
-/**
- * TAMBASKI.COM.TR - Admin Kampanya & Kupon Kurguları Modülü
- */
-$page_title = "Kampanya Kurguları & Kupon Yönetimi";
+require_once __DIR__ . '/../config/config.php';
+Auth::requireAdmin();
+
+$db = Database::getInstance()->getConnection();
+$action = $_GET['action'] ?? 'list';
+
+if ($action === 'delete') {
+    $id = (int)($_GET['id'] ?? 0);
+    $stmt = $db->prepare("DELETE FROM campaigns WHERE id = ?");
+    $stmt->execute([$id]);
+    Helper::setFlash('success', 'Kampanya kuponu silindi.');
+    header("Location: " . SITE_URL . "/admin/campaigns.php");
+    exit;
+}
+
+// Genel Kargo & Sepet Limiti Güncelleme
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_shipping_rules'])) {
+    Helper::saveSetting('free_shipping_limit', (float)$_POST['free_shipping_limit']);
+    Helper::saveSetting('default_shipping_fee', (float)$_POST['default_shipping_fee']);
+    Helper::setFlash('success', 'Kargo kuralları ve ücretsiz kargo limiti güncellendi.');
+    header("Location: " . SITE_URL . "/admin/campaigns.php");
+    exit;
+}
+
+// Yeni Kupon / Kampanya Ekleme
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_campaign'])) {
+    $title = trim($_POST['title'] ?? '');
+    $code = strtoupper(trim($_POST['code'] ?? ''));
+    $type = $_POST['type'] ?? 'percent';
+    $value = (float)($_POST['value'] ?? 0);
+    $minCart = (float)($_POST['min_cart_amount'] ?? 0);
+    $limit = (int)($_POST['usage_limit'] ?? 1000);
+
+    $stmt = $db->prepare("INSERT INTO campaigns (title, code, type, value, min_cart_amount, usage_limit) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$title, $code, $type, $value, $minCart, $limit]);
+
+    Helper::setFlash('success', 'Yeni indirim kuponu oluşturuldu.');
+    header("Location: " . SITE_URL . "/admin/campaigns.php");
+    exit;
+}
+
+$campaigns = $db->query("SELECT * FROM campaigns ORDER BY id DESC")->fetchAll();
+$freeShippingLimit = Helper::getSetting('free_shipping_limit', '750.00');
+$defaultShippingFee = Helper::getSetting('default_shipping_fee', '79.90');
+
+$pageTitle = 'Kampanya & Sepet Kuralları Yönetimi';
 require_once __DIR__ . '/header.php';
-
-$success_msg = null;
-
-// Mock Kuponlar & Kampanya Kuralları
-if (!isset($_SESSION['mock_coupons'])) {
-    $_SESSION['mock_coupons'] = [
-        [
-            'id' => 1,
-            'code' => 'YENIYIL15',
-            'type' => 'percent',
-            'amount' => 15,
-            'min_basket' => 500,
-            'max_discount' => 300,
-            'usage_limit' => 100,
-            'used_count' => 34,
-            'expire_date' => '2026-12-31',
-            'status' => 1
-        ],
-        [
-            'id' => 2,
-            'code' => 'KARTVIZIT50',
-            'type' => 'fixed',
-            'amount' => 50,
-            'min_basket' => 400,
-            'max_discount' => 50,
-            'usage_limit' => 500,
-            'used_count' => 128,
-            'expire_date' => '2026-10-15',
-            'status' => 1
-        ]
-    ];
-}
-
-// Yeni Kupon Ekleme
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_coupon') {
-    $new_coupon = [
-        'id' => count($_SESSION['mock_coupons']) + 1,
-        'code' => strtoupper(trim($_POST['code'] ?? '')),
-        'type' => $_POST['type'] ?? 'percent',
-        'amount' => (float)($_POST['amount'] ?? 0),
-        'min_basket' => (float)($_POST['min_basket'] ?? 0),
-        'max_discount' => (float)($_POST['max_discount'] ?? 0),
-        'usage_limit' => (int)($_POST['usage_limit'] ?? 100),
-        'used_count' => 0,
-        'expire_date' => $_POST['expire_date'] ?? date('Y-m-d', strtotime('+30 days')),
-        'status' => 1
-    ];
-    $_SESSION['mock_coupons'][] = $new_coupon;
-    $success_msg = "Yeni kupon başarıyla oluşturuldu ve aktif edildi!";
-}
-
-// Kupon Silme
-if (isset($_GET['delete_coupon'])) {
-    $del_id = (int)$_GET['delete_coupon'];
-    $_SESSION['mock_coupons'] = array_filter($_SESSION['mock_coupons'], function($c) use ($del_id) {
-        return $c['id'] !== $del_id;
-    });
-    $success_msg = "Kupon sistemden kaldırıldı.";
-}
 ?>
 
-<div class="row g-4">
-    <!-- Başlık & Buton -->
-    <div class="col-12 d-flex justify-content-between align-items-center">
-        <div>
-            <h3 class="fw-bold mb-1"><i class="bi bi-percent text-danger me-2"></i>Kampanya & İndirim Kurguları</h3>
-            <p class="text-muted small mb-0">Müşterilerinize özel indirim kuponları, sepet kuralları ve üst duyuru bandı yönetimi</p>
-        </div>
-        <button class="btn btn-apple btn-apple-orange" data-bs-toggle="modal" data-bs-target="#newCouponModal">
-            <i class="bi bi-plus-lg me-1"></i> Yeni Kupon Oluştur
-        </button>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-0">Kampanyalar & Sepet İndirim Kuralları</h4>
+        <p class="text-muted small mb-0">İndirim kuponları, ücretsiz kargo limitleri ve promosyonları tanımlayın.</p>
     </div>
+</div>
 
-    <?php if ($success_msg): ?>
-        <div class="col-12">
-            <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm" role="alert">
-                <i class="bi bi-check-circle-fill me-2"></i> <?= htmlspecialchars($success_msg) ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        </div>
-    <?php endif; ?>
-
-    <!-- 1. KUPONLAR LİSTESİ -->
-    <div class="col-lg-8">
-        <div class="apple-card p-4 bg-white mb-4">
-            <h5 class="fw-bold mb-3"><i class="bi bi-ticket-perforated text-primary me-2"></i>Aktif İndirim Kuponları</h5>
-            
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light small">
-                        <tr>
-                            <th>Kupon Kodu</th>
-                            <th>İndirim</th>
-                            <th>Min. Sepet</th>
-                            <th>Kullanım</th>
-                            <th>Son Tarih</th>
-                            <th>Durum</th>
-                            <th>İşlem</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($_SESSION['mock_coupons'] as $coupon): ?>
-                            <tr>
-                                <td><code class="fs-6 fw-bold text-dark px-2 py-1 bg-light rounded"><?= htmlspecialchars($coupon['code']) ?></code></td>
-                                <td>
-                                    <span class="badge bg-danger-subtle text-danger fs-6">
-                                        <?= $coupon['type'] === 'percent' ? '%' . $coupon['amount'] : format_price($coupon['amount']) ?>
-                                    </span>
-                                </td>
-                                <td><?= format_price($coupon['min_basket']) ?></td>
-                                <td>
-                                    <small><?= $coupon['used_count'] ?> / <?= $coupon['usage_limit'] ?></small>
-                                    <div class="progress" style="height: 4px;">
-                                        <div class="progress-bar bg-primary" style="width: <?= ($coupon['used_count'] / $coupon['usage_limit']) * 100 ?>%"></div>
-                                    </div>
-                                </td>
-                                <td class="small text-muted"><?= $coupon['expire_date'] ?></td>
-                                <td><span class="badge bg-success">Aktif</span></td>
-                                <td>
-                                    <a href="campaigns.php?delete_coupon=<?= $coupon['id'] ?>" class="btn btn-sm btn-outline-danger border-0" onclick="return confirm('Bu kuponu silmek istediğinize emin misiniz?');">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- 2. OTOMATİK SEPET İNDİRİM KURALLARI -->
-        <div class="apple-card p-4 bg-white">
-            <h5 class="fw-bold mb-3"><i class="bi bi-cart-check text-success me-2"></i>Otomatik Sepet Kurguları (Kupunsuz)</h5>
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <div class="p-3 border rounded-3 bg-light">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6 class="fw-bold mb-0">Tirajlı Alışveriş İndirimi</h6>
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" checked>
-                            </div>
-                        </div>
-                        <p class="text-muted small mb-2">1.500 TL ve üzeri sepette anında %10 indirim uygulanır.</p>
-                        <small class="badge bg-primary">Aktif Kural</small>
+<div class="row g-4 mb-4">
+    <!-- Genel Kargo & Sepet Limiti Ayarı -->
+    <div class="col-lg-6">
+        <div class="apple-card p-4 h-100">
+            <h6 class="fw-bold mb-3 border-bottom pb-2 text-primary"><i class="bi bi-truck me-1"></i> Sepet Kargo Kuralları</h6>
+            <form action="<?= SITE_URL ?>/admin/campaigns.php" method="POST">
+                <input type="hidden" name="save_shipping_rules" value="1">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Ücretsiz Kargo Sepet Limiti ₺</label>
+                        <input type="number" step="0.01" name="free_shipping_limit" class="form-control" value="<?= htmlspecialchars($freeShippingLimit) ?>" required>
+                        <small class="text-muted" style="font-size: 11px;">Bu tutar ve üzeri sepetlerde kargo bedava olur.</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Varsayılan Kargo Ücreti ₺</label>
+                        <input type="number" step="0.01" name="default_shipping_fee" class="form-control" value="<?= htmlspecialchars($defaultShippingFee) ?>" required>
+                    </div>
+                    <div class="col-12 text-end mt-3">
+                        <button type="submit" class="btn btn-dark btn-sm px-3">
+                            <i class="bi bi-save me-1"></i> Kargo Limitini Güncelle
+                        </button>
                     </div>
                 </div>
-
-                <div class="col-md-6">
-                    <div class="p-3 border rounded-3 bg-light">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6 class="fw-bold mb-0">Kombinasyon Kampanyası</h6>
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" checked>
-                            </div>
-                        </div>
-                        <p class="text-muted small mb-2">Kartvizit + Cepli Dosya birlikte alındığında 150 ₺ ek indirim.</p>
-                        <small class="badge bg-primary">Aktif Kural</small>
-                    </div>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
 
-    <!-- SAĞ: ÜST DUYURU & FLASH BAR YÖNETİMİ -->
-    <div class="col-lg-4">
-        <div class="apple-card p-4 bg-white">
-            <h5 class="fw-bold mb-3"><i class="bi bi-megaphone-fill text-warning me-2"></i>Üst Duyuru Bandı (Header Bar)</h5>
-            
-            <form method="POST">
-                <div class="mb-3">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="announcementActive" checked>
-                        <label class="form-check-label fw-bold small" for="announcementActive">Duyuru Bandı Yayında</label>
+    <!-- Yeni Kupon Ekleme Formu -->
+    <div class="col-lg-6">
+        <div class="apple-card p-4 h-100">
+            <h6 class="fw-bold mb-3 border-bottom pb-2 text-primary"><i class="bi bi-ticket-perforated me-1"></i> Yeni Kupon Kodu Tanımla</h6>
+            <form action="<?= SITE_URL ?>/admin/campaigns.php" method="POST">
+                <input type="hidden" name="save_campaign" value="1">
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Kampanya Başlığı</label>
+                        <input type="text" name="title" class="form-control form-control-sm" placeholder="Örn: Bahar İndirimi %15" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Kupon Kodu (BÜYÜK HARF)</label>
+                        <input type="text" name="code" class="form-control form-control-sm text-uppercase" placeholder="BAHAR15" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold">İndirim Türü</label>
+                        <select name="type" class="form-select form-select-sm">
+                            <option value="percent">Yüzde (%) İndirim</option>
+                            <option value="fixed">Sabit Tutar (₺) İndirim</option>
+                            <option value="free_shipping">Kargo Ücretsiz</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold">İndirim Değeri (% veya ₺)</label>
+                        <input type="number" step="0.01" name="value" class="form-control form-control-sm" value="10" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold">Min. Sepet Tutarı ₺</label>
+                        <input type="number" step="0.01" name="min_cart_amount" class="form-control form-control-sm" value="200">
+                    </div>
+                    <div class="col-12 text-end mt-3">
+                        <button type="submit" class="btn btn-primary btn-sm px-3 fw-bold">
+                            <i class="bi bi-plus-lg me-1"></i> Kuponu Oluştur
+                        </button>
                     </div>
                 </div>
-
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Duyuru Metni</label>
-                    <textarea class="form-control" rows="2">🚀 750 ₺ ve Üzeri Siparişlerde Kargo Ücretsiz! • Türkiye'nin Her Yerine Hızlı Gönderim</textarea>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Sağ Taraf Buton / Link Metni</label>
-                    <input type="text" class="form-control" value="E-Bayi Ol %25 İndirim Kazan">
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Yönlendirme Linki (URL)</label>
-                    <input type="text" class="form-control" value="dealer_apply.php">
-                </div>
-
-                <button type="button" class="btn btn-apple btn-apple-orange w-100 py-2">
-                    <i class="bi bi-save me-1"></i> Duyuru Bandını Güncelle
-                </button>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Yeni Kupon Ekleme Modalı -->
-<div class="modal fade" id="newCouponModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-4 border-0 shadow-lg">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold">Yeni İndirim Kuponu Tanımla</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form method="POST">
-                <input type="hidden" name="action" value="add_coupon">
-                <div class="modal-body">
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <label class="form-label small fw-bold">Kupon Kodu</label>
-                            <input type="text" name="code" class="form-control form-control-lg text-uppercase fw-bold" placeholder="Örn: EKIM20" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold">İndirim Türü</label>
-                            <select name="type" class="form-select">
-                                <option value="percent">% Yüzde İndirim</option>
-                                <option value="fixed">Sabit Tutar (₺)</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold">İndirim Oranı / Tutarı</label>
-                            <input type="number" name="amount" class="form-control" placeholder="15" required min="1">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold">Minimum Sepet Tutarı (₺)</label>
-                            <input type="number" name="min_basket" class="form-control" value="500">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold">Maksimum İndirim (₺)</label>
-                            <input type="number" name="max_discount" class="form-control" value="300">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold">Toplam Kullanım Limiti</label>
-                            <input type="number" name="usage_limit" class="form-control" value="100">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold">Son Kullanma Tarihi</label>
-                            <input type="date" name="expire_date" class="form-control" value="<?= date('Y-m-d', strtotime('+30 days')) ?>">
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Vazgeç</button>
-                    <button type="submit" class="btn btn-apple btn-apple-orange rounded-pill px-4">Kuponu Kaydet</button>
-                </div>
-            </form>
-        </div>
+<!-- Kupon Listesi -->
+<div class="apple-card p-4">
+    <h6 class="fw-bold mb-3 border-bottom pb-2">Tanımlı Kuponlar ve Kampanyalar (<?= count($campaigns) ?>)</h6>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle small">
+            <thead class="table-light">
+                <tr>
+                    <th>Kupon Başlığı</th>
+                    <th>Kod</th>
+                    <th>Tür</th>
+                    <th>İndirim Değeri</th>
+                    <th>Min. Sepet</th>
+                    <th>Kullanım</th>
+                    <th>Durum</th>
+                    <th class="text-end">İşlem</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($campaigns as $camp): ?>
+                    <tr>
+                        <td class="fw-bold"><?= htmlspecialchars($camp['title']) ?></td>
+                        <td><code><?= htmlspecialchars($camp['code']) ?></code></td>
+                        <td>
+                            <?php if ($camp['type'] === 'percent'): ?>
+                                <span class="badge bg-info text-dark">Yüzde İndirimi</span>
+                            <?php elseif ($camp['type'] === 'fixed'): ?>
+                                <span class="badge bg-primary">Sabit Tutar</span>
+                            <?php else: ?>
+                                <span class="badge bg-success">Bedava Kargo</span>
+                            <?php endif; ?>
+                        </td>
+                        <td class="fw-bold">
+                            <?= $camp['type'] === 'percent' ? '%' . (int)$camp['value'] : Helper::formatPrice($camp['value']) ?>
+                        </td>
+                        <td><?= Helper::formatPrice($camp['min_cart_amount']) ?></td>
+                        <td><?= $camp['usage_count'] ?> / <?= $camp['usage_limit'] ?></td>
+                        <td><?= $camp['status'] ? '<span class="badge bg-success">Aktif</span>' : '<span class="badge bg-secondary">Pasif</span>' ?></td>
+                        <td class="text-end">
+                            <a href="<?= SITE_URL ?>/admin/campaigns.php?action=delete&id=<?= $camp['id'] ?>" class="btn btn-sm btn-outline-danger py-0" onclick="return confirm('Bu kuponu silmek istediğinize emin misiniz?');">
+                                Sil
+                            </a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
     </div>
 </div>
 

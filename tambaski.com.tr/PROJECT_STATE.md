@@ -6,5 +6,5 @@
 | **Memo** | - | - | - | 🟢 [BOŞTA] |
 
 ---
-- **Son Eşitleme:** 2026-09-28 21:52
-- **Durum:** ✅ Sitedeki tüm veritabanı, başlık ve tasarım hataları giderildi. Yapay zeka soğukluğu kaldırılarak doğal Türk matbaa e-ticaret dili (`#f15a24` TamBaskı turuncusu, net paketler, gerçek tiraj fiyatlandırması) uygulandı. Meslek/sektör seçimi, tek tıkla Canva stüdyo ve kurumsal/bireysel checkout canlıya alındı.
+- **Son Eşitleme:** 2026-09-28 22:05
+- **Durum:** ✅ Sitedeki tüm veritabanı, başlık, logo ve tasarım hataları giderildi. İnce ayar akordiyonu kaldırılarak 4 hazır paket, 1 tıkla online tasarım, meslek/sektör seçimi ve sürükle-bırak dosya yükleme devreye alındı. Canlı sunucuya aktarıldı.

@@ -1,19 +1,47 @@
 {
-  "name": "TamBaskı – Online Matbaa & Kesim Merkezi",
+  "name": "TamBaskı Online Matbaa",
   "short_name": "TamBaskı",
-  "description": "Türkiye'nin En Hızlı Online Matbaa, Dekota / Pleksi Kesim ve Promosyon Platformu",
-  "start_url": "index.php",
+  "description": "Yeni Nesil Online Matbaa & Canlı Baskı Platformu",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#1d1d1f",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
+  "background_color": "#1d1d1b",
+  "theme_color": "#1d1d1b",
   "icons": [
     {
-      "src": "assets/img/logo.svg",
-      "sizes": "192x192 512x512",
-      "type": "image/svg+xml",
+      "src": "/assets/img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ],
-  "categories": ["shopping", "business", "utilities"]
+  "shortcuts": [
+    {
+      "name": "Kartvizit Baskı",
+      "short_name": "Kartvizit",
+      "description": "Hızlı Kartvizit Siparişi",
+      "url": "/product.php?slug=premium-mat-kuse-kartvizit",
+      "icons": [{ "src": "/assets/img/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Kargo Takip",
+      "short_name": "Kargo",
+      "description": "Siparişinizi Takip Edin",
+      "url": "/order_tracking.php",
+      "icons": [{ "src": "/assets/img/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Sepetim",
+      "short_name": "Sepet",
+      "description": "Alışveriş Sepetiniz",
+      "url": "/cart.php",
+      "icons": [{ "src": "/assets/img/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
 }
