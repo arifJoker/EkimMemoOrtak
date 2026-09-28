@@ -1,0 +1,457 @@
+/* ==========================================================================
+   TAMBASKI.COM.TR - Modern Apple & High-End Print E-Commerce Stylesheet
+   ========================================================================== */
+
+:root {
+    --apple-bg: #f5f5f7;
+    --apple-card-bg: #ffffff;
+    --apple-dark: #1d1d1f;
+    --apple-darker: #111113;
+    --apple-blue: #0071e3;
+    --apple-blue-hover: #0077ed;
+    --apple-orange: #f15a24;
+    --apple-orange-hover: #e04e18;
+    --apple-text: #1d1d1f;
+    --apple-subtext: #86868b;
+    --apple-border: rgba(0, 0, 0, 0.08);
+    --apple-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+    --apple-shadow-hover: 0 12px 36px rgba(0, 0, 0, 0.08);
+    --apple-radius: 18px;
+    --apple-radius-sm: 12px;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--apple-bg);
+    color: var(--apple-text);
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s ease;
+}
+
+/* Üst Duyuru Bandı */
+.top-announcement {
+    background: #111113;
+    color: #e5e5ea;
+    font-size: 13px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.top-announcement a {
+    color: #ff9f0a;
+    font-weight: 600;
+}
+.top-announcement a:hover {
+    color: #ffb340;
+    text-decoration: underline;
+}
+
+/* Apple Tarzı Header */
+.apple-header {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    position: sticky;
+    top: 0;
+    z-index: 1050;
+    border-bottom: 1px solid var(--apple-border);
+    transition: all 0.3s ease;
+}
+
+.brand-logo-img {
+    height: 42px;
+    width: auto;
+    object-fit: contain;
+}
+
+.nav-link-modern {
+    color: var(--apple-dark);
+    font-weight: 500;
+    font-size: 14px;
+    padding: 8px 14px;
+    border-radius: 20px;
+    transition: all 0.2s ease;
+}
+.nav-link-modern:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--apple-orange);
+}
+
+.nav-link-urgent {
+    background: #fee2e2;
+    color: #dc2626;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    animation: pulseGlow 2s infinite;
+}
+@keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(220, 38, 38, 0); }
+}
+
+.header-search-form {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 20px;
+    padding: 6px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 180px;
+    transition: all 0.3s ease;
+}
+.header-search-form:focus-within {
+    background: #ffffff;
+    box-shadow: 0 0 0 2px var(--apple-blue);
+    width: 240px;
+}
+.header-search-form input {
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 13px;
+    width: 100%;
+}
+
+.header-action-pill {
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--apple-dark);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 14px;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.header-action-pill:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.header-cart-pill {
+    background: var(--apple-orange);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 16px;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(241, 90, 36, 0.3);
+}
+.header-cart-pill:hover {
+    background: var(--apple-orange-hover);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+.cart-count-badge {
+    background: #ffffff;
+    color: var(--apple-orange);
+    font-size: 11px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 10px;
+}
+
+/* Mobil Alt Kategori Barı */
+.category-subbar {
+    background: #ffffff;
+    border-top: 1px solid var(--apple-border);
+    padding: 8px 0;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+.category-subbar-inner {
+    display: flex;
+    gap: 8px;
+    padding: 0 8px;
+}
+.cat-chip {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 16px;
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--apple-dark);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.cat-chip.urgent {
+    background: #fee2e2;
+    color: #dc2626;
+    font-weight: 700;
+}
+
+/* Hero Carousel & Slider */
+.hero-slider-section {
+    background: radial-gradient(circle at 50% 30%, #ffffff 0%, #ececed 100%);
+    padding: 60px 0 80px 0;
+    min-height: 520px;
+}
+.hero-ambient-glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.5;
+    pointer-events: none;
+}
+.orb-1 { width: 350px; height: 350px; background: rgba(241, 90, 36, 0.2); top: 10%; right: 15%; }
+.orb-2 { width: 400px; height: 400px; background: rgba(0, 113, 227, 0.15); bottom: 5%; left: 10%; }
+
+.slide-headline {
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -1.2px;
+    line-height: 1.15;
+    color: #111113;
+    margin-bottom: 18px;
+}
+.slide-grad-kartvizit {
+    background: linear-gradient(135deg, #f15a24 0%, #ff8c00 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.slide-grad-brosur {
+    background: linear-gradient(135deg, #0071e3 0%, #4facfe 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.slide-grad-kesim {
+    background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.slide-description {
+    font-size: 16px;
+    color: #6e6e73;
+    line-height: 1.5;
+    margin-bottom: 24px;
+}
+
+.hero-pill-badge {
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+.slide-price-pill {
+    background: #ffffff;
+    border: 1px solid var(--apple-border);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    padding: 10px 18px;
+    border-radius: 30px;
+    font-size: 14px;
+    display: inline-block;
+    margin-bottom: 24px;
+}
+
+/* Butonlar */
+.btn-apple {
+    background: var(--apple-dark);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 22px;
+    border-radius: 25px;
+    border: none;
+    transition: all 0.2s ease;
+}
+.btn-apple:hover {
+    background: #000000;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+.btn-apple-orange {
+    background: var(--apple-orange);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(241, 90, 36, 0.35);
+}
+.btn-apple-orange:hover {
+    background: var(--apple-orange-hover);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+.btn-apple-secondary {
+    background: rgba(0, 0, 0, 0.06);
+    color: var(--apple-dark);
+    font-weight: 600;
+    border-radius: 25px;
+}
+.btn-apple-secondary:hover {
+    background: rgba(0, 0, 0, 0.12);
+}
+
+/* Apple Kartları */
+.apple-card {
+    background: var(--apple-card-bg);
+    border-radius: var(--apple-radius);
+    border: 1px solid var(--apple-border);
+    box-shadow: var(--apple-shadow);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+}
+.apple-card:hover {
+    box-shadow: var(--apple-shadow-hover);
+    transform: translateY(-3px);
+}
+
+/* Ürün Kartı */
+.product-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 16px;
+}
+.product-img-wrapper {
+    background: #fbfbfd;
+    border-radius: var(--apple-radius-sm);
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+    overflow: hidden;
+    position: relative;
+}
+.product-img-wrapper img {
+    max-height: 85%;
+    max-width: 85%;
+    object-fit: contain;
+    transition: transform 0.4s ease;
+}
+.product-card:hover .product-img-wrapper img {
+    transform: scale(1.06);
+}
+.product-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #111113;
+    margin-bottom: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 44px;
+}
+.product-desc {
+    font-size: 13px;
+    color: var(--apple-subtext);
+    margin-bottom: 14px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 38px;
+}
+.product-price-row {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 12px;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+.product-price {
+    font-size: 19px;
+    font-weight: 800;
+    color: #111113;
+}
+.product-price-sub {
+    font-size: 11px;
+    color: var(--apple-subtext);
+    display: block;
+}
+
+/* Canlı Fiyatlandırma & Paket Seçici Kartları */
+.package-select-card {
+    border: 2px solid var(--apple-border);
+    border-radius: var(--apple-radius-sm);
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #ffffff;
+}
+.package-select-card:hover {
+    border-color: rgba(241, 90, 36, 0.5);
+    background: #fffbf9;
+}
+.package-select-card.active {
+    border-color: var(--apple-orange);
+    background: #fff8f5;
+    box-shadow: 0 0 0 1px var(--apple-orange);
+}
+
+.custom-qty-box {
+    background: #ffffff;
+    border: 1px solid var(--apple-border);
+    border-radius: var(--apple-radius-sm);
+    padding: 16px;
+}
+
+/* Dosya Yükleme Alanı */
+.upload-drop-zone {
+    border: 2px dashed #d1d5db;
+    border-radius: var(--apple-radius-sm);
+    padding: 30px;
+    text-align: center;
+    background: #f9fafb;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.upload-drop-zone:hover {
+    border-color: var(--apple-orange);
+    background: #fffbf9;
+}
+
+/* Footer */
+.apple-footer {
+    background: #111113;
+    color: #a1a1a6;
+    font-size: 13px;
+    padding: 60px 0 30px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.apple-footer h6 {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+.apple-footer ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.apple-footer ul li {
+    margin-bottom: 10px;
+}
+.apple-footer ul li a {
+    color: #a1a1a6;
+}
+.apple-footer ul li a:hover {
+    color: #ffffff;
+}
+.footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 24px;
+    margin-top: 40px;
+}
