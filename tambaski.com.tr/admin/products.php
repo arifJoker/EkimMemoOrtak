@@ -36,29 +36,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $basePrice = (float)str_replace(',', '.', $_POST['base_price'] ?? 900.00);
     $taxRate = (float)str_replace(',', '.', $_POST['tax_rate'] ?? 20.00);
 
-    // 4 Paket Önayarları (JSON)
-    $packagePresets = json_encode([
-        'ekonomik' => [
-            'active' => !empty($_POST['pkg_ekonomik_active']) ? 1 : 0,
-            'price'  => (float)str_replace(',', '.', $_POST['pkg_ekonomik_price'] ?? ($basePrice * 0.85)),
-            'desc'   => trim($_POST['pkg_ekonomik_desc'] ?? '250gr Bristol, Tek Yön Renkli')
-        ],
-        'standart' => [
-            'active' => !empty($_POST['pkg_standart_active']) ? 1 : 0,
-            'price'  => (float)str_replace(',', '.', $_POST['pkg_standart_price'] ?? $basePrice),
-            'desc'   => trim($_POST['pkg_standart_desc'] ?? '350gr Kuşe, Çift Taraf Mat Selefon')
-        ],
-        'premium'  => [
-            'active' => !empty($_POST['pkg_premium_active']) ? 1 : 0,
-            'price'  => (float)str_replace(',', '.', $_POST['pkg_premium_price'] ?? ($basePrice * 1.45)),
-            'desc'   => trim($_POST['pkg_premium_desc'] ?? 'Soft-Touch Kadife Selefon & Kabartma Lak')
-        ],
-        'vip'      => [
-            'active' => !empty($_POST['pkg_vip_active']) ? 1 : 0,
-            'price'  => (float)str_replace(',', '.', $_POST['pkg_vip_price'] ?? ($basePrice * 1.85)),
-            'desc'   => trim($_POST['pkg_vip_desc'] ?? 'Tuale Fantezi / Altın Varak Yaldız')
-        ],
-    ], JSON_UNESCAPED_UNICODE);
+    // Dinamik Paket Önayarları (JSON)
+    $packagesArray = [];
+    if (!empty($_POST['packages']) && is_array($_POST['packages'])) {
+        foreach ($_POST['packages'] as $idx => $pkg) {
+            $pkgName = trim($pkg['name'] ?? '');
+            if (empty($pkgName)) continue;
+            $pkgKey = !empty($pkg['key']) ? Helper::slugify($pkg['key']) : Helper::slugify($pkgName);
+            if (empty($pkgKey)) $pkgKey = 'paket_' . ($idx + 1);
+
+            $packagesArray[$pkgKey] = [
+                'name'   => $pkgName,
+                'active' => !empty($pkg['active']) ? 1 : 0,
+                'price'  => (float)str_replace(',', '.', $pkg['price'] ?? $basePrice),
+                'desc'   => trim($pkg['desc'] ?? ''),
+                'badge'  => trim($pkg['badge'] ?? '')
+            ];
+        }
+    }
+    // Eğer hiçbir paket kalmadıysa varsayılan 4 paket ekle
+    if (empty($packagesArray)) {
+        $packagesArray = [
+            'ekonomik' => ['name' => 'Ekonomik', 'active' => 1, 'price' => round($basePrice * 0.85, 2), 'desc' => '250gr Bristol, Tek Yön Renkli', 'badge' => 'Uygun Fiyat'],
+            'standart' => ['name' => 'Standart', 'active' => 1, 'price' => $basePrice, 'desc' => '350gr Kuşe, Çift Taraf Mat Selefon', 'badge' => 'Çok Satan'],
+            'premium'  => ['name' => 'Premium', 'active' => 1, 'price' => round($basePrice * 1.45, 2), 'desc' => 'Soft-Touch Kadife Selefon & Kabartma Lak', 'badge' => 'Özel Doku'],
+            'vip'      => ['name' => 'VIP Prestij', 'active' => 1, 'price' => round($basePrice * 1.85, 2), 'desc' => 'Tuale Fantezi / Altın Varak Yaldız', 'badge' => 'Lüks Seri']
+        ];
+    }
+    $packagePresets = json_encode($packagesArray, JSON_UNESCAPED_UNICODE);
 
     // İzinler ve Özellikler
     $allowOnlineEditor = !empty($_POST['allow_online_editor']) ? 1 : 0;
@@ -69,12 +74,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $isUrgent = !empty($_POST['is_urgent']) ? 1 : 0;
     $status = !empty($_POST['status']) ? 1 : 0;
 
-    // Görsel Yükleme
+    // Kapak Görseli Yükleme
     $featuredImage = trim($_POST['existing_image'] ?? '');
     if (!empty($_FILES['image']['name'])) {
         $up = Helper::uploadImageAsWebp($_FILES['image'], 'products', 85);
         if ($up['success']) {
             $featuredImage = $up['file_path'];
+        }
+    }
+
+    // 3D Gerçekçi Mockup Görseli Yükleme / Seçme
+    $mockupImage = trim($_POST['existing_mockup_image'] ?? '');
+    if (!empty($_POST['selected_preset_mockup'])) {
+        $mockupImage = trim($_POST['selected_preset_mockup']);
+    }
+    if (!empty($_FILES['mockup_image']['name'])) {
+        $upMock = Helper::uploadImageAsWebp($_FILES['mockup_image'], 'mockups', 90);
+        if ($upMock['success']) {
+            $mockupImage = $upMock['file_path'];
         }
     }
 
@@ -85,14 +102,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 category_id = ?, name = ?, slug = ?, sku = ?, short_description = ?, full_description = ?,
                 base_price = ?, manual_base_price = ?, tax_rate = ?, package_presets = ?,
                 allow_online_editor = ?, allow_design_upload = ?, allow_design_service = ?, design_service_price = ?,
-                is_featured = ?, is_urgent = ?, status = ?, featured_image = ?
+                is_featured = ?, is_urgent = ?, status = ?, featured_image = ?, mockup_image = ?
                 WHERE id = ?");
             
             $stmt->execute([
                 $categoryId, $name, $slug, $sku, $shortDesc, $fullDesc,
                 $basePrice, $basePrice, $taxRate, $packagePresets,
                 $allowOnlineEditor, $allowDesignUpload, $allowDesignService, $designServicePrice,
-                $isFeatured, $isUrgent, $status, $featuredImage, $productId
+                $isFeatured, $isUrgent, $status, $featuredImage, $mockupImage, $productId
             ]);
 
             Helper::setFlash('success', "<strong>{$name}</strong> ürünü başarıyla güncellendi.");
@@ -102,14 +119,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 category_id, name, slug, sku, short_description, full_description,
                 base_price, manual_base_price, tax_rate, package_presets,
                 allow_online_editor, allow_design_upload, allow_design_service, design_service_price,
-                is_featured, is_urgent, status, featured_image
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                is_featured, is_urgent, status, featured_image, mockup_image
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
             $stmt->execute([
                 $categoryId, $name, $slug, $sku, $shortDesc, $fullDesc,
                 $basePrice, $basePrice, $taxRate, $packagePresets,
                 $allowOnlineEditor, $allowDesignUpload, $allowDesignService, $designServicePrice,
-                $isFeatured, $isUrgent, $status, $featuredImage
+                $isFeatured, $isUrgent, $status, $featuredImage, $mockupImage
             ]);
 
             $productId = (int)$db->lastInsertId();
@@ -247,13 +264,13 @@ if ($action === 'add' || $action === 'edit') {
                     </div>
                 </div>
 
-                <!-- 2. Fiyatlandırma & 4 Hazır Paket Kartı -->
+                <!-- 2. Fiyatlandırma & Dinamik Paketler Kartı -->
                 <div class="apple-card p-4 mb-4">
                     <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
                         <h6 class="fw-bold mb-0 text-dark">
-                            <i class="bi bi-tag text-success me-2"></i>2. Fiyatlandırma &amp; 4 Standart Paket
+                            <i class="bi bi-tag text-success me-2"></i>2. Fiyatlandırma &amp; Paketler
                         </h6>
-                        <span class="badge bg-success-subtle text-success px-2.5 py-1 rounded-pill">Net Fiyat Modeli</span>
+                        <span class="badge bg-success-subtle text-success px-2.5 py-1 rounded-pill">Dinamik Paket Modeli</span>
                     </div>
 
                     <div class="row g-3 mb-4">
@@ -266,7 +283,7 @@ if ($action === 'add' || $action === 'edit') {
                                        value="<?= htmlspecialchars($product['base_price'] ?? '900.00') ?>"
                                        oninput="updatePackagePriceSuggestions(this.value)">
                             </div>
-                            <small class="text-muted" style="font-size: 11px;">Müşteri standart paketi seçtiğinde 1.000 adet için geçerli baz fiyattır (+KDV).</small>
+                            <small class="text-muted" style="font-size: 11px;">1.000 adet için geçerli baz fiyattır (+KDV).</small>
                         </div>
 
                         <div class="col-md-6">
@@ -278,111 +295,76 @@ if ($action === 'add' || $action === 'edit') {
                         </div>
                     </div>
 
-                    <!-- 4 Hazır Paket Tablosu -->
-                    <label class="form-label small fw-bold text-dark mb-2">4 Hazır Paket Ayarları (Müşterinin Seçeceği Kartlar):</label>
+                    <!-- Dinamik Paketler Listesi -->
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label small fw-bold text-dark mb-0">Ürün Paketleri (Müşterinin Seçeceği Kartlar):</label>
+                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 shadow-2xs" onclick="addPackageRow()">
+                            <i class="bi bi-plus-circle me-1"></i> Yeni Paket Ekle
+                        </button>
+                    </div>
                     
                     <div class="table-responsive">
-                        <table class="table table-bordered align-middle small mb-0">
+                        <table class="table table-bordered align-middle small mb-0" id="packagesTable">
                             <thead class="table-light">
                                 <tr>
-                                    <th style="width: 50px;" class="text-center">Aktif</th>
-                                    <th style="width: 130px;">Paket</th>
-                                    <th style="width: 160px;">1.000 Adet Fiyatı (₺)</th>
+                                    <th style="width: 45px;" class="text-center">Aktif</th>
+                                    <th style="width: 140px;">Paket Adı</th>
+                                    <th style="width: 110px;">Kod (Key)</th>
+                                    <th style="width: 145px;">1.000 Adet Fiyatı (₺)</th>
                                     <th>Paket Özellik Açıklaması</th>
+                                    <th style="width: 110px;">Rozet (Badge)</th>
+                                    <th style="width: 45px;" class="text-center">Sil</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <!-- 1. Ekonomik -->
-                                <tr>
+                            <tbody id="packagesTbody">
+                                <?php
+                                $pkgIndex = 0;
+                                $currentPresets = !empty($presets) ? $presets : [
+                                    'ekonomik' => ['name' => 'Ekonomik', 'active' => 1, 'price' => round(($product['base_price'] ?? 900) * 0.85, 2), 'desc' => '250gr Bristol, Tek Yön Düz Baskı', 'badge' => 'Uygun'],
+                                    'standart' => ['name' => 'Standart', 'active' => 1, 'price' => ($product['base_price'] ?? 900.00), 'desc' => '350gr Kuşe, Çift Taraf Mat Selefon', 'badge' => 'Popüler'],
+                                    'premium'  => ['name' => 'Premium', 'active' => 1, 'price' => round(($product['base_price'] ?? 900) * 1.45, 2), 'desc' => 'Soft-Touch Kadife Selefon & Kabartma Lak', 'badge' => 'Özel Doku'],
+                                    'vip'      => ['name' => 'VIP Prestij', 'active' => 1, 'price' => round(($product['base_price'] ?? 900) * 1.85, 2), 'desc' => 'Tuale Fantezi / Altın Varak Yaldız', 'badge' => 'Lüks Seri']
+                                ];
+                                foreach ($currentPresets as $pKey => $pData):
+                                    $pkgIndex++;
+                                ?>
+                                <tr class="package-row" id="pkg_row_<?= $pkgIndex ?>">
                                     <td class="text-center">
-                                        <input type="checkbox" name="pkg_ekonomik_active" value="1" class="form-check-input"
-                                               <?= (!isset($presets['ekonomik']) || !empty($presets['ekonomik']['active'])) ? 'checked' : '' ?>>
+                                        <input type="checkbox" name="packages[<?= $pkgIndex ?>][active]" value="1" class="form-check-input"
+                                               <?= (!isset($pData['active']) || !empty($pData['active'])) ? 'checked' : '' ?>>
                                     </td>
                                     <td>
-                                        <span class="badge bg-secondary-subtle text-secondary px-2 py-1 fw-bold">Ekonomik</span>
+                                        <input type="text" name="packages[<?= $pkgIndex ?>][name]" class="form-control form-control-sm fw-bold"
+                                               value="<?= htmlspecialchars($pData['name'] ?? ucfirst($pKey)) ?>" required placeholder="Paket Adı">
+                                    </td>
+                                    <td>
+                                        <input type="text" name="packages[<?= $pkgIndex ?>][key]" class="form-control form-control-sm font-monospace text-muted"
+                                               value="<?= htmlspecialchars($pKey) ?>" placeholder="kod">
                                     </td>
                                     <td>
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text">₺</span>
-                                            <input type="number" step="0.01" name="pkg_ekonomik_price" id="pkgEkoPrice" class="form-control font-monospace"
-                                                   value="<?= htmlspecialchars($presets['ekonomik']['price'] ?? ($product['base_price'] ?? 750.00)) ?>">
+                                            <input type="number" step="0.01" name="packages[<?= $pkgIndex ?>][price]" class="form-control font-monospace fw-bold pkg-price-inp"
+                                                   value="<?= htmlspecialchars($pData['price'] ?? ($product['base_price'] ?? 900)) ?>" required>
                                         </div>
                                     </td>
                                     <td>
-                                        <input type="text" name="pkg_ekonomik_desc" class="form-control form-control-sm"
-                                               placeholder="250gr Bristol, Tek Yön Renkli"
-                                               value="<?= htmlspecialchars($presets['ekonomik']['desc'] ?? '250gr Bristol, Tek Yön Düz Baskı') ?>">
+                                        <input type="text" name="packages[<?= $pkgIndex ?>][desc]" class="form-control form-control-sm"
+                                               placeholder="Kağıt, selefon, kesim detayları"
+                                               value="<?= htmlspecialchars($pData['desc'] ?? '') ?>">
                                     </td>
-                                </tr>
-
-                                <!-- 2. Standart -->
-                                <tr class="table-primary-subtle">
+                                    <td>
+                                        <input type="text" name="packages[<?= $pkgIndex ?>][badge]" class="form-control form-control-sm"
+                                               placeholder="Örn: Popüler"
+                                               value="<?= htmlspecialchars($pData['badge'] ?? '') ?>">
+                                    </td>
                                     <td class="text-center">
-                                        <input type="checkbox" name="pkg_standart_active" value="1" class="form-check-input"
-                                               <?= (!isset($presets['standart']) || !empty($presets['standart']['active'])) ? 'checked' : '' ?>>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-primary text-white px-2 py-1 fw-bold">Standart</span>
-                                    </td>
-                                    <td>
-                                        <div class="input-group input-group-sm">
-                                            <span class="input-group-text">₺</span>
-                                            <input type="number" step="0.01" name="pkg_standart_price" id="pkgStdPrice" class="form-control font-monospace fw-bold"
-                                                   value="<?= htmlspecialchars($presets['standart']['price'] ?? ($product['base_price'] ?? 900.00)) ?>">
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <input type="text" name="pkg_standart_desc" class="form-control form-control-sm"
-                                               placeholder="350gr Kuşe, Çift Taraf Mat Selefon"
-                                               value="<?= htmlspecialchars($presets['standart']['desc'] ?? '350gr Kuşe, Çift Taraf Mat Selefon') ?>">
+                                        <button type="button" class="btn btn-xs btn-outline-danger" onclick="removePackageRow('pkg_row_<?= $pkgIndex ?>')" title="Paketi Sil">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
                                     </td>
                                 </tr>
-
-                                <!-- 3. Premium -->
-                                <tr>
-                                    <td class="text-center">
-                                        <input type="checkbox" name="pkg_premium_active" value="1" class="form-check-input"
-                                               <?= (!isset($presets['premium']) || !empty($presets['premium']['active'])) ? 'checked' : '' ?>>
-                                    </td>
-                                    <td>
-                                        <span class="badge text-white px-2 py-1 fw-bold" style="background: #8b5cf6;">Premium</span>
-                                    </td>
-                                    <td>
-                                        <div class="input-group input-group-sm">
-                                            <span class="input-group-text">₺</span>
-                                            <input type="number" step="0.01" name="pkg_premium_price" id="pkgPremPrice" class="form-control font-monospace"
-                                                   value="<?= htmlspecialchars($presets['premium']['price'] ?? (round(($product['base_price'] ?? 900) * 1.45, 2))) ?>">
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <input type="text" name="pkg_premium_desc" class="form-control form-control-sm"
-                                               placeholder="Soft-Touch Kadife Selefon & Kabartma Lak"
-                                               value="<?= htmlspecialchars($presets['premium']['desc'] ?? 'Soft-Touch Kadife Selefon & Kabartma Lak') ?>">
-                                    </td>
-                                </tr>
-
-                                <!-- 4. VIP -->
-                                <tr>
-                                    <td class="text-center">
-                                        <input type="checkbox" name="pkg_vip_active" value="1" class="form-check-input"
-                                               <?= (!isset($presets['vip']) || !empty($presets['vip']['active'])) ? 'checked' : '' ?>>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-warning text-dark px-2 py-1 fw-bold">VIP Prestij</span>
-                                    </td>
-                                    <td>
-                                        <div class="input-group input-group-sm">
-                                            <span class="input-group-text">₺</span>
-                                            <input type="number" step="0.01" name="pkg_vip_price" id="pkgVipPrice" class="form-control font-monospace"
-                                                   value="<?= htmlspecialchars($presets['vip']['price'] ?? (round(($product['base_price'] ?? 900) * 1.85, 2))) ?>">
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <input type="text" name="pkg_vip_desc" class="form-control form-control-sm"
-                                               placeholder="Tuale Fantezi / Altın Varak Yaldız"
-                                               value="<?= htmlspecialchars($presets['vip']['desc'] ?? 'Tuale Fantezi / Altın Varak Yaldız') ?>">
-                                    </td>
-                                </tr>
+                                <?php endforeach; ?>
                             </tbody>
                         </table>
                     </div>
@@ -471,24 +453,49 @@ if ($action === 'add' || $action === 'edit') {
                     </div>
                 </div>
 
-                <!-- Ürün Görseli Kartı -->
+                <!-- Ürün Görseli & 3D Mockup Kartı -->
                 <div class="apple-card p-4 mb-4">
                     <h6 class="fw-bold mb-3 border-bottom pb-2 text-dark">
-                        <i class="bi bi-image text-primary me-2"></i>Ürün Görseli
+                        <i class="bi bi-image text-primary me-2"></i>Kapak Görseli &amp; 3D Mockup
                     </h6>
 
-                    <?php if (!empty($product['featured_image'])): ?>
-                        <div class="mb-3 text-center">
-                            <img src="<?= SITE_URL . '/' . htmlspecialchars($product['featured_image']) ?>" 
-                                 alt="Ürün Görseli" class="rounded-3 shadow-xs border img-fluid" style="max-height: 160px; object-fit: contain;">
-                            <small class="text-muted d-block mt-1" style="font-size: 11px;">Mevcut Görsel</small>
-                        </div>
-                    <?php endif; ?>
-
-                    <div class="mb-2">
-                        <label class="form-label small fw-bold text-dark">Kapak Görseli Yükle</label>
+                    <!-- Kapak Görseli -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark d-block">1. Kapak Görseli (Vitrin / Liste)</label>
+                        <?php if (!empty($product['featured_image'])): ?>
+                            <div class="mb-2 text-center bg-light p-2 rounded-3 border">
+                                <img src="<?= SITE_URL . '/' . htmlspecialchars($product['featured_image']) ?>" 
+                                     alt="Ürün Görseli" class="rounded-3 shadow-xs border img-fluid" style="max-height: 120px; object-fit: contain;">
+                                <input type="hidden" name="existing_image" value="<?= htmlspecialchars($product['featured_image']) ?>">
+                            </div>
+                        <?php endif; ?>
                         <input type="file" name="image" class="form-control form-control-sm" accept="image/*">
-                        <small class="text-muted" style="font-size: 11px;">JPG, PNG veya WebP. Otomatik optimize edilir.</small>
+                        <small class="text-muted" style="font-size: 11px;">JPG, PNG veya WebP.</small>
+                    </div>
+
+                    <!-- 3D Mockup Görseli -->
+                    <div class="pt-3 border-top">
+                        <label class="form-label small fw-bold text-dark d-block">2. 3D Gerçekçi Mockup Görseli (Detay Sahnesi)</label>
+                        <?php if (!empty($product['mockup_image'])): ?>
+                            <div class="mb-2 text-center bg-dark p-2 rounded-3 border">
+                                <img src="<?= SITE_URL . '/' . htmlspecialchars($product['mockup_image']) ?>" 
+                                     alt="Mockup Görseli" class="rounded-3 shadow-xs img-fluid" style="max-height: 120px; object-fit: contain;">
+                                <input type="hidden" name="existing_mockup_image" value="<?= htmlspecialchars($product['mockup_image']) ?>">
+                                <small class="text-white-50 d-block mt-1" style="font-size: 10px;">Mevcut Gerçekçi Mockup</small>
+                            </div>
+                        <?php endif; ?>
+                        <input type="file" name="mockup_image" class="form-control form-control-sm mb-2" accept="image/*">
+                        
+                        <label class="form-label small text-muted mb-1" style="font-size: 11px;">veya Hazır TamBaskı Mockup'larından Seçin:</label>
+                        <select name="selected_preset_mockup" class="form-select form-select-sm">
+                            <option value="">-- Yeni Mockup Yükle / Mevcutu Koru --</option>
+                            <option value="uploads/mockups/tambaski_kartvizit_vip_mockup.jpg" <?= (isset($product['mockup_image']) && $product['mockup_image'] == 'uploads/mockups/tambaski_kartvizit_vip_mockup.jpg') ? 'selected' : '' ?>>
+                                ⭐ VIP Fantezi Tuale &amp; Altın Varak Stüdyo Mockup
+                            </option>
+                            <option value="uploads/mockups/tambaski_kartvizit_std_mockup.jpg" <?= (isset($product['mockup_image']) && $product['mockup_image'] == 'uploads/mockups/tambaski_kartvizit_std_mockup.jpg') ? 'selected' : '' ?>>
+                                🖤 Mat Siyah Kadife Deste &amp; Turuncu Kenar Mockup
+                            </option>
+                        </select>
                     </div>
                 </div>
 
@@ -570,11 +577,52 @@ if ($action === 'add' || $action === 'edit') {
         if (vipInput && !vipInput.dataset.manual) vipInput.value = (base * 1.85).toFixed(2);
     }
 
-    ['pkgEkoPrice', 'pkgPremPrice', 'pkgVipPrice'].forEach(id => {
-        document.getElementById(id)?.addEventListener('input', function() {
-            this.dataset.manual = 'true';
-        });
-    });
+    let packageCounter = <?= $pkgIndex ?>;
+
+    function addPackageRow() {
+        packageCounter++;
+        const tbody = document.getElementById('packagesTbody');
+        const basePrice = parseFloat(document.getElementById('basePriceInput')?.value || 900);
+        const row = document.createElement('tr');
+        row.className = 'package-row';
+        row.id = 'pkg_row_' + packageCounter;
+        row.innerHTML = `
+            <td class="text-center">
+                <input type="checkbox" name="packages[${packageCounter}][active]" value="1" class="form-check-input" checked>
+            </td>
+            <td>
+                <input type="text" name="packages[${packageCounter}][name]" class="form-control form-control-sm fw-bold" required placeholder="Yeni Paket">
+            </td>
+            <td>
+                <input type="text" name="packages[${packageCounter}][key]" class="form-control form-control-sm font-monospace text-muted" placeholder="kod_${packageCounter}">
+            </td>
+            <td>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">₺</span>
+                    <input type="number" step="0.01" name="packages[${packageCounter}][price]" class="form-control font-monospace fw-bold pkg-price-inp" value="${basePrice.toFixed(2)}" required>
+                </div>
+            </td>
+            <td>
+                <input type="text" name="packages[${packageCounter}][desc]" class="form-control form-control-sm" placeholder="Paket kağıt ve baskı detayları">
+            </td>
+            <td>
+                <input type="text" name="packages[${packageCounter}][badge]" class="form-control form-control-sm" placeholder="Örn: Yeni">
+            </td>
+            <td class="text-center">
+                <button type="button" class="btn btn-xs btn-outline-danger" onclick="removePackageRow('pkg_row_${packageCounter}')" title="Paketi Sil">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    }
+
+    function removePackageRow(rowId) {
+        const row = document.getElementById(rowId);
+        if (row) {
+            row.remove();
+        }
+    }
     </script>
 
 <?php

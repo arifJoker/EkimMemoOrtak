@@ -74,17 +74,30 @@ class Product {
 
         $lowestPrice = null;
 
-        // 3. Fiyat motoru ile ekonomik paket fiyatını hesapla (Kargo ve KDV Hariç En Uygun Fiyat)
-        $calcEko = $this->calculatePrice($product['id'], $minQty, [], 0, 0, false, 'ekonomik');
-        if (!empty($calcEko['success']) && isset($calcEko['subtotal']) && $calcEko['subtotal'] > 0) {
-            $lowestPrice = (float)$calcEko['subtotal'];
-        }
-
-        // 4. Standart paket fiyatını hesapla
-        $calcStd = $this->calculatePrice($product['id'], $minQty, [], 0, 0, false, 'standart');
-        if (!empty($calcStd['success']) && isset($calcStd['subtotal']) && $calcStd['subtotal'] > 0) {
-            if ($lowestPrice === null || (float)$calcStd['subtotal'] < $lowestPrice) {
-                $lowestPrice = (float)$calcStd['subtotal'];
+        // 3. Tüm aktif paketler arasından en uygun fiyatı bul
+        $presets = !empty($product['package_presets']) ? json_decode($product['package_presets'], true) : [];
+        if (!empty($presets) && is_array($presets)) {
+            foreach ($presets as $pkgKey => $pkgData) {
+                if (!isset($pkgData['active']) || !empty($pkgData['active'])) {
+                    $calc = $this->calculatePrice($product['id'], $minQty, [], 0, 0, false, $pkgKey);
+                    if (!empty($calc['success']) && isset($calc['subtotal']) && $calc['subtotal'] > 0) {
+                        if ($lowestPrice === null || (float)$calc['subtotal'] < $lowestPrice) {
+                            $lowestPrice = (float)$calc['subtotal'];
+                        }
+                    }
+                }
+            }
+        } else {
+            // Fallback ekonomik ve standart paket
+            $calcEko = $this->calculatePrice($product['id'], $minQty, [], 0, 0, false, 'ekonomik');
+            if (!empty($calcEko['success']) && isset($calcEko['subtotal']) && $calcEko['subtotal'] > 0) {
+                $lowestPrice = (float)$calcEko['subtotal'];
+            }
+            $calcStd = $this->calculatePrice($product['id'], $minQty, [], 0, 0, false, 'standart');
+            if (!empty($calcStd['success']) && isset($calcStd['subtotal']) && $calcStd['subtotal'] > 0) {
+                if ($lowestPrice === null || (float)$calcStd['subtotal'] < $lowestPrice) {
+                    $lowestPrice = (float)$calcStd['subtotal'];
+                }
             }
         }
 

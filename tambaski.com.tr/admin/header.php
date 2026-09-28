@@ -205,17 +205,11 @@ $isSettingsMenuOpen = in_array($activePage, ['payment_settings.php', 'cargo_sett
                     <a href="<?= SITE_URL ?>/admin/products.php" class="admin-sub-link <?= ($activePage == 'products.php' && $currentAction != 'create') ? 'active' : '' ?>">
                         <i class="bi bi-list-ul"></i> Tüm Ürünler
                     </a>
-                    <a href="<?= SITE_URL ?>/admin/products.php?action=create" class="admin-sub-link <?= ($activePage == 'products.php' && $currentAction == 'create') ? 'active' : '' ?>">
+                    <a href="<?= SITE_URL ?>/admin/products.php?action=add" class="admin-sub-link <?= ($activePage == 'products.php' && in_array($currentAction, ['add', 'create'])) ? 'active' : '' ?>">
                         <i class="bi bi-plus-circle text-success"></i> Yeni Ürün Ekle
                     </a>
                     <a href="<?= SITE_URL ?>/admin/categories.php" class="admin-sub-link <?= $activePage == 'categories.php' ? 'active' : '' ?>">
                         <i class="bi bi-grid"></i> Kategoriler
-                    </a>
-                    <a href="<?= SITE_URL ?>/admin/variants.php" class="admin-sub-link <?= $activePage == 'variants.php' ? 'active' : '' ?>">
-                        <i class="bi bi-diagram-3 text-info"></i> Varyant & Kağıt Havuzu
-                    </a>
-                    <a href="<?= SITE_URL ?>/admin/pricing_engine.php" class="admin-sub-link <?= $activePage == 'pricing_engine.php' ? 'active' : '' ?>">
-                        <i class="bi bi-calculator text-warning"></i> 70x100 Tabaka Motoru
                     </a>
                 </div>
             </div>

@@ -145,11 +145,11 @@
 
             ctx.fillStyle = '#f4f4f5';
             ctx.font = 'bold 15px "Montserrat", sans-serif';
-            ctx.fillText('Murat Sancak', 0, 15);
+            ctx.fillText('Arif Uz', 0, 15);
 
             ctx.fillStyle = '#a1a1aa';
             ctx.font = '11px "Inter", sans-serif';
-            ctx.fillText('Kreatif Direktör', 0, 35);
+            ctx.fillText('Yönetici', 0, 35);
             ctx.fillText('www.tambaski.com.tr', 0, 68);
 
         } else {

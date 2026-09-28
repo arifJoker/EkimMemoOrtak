@@ -386,11 +386,11 @@ $slug = $_GET['product'] ?? 'ekonomik-kartvizit-250gr';
 
                     <!-- Şablon Küçük Resimleri -->
                     <div class="template-thumbs-grid">
-                        <!-- Şablon 1: Avenue Capital (Siyah & Altın) -->
+                        <!-- Şablon 1: TamBaskı Kurumsal (Siyah & Altın) -->
                         <div class="template-thumb-card" onclick="loadTemplate('avenue')">
                             <div class="template-preview-img" style="background: linear-gradient(135deg, #09090b 0%, #18181b 100%);">
-                                <div style="color: #f59e0b; font-weight: 800; font-size: 10px;">AVENUE CAPITAL</div>
-                                <div style="color: #a1a1aa; font-size: 7px;">Global Investment</div>
+                                <div style="color: #f59e0b; font-weight: 800; font-size: 10px;">TAM BASKI</div>
+                                <div style="color: #a1a1aa; font-size: 7px;">Kurumsal &amp; Ofset</div>
                             </div>
                             <div class="p-1 text-center bg-white" style="font-size: 9px; font-weight: 600;">Kurumsal &amp; İş Dünyası</div>
                         </div>
@@ -398,8 +398,8 @@ $slug = $_GET['product'] ?? 'ekonomik-kartvizit-250gr';
                         <!-- Şablon 2: Gold Executive -->
                         <div class="template-thumb-card" onclick="loadTemplate('executive')">
                             <div class="template-preview-img" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-left: 3px solid #f59e0b;">
-                                <div style="color: #ffffff; font-weight: 700; font-size: 9px;">MURAT SANCAK</div>
-                                <div style="color: #f59e0b; font-size: 7px;">Managing Partner</div>
+                                <div style="color: #ffffff; font-weight: 700; font-size: 9px;">ARİF UZ</div>
+                                <div style="color: #f59e0b; font-size: 7px;">Yönetici</div>
                             </div>
                             <div class="p-1 text-center bg-white" style="font-size: 9px; font-weight: 600;">Gold Executive</div>
                         </div>
@@ -506,11 +506,11 @@ $slug = $_GET['product'] ?? 'ekonomik-kartvizit-250gr';
                 left: 316, top: 45, width: 40, height: 40, fill: 'transparent', stroke: '#f59e0b', strokeWidth: 2, rx: 6, ry: 6
             });
 
-            const name = new fabric.IText('Murat Sancak', {
+            const name = new fabric.IText('Arif Uz', {
                 left: 236, top: 110, fontFamily: 'Georgia', fontSize: 30, fontWeight: 'bold', fill: '#f59e0b', textAlign: 'center'
             });
 
-            const title = new fabric.IText('Managing Partner & CFO', {
+            const title = new fabric.IText('Yönetici', {
                 left: 260, top: 155, fontFamily: 'Helvetica', fontSize: 14, fill: '#d4d4d8', letterSpacing: 2
             });
 
@@ -518,15 +518,15 @@ $slug = $_GET['product'] ?? 'ekonomik-kartvizit-250gr';
                 left: 276, top: 185, width: 120, height: 2, fill: '#f59e0b'
             });
 
-            const company = new fabric.IText('AVENUE CAPITAL', {
+            const company = new fabric.IText('TAM BASKI', {
                 left: 246, top: 215, fontFamily: 'Helvetica', fontSize: 20, fontWeight: 'bold', fill: '#ffffff', letterSpacing: 3
             });
 
-            const sub = new fabric.IText('Global Investment & Ventures', {
+            const sub = new fabric.IText('Matbaa & Kurumsal Baskı Çözümleri', {
                 left: 265, top: 245, fontFamily: 'Helvetica', fontSize: 11, fill: '#a1a1aa'
             });
 
-            const phone = new fabric.IText('📍 Maslak No:1 Plaza Kat:18 Sarıyer / İstanbul\n📞 +90 (212) 380 40 50 • ✉️ murat@avenuecap.com', {
+            const phone = new fabric.IText('📍 Topkapı Matbaacılar Sitesi Zeytinburnu / İstanbul\n📞 0850 308 00 00 • ✉️ info@tambaski.com.tr', {
                 left: 170, top: 310, fontFamily: 'Helvetica', fontSize: 11, fill: '#cbd5e1', textAlign: 'center', lineHeight: 1.4
             });
 

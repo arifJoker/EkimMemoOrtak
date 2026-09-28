@@ -1041,20 +1041,20 @@ const CanvaStudio = {
             category: 'kurumsal',
             keywords: 'kurumsal yönetici ceo lacivert mavi holding executive startup',
             bg: '#081325',
-            previewSvg: `<svg viewBox="0 0 850 500" width="100%" height="100%"><rect width="850" height="500" fill="#081325"/><rect x="0" y="0" width="16" height="500" fill="#3b82f6"/><text x="60" y="110" font-family="Montserrat" font-size="38" font-weight="900" fill="#ffffff">AVENUE <tspan fill="#3b82f6">CAPITAL</tspan></text><text x="60" y="145" font-family="Inter" font-size="14" font-weight="500" fill="#94a3b8" letter-spacing="3">GLOBAL INVESTMENT &amp; VENTURES</text><text x="60" y="270" font-family="Montserrat" font-size="30" font-weight="800" fill="#ffffff">Murat Sancak</text><text x="60" y="305" font-family="Inter" font-size="16" font-weight="600" fill="#60a5fa">Managing Partner &amp; CFO</text><text x="500" y="270" font-family="Inter" font-size="16" fill="#cbd5e1">📞 +90 (212) 380 40 50</text><text x="500" y="305" font-family="Inter" font-size="16" fill="#cbd5e1">✉️ murat@avenuecap.com</text><text x="500" y="340" font-family="Inter" font-size="16" fill="#cbd5e1">🌐 www.avenuecap.com</text><text x="60" y="420" font-family="Inter" font-size="14" fill="#64748b">📍 Maslak No:1 Plaza Kat:18 Sarıyer / İstanbul</text></svg>`,
+            previewSvg: `<svg viewBox="0 0 850 500" width="100%" height="100%"><rect width="850" height="500" fill="#081325"/><rect x="0" y="0" width="16" height="500" fill="#3b82f6"/><text x="60" y="110" font-family="Montserrat" font-size="38" font-weight="900" fill="#ffffff">TAM <tspan fill="#3b82f6">BASKI</tspan></text><text x="60" y="145" font-family="Inter" font-size="14" font-weight="500" fill="#94a3b8" letter-spacing="3">MATBAA &amp; KURUMSAL BASKI ÇÖZÜMLERİ</text><text x="60" y="270" font-family="Montserrat" font-size="30" font-weight="800" fill="#ffffff">Arif Uz</text><text x="60" y="305" font-family="Inter" font-size="16" font-weight="600" fill="#60a5fa">Yönetici</text><text x="500" y="270" font-family="Inter" font-size="16" fill="#cbd5e1">📞 0850 308 00 00</text><text x="500" y="305" font-family="Inter" font-size="16" fill="#cbd5e1">✉️ info@tambaski.com.tr</text><text x="500" y="340" font-family="Inter" font-size="16" fill="#cbd5e1">🌐 tambaski.com.tr</text><text x="60" y="420" font-family="Inter" font-size="14" fill="#64748b">📍 Topkapı Matbaacılar Sitesi Zeytinburnu / İstanbul</text></svg>`,
             render: function(canvas) {
                 canvas.setBackgroundColor('#081325', canvas.renderAll.bind(canvas));
                 const bar = new fabric.Rect({ left: 0, top: 0, width: 14, height: 500, fill: '#3b82f6' });
-                const comp = new fabric.IText('AVENUE CAPITAL', { left: 60, top: 80, fontFamily: 'Montserrat', fontSize: 32, fontWeight: '900', fill: '#ffffff' });
-                const sub = new fabric.IText('GLOBAL INVESTMENT & VENTURES', { left: 60, top: 122, fontFamily: 'Inter', fontSize: 11, fill: '#94a3b8', charSpacing: 90 });
+                const comp = new fabric.IText('TAM BASKI', { left: 60, top: 80, fontFamily: 'Montserrat', fontSize: 32, fontWeight: '900', fill: '#ffffff' });
+                const sub = new fabric.IText('MATBAA & KURUMSAL BASKI ÇÖZÜMLERİ', { left: 60, top: 122, fontFamily: 'Inter', fontSize: 11, fill: '#94a3b8', charSpacing: 90 });
                 
-                const person = new fabric.IText('Murat Sancak', { left: 60, top: 230, fontFamily: 'Montserrat', fontSize: 26, fontWeight: '800', fill: '#ffffff' });
-                const title = new fabric.IText('Managing Partner & CFO', { left: 60, top: 268, fontFamily: 'Inter', fontSize: 13, fontWeight: '600', fill: '#60a5fa' });
+                const person = new fabric.IText('Arif Uz', { left: 60, top: 230, fontFamily: 'Montserrat', fontSize: 26, fontWeight: '800', fill: '#ffffff' });
+                const title = new fabric.IText('Yönetici', { left: 60, top: 268, fontFamily: 'Inter', fontSize: 13, fontWeight: '600', fill: '#60a5fa' });
 
-                const phone = new fabric.IText('📞  +90 (212) 380 40 50', { left: 520, top: 230, fontFamily: 'Inter', fontSize: 13, fill: '#cbd5e1' });
-                const mail = new fabric.IText('✉️  murat@avenuecap.com', { left: 520, top: 265, fontFamily: 'Inter', fontSize: 13, fill: '#cbd5e1' });
-                const web = new fabric.IText('🌐  www.avenuecap.com', { left: 520, top: 300, fontFamily: 'Inter', fontSize: 13, fill: '#cbd5e1' });
-                const addr = new fabric.IText('📍  Maslak No:1 Plaza Kat:18 Sarıyer / İstanbul', { left: 60, top: 400, fontFamily: 'Inter', fontSize: 12, fill: '#64748b' });
+                const phone = new fabric.IText('📞  0850 308 00 00', { left: 520, top: 230, fontFamily: 'Inter', fontSize: 13, fill: '#cbd5e1' });
+                const mail = new fabric.IText('✉️  info@tambaski.com.tr', { left: 520, top: 265, fontFamily: 'Inter', fontSize: 13, fill: '#cbd5e1' });
+                const web = new fabric.IText('🌐  tambaski.com.tr', { left: 520, top: 300, fontFamily: 'Inter', fontSize: 13, fill: '#cbd5e1' });
+                const addr = new fabric.IText('📍  Topkapı Matbaacılar Sitesi Zeytinburnu / İstanbul', { left: 60, top: 400, fontFamily: 'Inter', fontSize: 12, fill: '#64748b' });
 
                 canvas.add(bar, comp, sub, person, title, phone, mail, web, addr);
             }
@@ -1437,7 +1437,7 @@ const CanvaStudio = {
 
     addBodyText: function() {
         if (window.innerWidth < 768) this.closeMobileDrawer();
-        const text = new fabric.IText('📞 0532 123 45 67 • info@sirket.com', {
+        const text = new fabric.IText('📞 0850 308 00 00 • info@tambaski.com.tr', {
             left: 100,
             top: 200,
             fontFamily: 'Inter',

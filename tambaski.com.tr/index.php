@@ -84,19 +84,16 @@ require_once __DIR__ . '/includes/header.php';
                         <!-- Sağ 3D Mockup Alanı -->
                         <div class="col-lg-6 d-flex align-items-center justify-content-center">
                             <div class="slide-visual-stage stage-kartvizit">
-                                <div class="bizcard-back"></div>
-                                <div class="bizcard-main">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div class="bizcard-chip"></div>
-                                        <span class="badge bg-secondary bg-opacity-50 text-white font-monospace" style="font-size: 8px;">LUXURY 350GR</span>
-                                    </div>
-                                    <div>
-                                        <div class="bizcard-logo">TAM <span>BASKI!</span></div>
-                                        <div class="bizcard-line"></div>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-end">
-                                        <div class="bizcard-meta">Ofset Kartvizit Serisi</div>
-                                        <div class="text-warning small"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+                                <div class="bizcard-mockup-frame position-relative shadow-lg rounded-4 overflow-hidden" style="max-width: 380px; transform: rotate(-2deg); transition: transform 0.3s ease; border: 2px solid rgba(255,255,255,0.2);">
+                                    <img src="<?= SITE_URL ?>/uploads/mockups/tambaski_kartvizit_vip_mockup.jpg" alt="TamBaskı Kurumsal Kartvizit Mockup - Arif Uz" class="img-fluid rounded-4 shadow-sm" style="display: block; width: 100%; object-fit: cover;">
+                                    <div class="position-absolute bottom-0 start-0 end-0 p-3 text-white" style="background: linear-gradient(180deg, transparent 0%, rgba(9, 9, 11, 0.85) 100%);">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div>
+                                                <div class="fw-bold fs-6 lh-1" style="color: #f59e0b;">TAM BASKI • VIP PRESTİJ</div>
+                                                <small class="text-white-50" style="font-size: 11px;">Arif Uz • Yönetici</small>
+                                            </div>
+                                            <span class="badge bg-warning text-dark fw-bold" style="font-size: 10px;">Altın Yaldız</span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="floating-badge badge-pos-left">
@@ -535,9 +532,15 @@ document.addEventListener('DOMContentLoaded', function() {
                             <?php endif; ?>
                         </div>
 
-                        <div class="product-img-wrapper">
-                            <?php if (!empty($prod['featured_image'])): ?>
-                                <img src="<?= SITE_URL . '/' . htmlspecialchars($prod['featured_image']) ?>" alt="<?= htmlspecialchars($prod['name']) ?>">
+                        <div class="product-img-wrapper" style="height: 200px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #f8fafc;">
+                            <?php 
+                                $prodImg = !empty($prod['featured_image']) ? $prod['featured_image'] : (!empty($prod['mockup_image']) ? $prod['mockup_image'] : '');
+                                if (empty($prodImg) && (stripos($prod['name'], 'kartvizit') !== false || stripos($prod['slug'], 'kartvizit') !== false)) {
+                                    $prodImg = 'uploads/mockups/tambaski_kartvizit_vip_mockup.jpg';
+                                }
+                            ?>
+                            <?php if (!empty($prodImg)): ?>
+                                <img src="<?= SITE_URL . '/' . htmlspecialchars($prodImg) ?>" alt="<?= htmlspecialchars($prod['name']) ?>" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease;">
                             <?php else: ?>
                                 <i class="bi bi-printer text-muted" style="font-size: 64px; opacity: 0.3;"></i>
                             <?php endif; ?>

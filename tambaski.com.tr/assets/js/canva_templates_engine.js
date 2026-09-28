@@ -170,7 +170,7 @@
             name: '🏢 Kurumsal & İş Dünyası',
             icon: 'bi-building',
             archetypes: [
-                { name: 'Murat Sancak', title: 'Managing Partner & CFO', company: 'AVENUE CAPITAL', sub: 'Global Investment & Ventures', phone: '+90 (212) 380 40 50', mail: 'murat@avenuecap.com', web: 'www.avenuecap.com', addr: 'Maslak No:1 Plaza Kat:18 Sarıyer / İstanbul', slogan: 'Yatırımda Küresel Güç' },
+                { name: 'Arif Uz', title: 'Yönetici', company: 'TamBaskı', sub: 'Matbaa & Kurumsal Baskı Çözümleri', phone: '0850 308 00 00', mail: 'info@tambaski.com.tr', web: 'tambaski.com.tr', addr: 'Topkapı Matbaacılar Sitesi Zeytinburnu / İstanbul', slogan: 'Kaliteli Baskının Güvenilir Adresi' },
                 { name: 'Cemre Aydın', title: 'Senior Strategic Consultant', company: 'KINETIC ADVISORY', sub: 'Management & Strategy Consulting', phone: '+90 532 700 80 90', mail: 'cemre@kinetic.ch', web: 'www.kinetic.ch', addr: 'Kanyon Ofis Kuleleri Kat:12 Levent / İstanbul', slogan: 'Geleceğin Stratejileri' },
                 { name: 'Hakan Öztürk', title: 'Genel Müdür / CEO', company: 'ÖZTÜRK HOLDİNG', sub: 'Sanayi & Dış Ticaret A.Ş.', phone: '+90 (216) 444 01 01', mail: 'hakan@ozturkholding.com', web: 'www.ozturkholding.com', addr: 'Batı Ataşehir Plaza Kat:24 Ataşehir / İstanbul', slogan: '50 Yıllık Güven ve Tecrübe' },
                 { name: 'Zeynep Kaya', title: 'İnsan Kaynakları Direktörü', company: 'TALENTUM HR', sub: 'Executive Search & Human Resources', phone: '+90 (212) 290 88 00', mail: 'zeynep@talentumhr.com', web: 'www.talentumhr.com', addr: 'Büyükdere Cad. No:193 Levent / İstanbul', slogan: 'En Doğru Yetenek Yönetimi' },
@@ -183,7 +183,7 @@
             name: '💎 VIP / Lüks & Altın Varak',
             icon: 'bi-gem',
             archetypes: [
-                { name: 'ARİF UZ', title: 'YÖNETİM KURULU BAŞKANI', company: 'UZ EXCLUSIVE HOLDING', sub: 'Private Family Office & Investments', phone: '+90 (212) 555 01 01', mail: 'arif@holding.com', web: 'WWW.HOLDING.COM', addr: 'Büyükdere Cad. Maya Plaza Kat:28 Levent / İst.', slogan: 'Prestij ve Ayrıcalık' },
+                { name: 'Arif Uz', title: 'Yönetici', company: 'TamBaskı VIP', sub: 'Özel Prestij & Varak Baskı Koleksiyonu', phone: '0850 308 00 00', mail: 'destek@tambaski.com.tr', web: 'tambaski.com.tr', addr: 'Topkapı Matbaacılar Sitesi Zeytinburnu / İstanbul', slogan: 'Seçkin Markalara Özel Prestij Baskı' },
                 { name: 'Zeynep Karaca', title: 'MANAGING DIRECTOR', company: 'MAISON ZELDA', sub: 'Haute Joaillerie & Diamonds', phone: '+90 (212) 288 99 00', mail: 'zeynep@maisonzelda.com', web: 'www.maisonzelda.com', addr: 'Abdi İpekçi Cad. No:42 Nişantaşı / İstanbul', slogan: 'Mücevherde İtalyan Zarafeti' },
                 { name: 'Emirhan Soylu', title: 'CHAIRMAN & FOUNDER', company: 'ROYAL MONARCH', sub: 'Private Aviation & Luxury Yachting', phone: '+90 532 999 00 00', mail: 'emirhan@royalmonarch.com', web: 'www.royalmonarch.com', addr: 'Yalıkavak Marina No:14 Bodrum / Muğla', slogan: 'Sınırsız Lüks Deneyimi' },
                 { name: 'Beste Yalçın', title: 'VIP PORTFOLIO MANAGER', company: 'PLATINUM RESERVE', sub: 'Exclusive Wealth Management', phone: '+90 (212) 345 67 89', mail: 'beste@platinumreserve.ch', web: 'www.platinumreserve.ch', addr: 'Bebek Park Residence No:8 Beşiktaş / İstanbul', slogan: 'Kişiye Özel Varlık Yönetimi' }
@@ -361,6 +361,47 @@
         isInitialized = true;
     }
 
+    let userCardProfile = null;
+
+    function getUserCardProfile() {
+        if (!userCardProfile) {
+            try {
+                const raw = localStorage.getItem('tb_user_card_profile');
+                if (raw) userCardProfile = JSON.parse(raw);
+            } catch(e) {}
+        }
+        if (!userCardProfile) {
+            userCardProfile = {
+                name: 'Arif Uz',
+                title: 'Yönetici',
+                company: 'TamBaskı',
+                sub: 'Matbaa & Kurumsal Baskı Çözümleri',
+                phone: '0850 308 00 00',
+                mail: 'info@tambaski.com.tr',
+                web: 'tambaski.com.tr',
+                addr: 'Topkapı Matbaacılar Sitesi Zeytinburnu / İstanbul',
+                slogan: 'Kaliteli Baskının Güvenilir Adresi'
+            };
+        }
+        return userCardProfile;
+    }
+
+    function getActiveUserData(person) {
+        const u = getUserCardProfile();
+        if (!u) return person;
+        return {
+            name: (u.name !== undefined && u.name !== '') ? u.name : person.name,
+            title: (u.title !== undefined && u.title !== '') ? u.title : person.title,
+            company: (u.company !== undefined && u.company !== '') ? u.company : person.company,
+            sub: (u.sub !== undefined && u.sub !== '') ? u.sub : person.sub,
+            phone: (u.phone !== undefined && u.phone !== '') ? u.phone : person.phone,
+            mail: (u.mail !== undefined && u.mail !== '') ? u.mail : person.mail,
+            web: (u.web !== undefined && u.web !== '') ? u.web : person.web,
+            addr: (u.addr !== undefined && u.addr !== '') ? u.addr : person.addr,
+            slogan: (u.slogan !== undefined && u.slogan !== '') ? u.slogan : person.slogan
+        };
+    }
+
     function getSectorGraphic(sectorKey, color) {
         const v = SECTOR_VECTORS[sectorKey] || SECTOR_VECTORS['kurumsal'];
         return v.getSvg(color);
@@ -369,7 +410,7 @@
     // Generate dynamic preview SVG with embedded sector-specific illustration
     function generatePreviewSvg(tpl) {
         const p = tpl.palette;
-        const d = tpl.data;
+        const d = getActiveUserData(tpl.data);
         const w = 850;
         const h = 500;
         const sectorSvg = getSectorGraphic(tpl.sector, p.accent || p.primary);
@@ -469,7 +510,7 @@
         canvas.clear();
 
         const p = tpl.palette;
-        const d = tpl.data;
+        const d = getActiveUserData(tpl.data);
         const w = (canvas.getWidth && typeof canvas.getWidth === 'function') ? canvas.getWidth() : (canvas.width || 850);
         const h = (canvas.getHeight && typeof canvas.getHeight === 'function') ? canvas.getHeight() : (canvas.height || 526);
         const sectorSvgStr = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="85" height="85">${getSectorGraphic(tpl.sector, p.accent || p.primary)}</svg>`;
@@ -608,6 +649,42 @@
             if (tpl && canvas) {
                 renderToFabric(canvas, tpl);
             }
+        },
+
+        getProfile: function() {
+            return getUserCardProfile();
+        },
+
+        setProfile: function(data) {
+            userCardProfile = Object.assign({}, getUserCardProfile(), data);
+            try {
+                localStorage.setItem('tb_user_card_profile', JSON.stringify(userCardProfile));
+            } catch(e) {}
+            if (typeof window.onUserProfileChanged === 'function') {
+                window.onUserProfileChanged(userCardProfile);
+            }
+            return userCardProfile;
+        },
+
+        resetProfileToTamBaski: function() {
+            userCardProfile = {
+                name: 'Arif Uz',
+                title: 'Yönetici',
+                company: 'TamBaskı',
+                sub: 'Matbaa & Kurumsal Baskı Çözümleri',
+                phone: '0850 308 00 00',
+                mail: 'info@tambaski.com.tr',
+                web: 'tambaski.com.tr',
+                addr: 'Topkapı Matbaacılar Sitesi Zeytinburnu / İstanbul',
+                slogan: 'Kaliteli Baskının Güvenilir Adresi'
+            };
+            try {
+                localStorage.setItem('tb_user_card_profile', JSON.stringify(userCardProfile));
+            } catch(e) {}
+            if (typeof window.onUserProfileChanged === 'function') {
+                window.onUserProfileChanged(userCardProfile);
+            }
+            return userCardProfile;
         }
     };
 

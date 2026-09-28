@@ -66,14 +66,14 @@ window.AiVectorEngine = {
     // 2. ✨ METİNDEN %100 VEKTÖREL SVG KARTVİZİT / BROŞÜR ÜRETİCİSİ
     // -------------------------------------------------------------------------
     generateVectorDesigns: function(data) {
-        const company = (data.company || 'Kurumsal Marka').trim();
+        const company = (data.company || 'TamBaskı').trim();
         const industry = (data.industry || 'genel').trim();
-        const person = (data.person || 'Ad Soyad').trim();
-        const title = (data.title || 'Şirket Yöneticisi').trim();
-        const phone = (data.phone || '0532 000 00 00').trim();
-        const email = (data.email || 'info@sirketiniz.com').trim();
-        const address = (data.address || 'İstanbul, Türkiye').trim();
-        const website = (data.website || 'www.sirketiniz.com').trim();
+        const person = (data.person || 'Arif Uz').trim();
+        const title = (data.title || 'Yönetici').trim();
+        const phone = (data.phone || '0850 308 00 00').trim();
+        const email = (data.email || 'info@tambaski.com.tr').trim();
+        const address = (data.address || 'Topkapı Matbaacılar Sitesi Zeytinburnu / İstanbul').trim();
+        const website = (data.website || 'tambaski.com.tr').trim();
         const style = data.style || 'gold_navy';
 
         const safeCompany = this.escapeHtml(company);

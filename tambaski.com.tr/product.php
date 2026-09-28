@@ -55,7 +55,12 @@ require_once __DIR__ . '/includes/header.php';
                 <!-- ========================================================================= -->
                 <!-- 🎨 CANLI DİNAMİK MOCKUP SAHNESİ & 3D DOKU SİMÜLATÖRÜ -->
                 <!-- ========================================================================= -->
-                <div class="mockup-stage-box text-center py-3 bg-light rounded-4 mb-2 position-relative overflow-hidden shadow-sm" style="min-height: 260px; background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); border: 1px solid #334155;">
+                <?php
+                $realisticMockup = !empty($product['mockup_image']) 
+                    ? (str_starts_with($product['mockup_image'], 'http') ? $product['mockup_image'] : SITE_URL . '/' . $product['mockup_image']) 
+                    : SITE_URL . '/uploads/mockups/tambaski_kartvizit_vip_mockup.jpg';
+                ?>
+                <div class="mockup-stage-box text-center py-3 bg-light rounded-4 mb-2 position-relative overflow-hidden shadow-sm" style="min-height: 280px; background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); border: 1px solid #334155;">
                     
                     <!-- Üst Bar: Kalınlık & Doku Göstergesi + 360° Video Butonu -->
                     <div class="position-absolute top-0 start-0 w-100 p-2 d-flex justify-content-between align-items-start" style="z-index: 25; pointer-events: none;">
@@ -64,7 +69,7 @@ require_once __DIR__ . '/includes/header.php';
                                 <i class="bi bi-layers-half text-warning me-1"></i> Kalınlık: <strong>0.38 mm (350 GSM)</strong>
                             </span>
                             <span class="badge bg-white bg-opacity-10 text-light rounded-pill px-2 py-1 shadow-sm" id="showcaseFinishBadge" style="font-size: 10px;">
-                                <i class="bi bi-stars text-info me-1"></i> Doku: <strong>Mat Selefon Kaplama</strong>
+                                <i class="bi bi-stars text-info me-1"></i> Doku: <strong>24K Altın Varak &amp; İtalyan Tuale</strong>
                             </span>
                         </div>
                         <button type="button" class="btn btn-sm btn-danger rounded-pill px-3 py-1 shadow d-flex align-items-center gap-1" onclick="PackageShowcase.playCinematicVideo()" style="font-size: 11px; pointer-events: auto; background: linear-gradient(135deg, #e11d48, #f43f5e); border: none;">
@@ -72,55 +77,60 @@ require_once __DIR__ . '/includes/header.php';
                         </button>
                     </div>
 
-                    <!-- 1. İnteraktif 3D Kart Sahnesi (Mouse ile Eğim & Işık Parıltısı) -->
-                    <div id="mockup_interactive_view" class="mockup-view-pane" style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; min-height: 250px; perspective: 1000px; padding: 20px 8px;">
-                        <div id="interactivePackageCard" class="interactive-showcase-card shadow-2xl position-relative overflow-hidden cursor-pointer" style="width: 280px; height: 165px; background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%); border-radius: 12px; transition: transform 0.15s ease-out; display: flex; flex-direction: column; justify-content: space-between; padding: 18px; box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
+                    <!-- 1. Canlı Yüksek Çözünürlüklü Gerçekçi Stüdyo Mockup Görünümü (VARSAYILAN) -->
+                    <div id="mockup_photo_view" class="mockup-view-pane" style="display: flex; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; background: #0b1120; align-items: center; justify-content: center; padding: 6px;">
+                        <img id="stagePhotoImg" src="<?= htmlspecialchars($realisticMockup) ?>" alt="TamBaskı Kurumsal Mockup" class="rounded-3 shadow-lg" style="max-width: 100%; max-height: 270px; width: 100%; height: 100%; object-fit: cover; cursor: zoom-in;" onclick="openFullscreenImage(this.src)" title="Tam ekran büyütmek için tıklayın">
+                        <button type="button" class="btn btn-sm btn-dark position-absolute bottom-0 end-0 m-2 rounded-pill px-2.5 py-1 text-white opacity-90 shadow d-flex align-items-center gap-1" style="font-size: 10px; background: rgba(15,23,42,0.85); border: 1px solid rgba(255,255,255,0.2); z-index: 20;" onclick="openFullscreenImage(document.getElementById('stagePhotoImg').src)">
+                            <i class="bi bi-arrows-fullscreen"></i> İncele
+                        </button>
+                    </div>
+
+                    <!-- 2. İnteraktif 3D Kart Sahnesi (Mouse ile Eğim & Işık Parıltısı) -->
+                    <div id="mockup_interactive_view" class="mockup-view-pane" style="display: none; align-items: center; justify-content: center; width: 100%; height: 100%; min-height: 270px; perspective: 1000px; padding: 20px 8px;">
+                        <div id="interactivePackageCard" class="interactive-showcase-card shadow-2xl position-relative overflow-hidden cursor-pointer" style="width: 290px; height: 170px; background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%); border-radius: 12px; transition: transform 0.15s ease-out; display: flex; flex-direction: column; justify-content: space-between; padding: 18px; box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
                             
                             <!-- Dinamik Işık Parıldama Katmanı -->
                             <div id="cardLightGleam" class="position-absolute top-0 start-0 w-100 h-100 pointer-events-none" style="z-index: 5; mix-blend-mode: screen; transition: background 0.08s ease;"></div>
 
-                            <!-- Kart İçeriği -->
+                            <!-- Kart İçeriği (TamBaskı Kurumsal Kimlik) -->
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <div id="showcaseBrandTitle" class="d-flex align-items-center">
-                                    <img src="<?= SITE_URL ?>/assets/img/logo.svg" alt="TamBaskı" style="height: 22px; max-width: 140px; object-fit: contain; transition: filter 0.3s ease;" id="showcaseLogoImg">
+                                    <img src="<?= SITE_URL ?>/assets/img/logo.svg" alt="TamBaskı" style="height: 24px; max-width: 140px; object-fit: contain; transition: filter 0.3s ease;" id="showcaseLogoImg">
                                 </div>
-                                <span class="badge bg-dark bg-opacity-75 text-white" style="font-size: 9px;">Heidelberg HD</span>
+                                <span class="badge bg-dark bg-opacity-75 text-white font-monospace" style="font-size: 8.5px;">HEIDELBERG HD</span>
                             </div>
                             <div class="text-start">
-                                <div class="fw-bold text-dark fs-6" style="line-height: 1.2;">Murat Sancak</div>
-                                <div class="text-muted" style="font-size: 10.5px;">Yönetim Kurulu Başkanı</div>
+                                <div class="fw-bold text-dark fs-6" style="line-height: 1.2;">Arif Uz</div>
+                                <div class="text-primary fw-semibold" style="font-size: 11px;">Yönetici</div>
                             </div>
                             <div class="d-flex justify-content-between align-items-center text-muted border-top pt-2" style="font-size: 9.5px;">
-                                <span><i class="bi bi-envelope"></i> info@tambaski.com.tr</span>
-                                <span class="fw-bold text-primary">tambaski.com.tr</span>
+                                <span><i class="bi bi-envelope text-primary"></i> info@tambaski.com.tr</span>
+                                <span class="fw-bold text-dark"><i class="bi bi-telephone text-primary"></i> 0850 308 00 00</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 2. Canlı Yüksek Çözünürlüklü Fotoğraf Görünümü -->
-                    <div id="mockup_photo_view" class="mockup-view-pane" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; background: #0f172a; align-items: center; justify-content: center; padding: 8px;">
-                        <img id="stagePhotoImg" src="" alt="TamBaskı Kurumsal Çekim" class="rounded-3 shadow-lg" style="max-width: 100%; max-height: 245px; width: auto; height: auto; object-fit: contain; cursor: zoom-in;" onclick="openFullscreenImage(this.src)" title="Tam ekran büyütmek için tıklayın">
-                        <button type="button" class="btn btn-sm btn-dark position-absolute bottom-0 end-0 m-2 rounded-pill px-2 py-1 text-white opacity-85 shadow d-flex align-items-center gap-1" style="font-size: 10px; background: rgba(0,0,0,0.65); border: 1px solid rgba(255,255,255,0.25); z-index: 20;" onclick="openFullscreenImage(document.getElementById('stagePhotoImg').src)">
-                            <i class="bi bi-arrows-fullscreen"></i> Tam Ekran
-                        </button>
-                    </div>
-
                     <!-- 3. Video Oynatıcı Görünümü (Varsa) -->
                     <div id="mockup_video_view" class="mockup-view-pane" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; background: #0f172a; align-items: center; justify-content: center; padding: 8px;">
-                        <video id="stageVideoPlayer" controls autoplay loop playsinline class="rounded-3 shadow-lg" style="max-width: 100%; max-height: 245px; width: auto; height: auto; object-fit: contain;"></video>
+                        <video id="stageVideoPlayer" controls autoplay loop playsinline class="rounded-3 shadow-lg" style="max-width: 100%; max-height: 260px; width: auto; height: auto; object-fit: contain;"></video>
                     </div>
 
                     <!-- Alt Bilgi: 3D Döndürme İpucu -->
                     <div class="position-absolute bottom-0 start-50 translate-middle-x mb-1 text-secondary small text-nowrap" style="font-size: 9.5px; opacity: 0.85; z-index: 20;">
-                        <i class="bi bi-hand-index-thumb text-warning me-1"></i> Kartı farenizle eğerek ışık ve varak yansımasını inceleyin
+                        <i class="bi bi-patch-check-fill text-warning me-1"></i> TamBaskı Gerçekçi Matbaa Baskı ve Doku Simülasyonu
                     </div>
                 </div>
 
                 <!-- 📸 Çoklu Fotoğraf & Video Küçük Resim Şeridi (Varsa) -->
                 <div class="d-flex gap-1 overflow-x-auto pb-2 mb-2 align-items-center" id="prodMediaStrip" style="white-space: nowrap;">
-                    <!-- 3D Mockup Butonu -->
-                    <button type="button" class="btn btn-sm btn-outline-primary active rounded-3 p-1 px-2 text-nowrap media-thumb-btn" onclick="showMediaMockup(this)" title="3D Mockup Önizleme" style="font-size: 11px; height: 42px;">
-                        <i class="bi bi-layers-half me-1"></i> Mockup
+                    <!-- Gerçekçi Mockup Butonu -->
+                    <button type="button" class="btn btn-sm btn-primary active rounded-3 p-1 px-2.5 text-nowrap media-thumb-btn shadow-xs" onclick="showMediaPhoto('<?= htmlspecialchars($realisticMockup) ?>', this)" title="Gerçekçi Stüdyo Mockup" style="font-size: 11px; height: 42px;">
+                        <i class="bi bi-image-fill me-1"></i> Mockup
+                    </button>
+
+                    <!-- İnteraktif 3D Butonu -->
+                    <button type="button" class="btn btn-sm btn-light border rounded-3 p-1 px-2 text-nowrap media-thumb-btn" onclick="showMediaMockup(this)" title="İnteraktif 3D Kart" style="font-size: 11px; height: 42px;">
+                        <i class="bi bi-layers-half me-1"></i> 3D Kart
                     </button>
 
                     <!-- Fotoğraflar (WebP / Ultra HD) -->
@@ -780,64 +790,79 @@ require_once __DIR__ . '/includes/header.php';
                     <!-- ========================================================================= -->
                     <?php
                     $presets = !empty($product['package_presets']) ? json_decode($product['package_presets'], true) : [];
-                    $allPackages = [
-                        'ekonomik' => [
-                            'key'         => 'ekonomik',
-                            'title'       => 'Ekonomik',
-                            'icon'        => 'bi-wallet2',
-                            'icon_class'  => 'text-secondary',
-                            'desc'        => $presets['ekonomik']['desc'] ?? '350gr Kuşe, Mat Selefon, Düz Kesim',
-                            'badge'       => 'En Uygun Fiyat',
-                            'badge_class' => 'bg-success-subtle text-success',
-                            'active'      => isset($presets['ekonomik']) ? (!empty($presets['ekonomik']['active'])) : true
-                        ],
-                        'standart' => [
-                            'key'         => 'standart',
-                            'title'       => 'Standart',
-                            'ribbon'      => 'Popüler',
-                            'ribbon_class'=> '',
-                            'icon'        => 'bi-award-fill',
-                            'icon_class'  => 'text-primary',
-                            'desc'        => $presets['standart']['desc'] ?? '350gr Kuşe, Çift Taraf Mat, Oval Köşe',
-                            'badge'       => 'En Çok Satan',
-                            'badge_class' => 'bg-primary-subtle text-primary',
-                            'active'      => isset($presets['standart']) ? (!empty($presets['standart']['active'])) : true
-                        ],
-                        'premium' => [
-                            'key'         => 'premium',
-                            'title'       => 'Premium',
-                            'icon'        => 'bi-stars',
-                            'icon_style'  => 'color: #8b5cf6;',
-                            'desc'        => $presets['premium']['desc'] ?? 'Soft-Touch Kadife Selefon & Kabartma Lak',
-                            'badge'       => 'Lüks Doku',
-                            'badge_style' => 'background: #8b5cf6; color: #fff;',
-                            'active'      => isset($presets['premium']) ? (!empty($presets['premium']['active'])) : true
-                        ],
-                        'vip' => [
-                            'key'         => 'vip',
-                            'title'       => 'VIP Prestij',
-                            'ribbon'      => 'VIP',
-                            'ribbon_class'=> 'ribbon-vip',
-                            'icon'        => 'bi-gem',
-                            'icon_class'  => 'text-warning',
-                            'desc'        => $presets['vip']['desc'] ?? 'Tuale Fantezi / Altın Varak Yaldız',
-                            'badge'       => 'Maksimum Prestij',
-                            'badge_class' => 'bg-warning-subtle text-dark',
-                            'active'      => isset($presets['vip']) ? (!empty($presets['vip']['active'])) : true
-                        ]
-                    ];
-
                     $activePackages = [];
-                    foreach ($allPackages as $k => $p) {
-                        if (!empty($p['active'])) {
-                            $activePackages[$k] = $p;
+
+                    if (!empty($presets) && is_array($presets)) {
+                        foreach ($presets as $pKey => $pData) {
+                            if (!isset($pData['active']) || !empty($pData['active'])) {
+                                $title = $pData['name'] ?? ucfirst($pKey);
+                                $desc = $pData['desc'] ?? '';
+                                $badge = $pData['badge'] ?? '';
+                                
+                                $icon = 'bi-box-seam';
+                                $iconClass = 'text-primary';
+                                $iconStyle = '';
+                                $badgeClass = 'bg-primary-subtle text-primary';
+                                $badgeStyle = '';
+                                $ribbon = '';
+                                $ribbonClass = '';
+
+                                if (str_contains($pKey, 'eko')) {
+                                    $icon = 'bi-wallet2';
+                                    $iconClass = 'text-secondary';
+                                    if (empty($badge)) $badge = 'Uygun Fiyat';
+                                    $badgeClass = 'bg-success-subtle text-success';
+                                } elseif (str_contains($pKey, 'std') || str_contains($pKey, 'standart')) {
+                                    $icon = 'bi-award-fill';
+                                    $iconClass = 'text-primary';
+                                    if (empty($badge)) $badge = 'Çok Satan';
+                                    $badgeClass = 'bg-primary-subtle text-primary';
+                                    $ribbon = 'Popüler';
+                                } elseif (str_contains($pKey, 'prem')) {
+                                    $icon = 'bi-stars';
+                                    $iconStyle = 'color: #8b5cf6;';
+                                    if (empty($badge)) $badge = 'Özel Doku';
+                                    $badgeStyle = 'background: #8b5cf6; color: #fff;';
+                                } elseif (str_contains($pKey, 'vip')) {
+                                    $icon = 'bi-gem';
+                                    $iconClass = 'text-warning';
+                                    if (empty($badge)) $badge = 'VIP Prestij';
+                                    $badgeClass = 'bg-warning-subtle text-dark';
+                                    $ribbon = 'VIP';
+                                    $ribbonClass = 'ribbon-vip';
+                                }
+
+                                $activePackages[$pKey] = [
+                                    'key'         => $pKey,
+                                    'title'       => $title,
+                                    'ribbon'      => $ribbon,
+                                    'ribbon_class'=> $ribbonClass,
+                                    'icon'        => $icon,
+                                    'icon_class'  => $iconClass,
+                                    'icon_style'  => $iconStyle,
+                                    'desc'        => $desc,
+                                    'badge'       => $badge,
+                                    'badge_class' => $badgeClass,
+                                    'badge_style' => $badgeStyle,
+                                    'price'       => (float)($pData['price'] ?? 0)
+                                ];
+                            }
                         }
                     }
+
                     if (empty($activePackages)) {
-                        $activePackages = $allPackages;
+                        $activePackages = [
+                            'standart' => [
+                                'key' => 'standart', 'title' => 'Standart', 'ribbon' => 'Popüler', 'ribbon_class' => '',
+                                'icon' => 'bi-award-fill', 'icon_class' => 'text-primary', 'icon_style' => '',
+                                'desc' => '350gr Kuşe, Çift Taraf Mat Selefon', 'badge' => 'Çok Satan',
+                                'badge_class' => 'bg-primary-subtle text-primary', 'badge_style' => '', 'price' => ($product['base_price'] ?? 900)
+                            ]
+                        ];
                     }
+
                     $pkgKeys = array_keys($activePackages);
-                    $firstPkgKey = $pkgKeys[0] ?? 'standart';
+                    $firstPkgKey = in_array('standart', $pkgKeys) ? 'standart' : ($pkgKeys[0] ?? 'standart');
                     ?>
                     <div class="package-grid mb-2 mb-lg-4">
                         <?php foreach ($activePackages as $pKey => $pkg): ?>
@@ -999,7 +1024,7 @@ require_once __DIR__ . '/includes/header.php';
                                 </div>
                             </div>
 
-                            <!-- 📑 TAB 2: HAZIR ŞABLON KULLAN (MESLEK / SEKTÖR SEÇİMİ) -->
+                            <!-- 📑 TAB 2: HAZIR ŞABLON KULLAN (HIZLI BİLGİ GİRİŞİ & MESLEK SEÇİMİ) -->
                             <div id="tabTemplate" class="design-tab-pane" style="display: none;">
                                 <div class="p-3 rounded-4 border bg-white mb-2 shadow-2xs" style="border-color: #fef08a !important; background: linear-gradient(180deg, #fefce8 0%, #ffffff 100%) !important;">
                                     <div class="d-flex align-items-center gap-2 mb-2 pb-2 border-bottom">
@@ -1008,66 +1033,103 @@ require_once __DIR__ . '/includes/header.php';
                                         </div>
                                         <div>
                                             <div class="fw-bold text-dark small lh-1">Meslek &amp; Sektör Şablonları</div>
-                                            <span class="text-muted" style="font-size: 10.5px;">Mesleğinizi seçin, sektörünüze uygun hazır şablonlarla anında başlayın</span>
+                                            <span class="text-muted" style="font-size: 10.5px;">Bilgilerinizi 1 kez girin; tüm şablonlar otomatik hazırlansın, baştan yazmayın!</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- 🚀 HIZLI BİLGİ DOLDURMA KUTUCUĞU -->
+                                    <div class="card border-0 rounded-3 shadow-2xs mb-3" style="background: #ffffff; border: 1px solid #fde047 !important;">
+                                        <div class="card-header bg-warning bg-opacity-10 py-2 px-3 border-bottom d-flex align-items-center justify-content-between">
+                                            <span class="fw-bold text-dark small">
+                                                <i class="bi bi-lightning-charge-fill text-warning me-1"></i> Hızlı Bilgi Girişi (Şablonlara Otomatik Uygulanır)
+                                            </span>
+                                            <button type="button" class="btn btn-2xs btn-outline-dark rounded-pill py-0 px-2" onclick="resetToTamBaskiCorporateInfo()" title="TamBaskı Kurumsal Kimliğini Yükle" style="font-size: 10px;">
+                                                <i class="bi bi-building me-1"></i> TamBaskı Bilgileri
+                                            </button>
+                                        </div>
+                                        <div class="card-body p-2 p-md-3">
+                                            <div class="row g-2">
+                                                <div class="col-6">
+                                                    <label class="form-label text-muted mb-0" style="font-size: 10.5px; font-weight: 600;">Ad Soyad</label>
+                                                    <input type="text" id="quickCardName" class="form-control form-control-sm rounded-2" placeholder="Örn: Arif Uz" oninput="onQuickInfoInput()">
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="form-label text-muted mb-0" style="font-size: 10.5px; font-weight: 600;">Unvan / Görev</label>
+                                                    <input type="text" id="quickCardTitle" class="form-control form-control-sm rounded-2" placeholder="Örn: Yönetici" oninput="onQuickInfoInput()">
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="form-label text-muted mb-0" style="font-size: 10.5px; font-weight: 600;">Firma / Marka</label>
+                                                    <input type="text" id="quickCardCompany" class="form-control form-control-sm rounded-2" placeholder="Örn: TamBaskı" oninput="onQuickInfoInput()">
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="form-label text-muted mb-0" style="font-size: 10.5px; font-weight: 600;">Telefon</label>
+                                                    <input type="text" id="quickCardPhone" class="form-control form-control-sm rounded-2" placeholder="Örn: 0850 308 00 00" oninput="onQuickInfoInput()">
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="form-label text-muted mb-0" style="font-size: 10.5px; font-weight: 600;">E-Posta</label>
+                                                    <input type="email" id="quickCardMail" class="form-control form-control-sm rounded-2" placeholder="Örn: info@tambaski.com.tr" oninput="onQuickInfoInput()">
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="form-label text-muted mb-0" style="font-size: 10.5px; font-weight: 600;">Web Sitesi</label>
+                                                    <input type="text" id="quickCardWeb" class="form-control form-control-sm rounded-2" placeholder="Örn: tambaski.com.tr" oninput="onQuickInfoInput()">
+                                                </div>
+                                                <div class="col-12">
+                                                    <label class="form-label text-muted mb-0" style="font-size: 10.5px; font-weight: 600;">Adres / Şehir</label>
+                                                    <input type="text" id="quickCardAddr" class="form-control form-control-sm rounded-2" placeholder="Örn: Topkapı Matbaacılar Sitesi Zeytinburnu / İstanbul" oninput="onQuickInfoInput()">
+                                                </div>
+                                            </div>
+                                            <div class="d-flex align-items-center justify-content-between mt-2 pt-2 border-top">
+                                                <span class="text-muted" style="font-size: 10px;">
+                                                    <i class="bi bi-shield-check text-success me-1"></i> Bilgileriniz tarayıcınızda saklanır.
+                                                </span>
+                                                <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 py-1 fw-bold shadow-2xs" onclick="applyQuickCardInfo()" style="font-size: 11px;">
+                                                    <i class="bi bi-check2-circle me-1"></i> Şablonları Güncelle
+                                                </button>
+                                            </div>
+                                            <div id="quickCardStatusNotice" class="text-success small fw-semibold mt-1" style="display: none; font-size: 10.5px;">
+                                                <i class="bi bi-check-circle-fill me-1"></i> Şablonlar girdiğiniz kurumsal kimlik bilgileriyle güncellendi!
+                                            </div>
                                         </div>
                                     </div>
 
                                     <!-- Sektör Seçici Dropdown -->
                                     <div class="mb-3">
-                                        <label class="form-label small fw-bold text-dark mb-1">
-                                            <i class="bi bi-filter-circle text-primary me-1"></i> Sektör / Meslek Filtresi:
+                                        <label class="form-label small fw-bold text-dark mb-1 d-flex justify-content-between align-items-center">
+                                            <span><i class="bi bi-filter-circle text-primary me-1"></i> Sektör / Meslek Filtresi:</span>
+                                            <span class="badge bg-light text-muted border" id="productTemplatesCountBadge">Yükleniyor...</span>
                                         </label>
-                                        <select class="form-select form-select-sm rounded-3 fw-semibold border-secondary" id="industrySelectDropdown" onchange="onIndustrySelectChange(this.value)">
-                                            <option value="all">🌟 Tüm Meslekler &amp; Sektörler</option>
-                                            <?php if (!empty($industries)): ?>
-                                                <?php foreach ($industries as $ind): ?>
-                                                    <option value="<?= htmlspecialchars($ind['slug']) ?>"><?= htmlspecialchars($ind['name']) ?></option>
-                                                <?php endforeach; ?>
-                                            <?php else: ?>
-                                                <option value="hukuk-avukatlik">⚖️ Hukuk, Avukatlık &amp; Danışmanlık</option>
-                                                <option value="saglik-klinik">🩺 Sağlık, Tıp, Doktor &amp; Diş Hekimi</option>
-                                                <option value="gayrimenkul-emlak">🏠 Gayrimenkul, Emlak &amp; Değerleme</option>
-                                                <option value="insaat-mimarlik">🏗️ İnşaat, Mimarlık &amp; Mühendislik</option>
-                                                <option value="restoran-kafe">☕ Restoran, Kafe, Fırın &amp; Gıda</option>
-                                                <option value="guzellik-kuafor">✂️ Güzellik, Kuaför, Berber &amp; Spa</option>
-                                                <option value="otomotiv-servis">🚗 Otomotiv, Araç Servisi &amp; Kiralama</option>
-                                                <option value="finans-muhasebe">💼 Finans, Muhasebe &amp; Sigorta</option>
-                                                <option value="teknoloji-yazilim">💻 Teknoloji, Yazılım, Ajans &amp; Medya</option>
-                                                <option value="egitim-kurs">🎓 Eğitim, Kurs, Okul &amp; Akademi</option>
-                                                <option value="genel-kurumsal">🏢 Genel Kurumsal &amp; Ticaret</option>
-                                            <?php endif; ?>
+                                        <select class="form-select form-select-sm rounded-3 fw-semibold border-secondary shadow-2xs" id="industrySelectDropdown" onchange="onIndustrySelectChange(this.value)">
+                                            <option value="all">🌟 Tüm Meslekler &amp; Sektörler (Tümü)</option>
+                                            <option value="kurumsal">🏢 Genel Kurumsal &amp; İş Dünyası</option>
+                                            <option value="lüks">💎 VIP / Lüks &amp; Altın Varak</option>
+                                            <option value="hukuk">⚖️ Hukuk, Avukatlık &amp; Danışmanlık</option>
+                                            <option value="sağlık">🩺 Sağlık, Tıp, Doktor &amp; Diş Hekimi</option>
+                                            <option value="mimarlık">📐 İnşaat, Mimarlık &amp; Mühendislik</option>
+                                            <option value="emlak">🏡 Gayrimenkul, Emlak &amp; Değerleme</option>
+                                            <option value="teknoloji">💻 Teknoloji, Yazılım, Ajans &amp; Bilişim</option>
+                                            <option value="gıda">☕ Restoran, Kafe, Fırın &amp; Gıda</option>
+                                            <option value="güzellik">✂️ Güzellik, Kuaför, Berber &amp; Spa</option>
+                                            <option value="otomotiv">🚗 Otomotiv, Araç Servisi &amp; Nakliyat</option>
+                                            <option value="finans">💼 Finans, Muhasebe &amp; Sigorta</option>
+                                            <option value="eğitim">🎓 Eğitim, Kurs, Okul &amp; Akademi</option>
                                         </select>
                                     </div>
 
-                                    <!-- Şablonlar Listesi veya Boş Durum Bilgisi -->
+                                    <!-- Şablonlar Grid Container -->
                                     <div id="templatesListContainer">
-                                        <?php if (!empty($product['templates'])): ?>
-                                            <div class="row g-2 mb-2" id="templatesRow">
-                                                <?php foreach ($product['templates'] as $tpl): ?>
-                                                    <div class="col-6 template-card-wrapper" data-industry="<?= htmlspecialchars($tpl['industry_slug'] ?? 'all') ?>">
-                                                        <div class="card p-2 h-100 border text-center shadow-2xs hover-lift">
-                                                            <div class="template-preview-box mb-2" style="height: 90px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #f8fafc; border-radius: 6px;">
-                                                                <?= $tpl['default_svg'] ?? '<i class="bi bi-file-earmark-image fs-1 text-muted"></i>' ?>
-                                                            </div>
-                                                            <div class="small fw-bold text-truncate mb-2"><?= htmlspecialchars($tpl['title']) ?></div>
-                                                            <button type="button" class="btn btn-sm btn-primary rounded-pill w-100 open-editor-btn" data-template='<?= htmlspecialchars(json_encode($tpl), ENT_QUOTES) ?>'>
-                                                                <i class="bi bi-pencil-square me-1"></i> Düzenle
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                <?php endforeach; ?>
-                                            </div>
-                                        <?php endif; ?>
+                                        <div class="row g-2 mb-2" id="dynamicTemplatesRow">
+                                            <!-- JavaScript ile canlı basılacak -->
+                                        </div>
 
-                                        <!-- Şablonlar Henüz Eklenmemişse Görünecek Şık Bilgi Kartı -->
-                                        <div id="noTemplatesNoticeBox" class="p-3 rounded-3 bg-white border text-center my-1" style="<?= empty($product['templates']) ? '' : 'display: none;' ?>">
-                                            <div class="mb-2 text-warning"><i class="bi bi-folder-plus fs-3"></i></div>
-                                            <h6 class="fw-bold text-dark mb-1" id="selectedIndustryNoticeTitle">Sektöre Özel Şablonlar</h6>
+                                        <!-- Boş Durum / Özel Tasarla Butonu -->
+                                        <div id="noTemplatesNoticeBox" class="p-3 rounded-3 bg-white border text-center my-1" style="display: none;">
+                                            <div class="mb-2 text-warning"><i class="bi bi-palette-fill fs-3"></i></div>
+                                            <h6 class="fw-bold text-dark mb-1">Özel Tasarım Başlat</h6>
                                             <p class="text-muted small mb-3" style="font-size: 11px;">
-                                                Bu meslek grubu için hazır şablonlarımız yükleme aşamasındadır. Dilerseniz 'Kendin Tasarla' editörümüzde logonuzu ve bilgilerinizi ekleyerek 1 dakikada sıfırdan oluşturabilirsiniz.
+                                                Dilediğiniz şablonu 'Kendin Tasarla' editörümüzde açıp logonuzu ve metinlerinizi özgürce düzenleyebilirsiniz.
                                             </p>
                                             <button type="button" class="btn btn-sm btn-warning text-dark fw-bold rounded-pill px-4 py-2 shadow-xs" onclick="openCanvaStudio()">
-                                                <i class="bi bi-palette-fill me-1 text-danger"></i> Sıfırdan Tasarlamaya Başla
+                                                <i class="bi bi-palette-fill me-1 text-danger"></i> Editörde Tasarlamaya Başla
                                             </button>
                                         </div>
                                     </div>
@@ -1380,15 +1442,6 @@ require_once __DIR__ . '/includes/header.php';
                             <input type="number" id="canvaStudioCustomQtyInput" class="form-control form-control-sm text-center fw-bold border-primary" style="width: 75px; font-size: 11px; padding: 3px 4px;" min="10" step="10" value="500" placeholder="Adet" oninput="CanvaStudio.setCustomQuantity(this.value)">
                         </div>
                     </div>
-
-                    <div class="vr mx-1 text-secondary opacity-25" style="height: 22px;"></div>
-
-                    <!-- 3. İnce Ayar (Özel Ölçü & Kağıt) Açılır Butonu -->
-                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 d-flex align-items-center gap-1 shadow-2xs" id="canvaBtnFineTuneToggle" onclick="CanvaStudio.toggleFineTunePanel()">
-                        <i class="bi bi-sliders text-primary"></i>
-                        <span class="fw-semibold" style="font-size: 11px;">İnce Ayar (Ölçü &amp; Kağıt)</span>
-                        <i class="bi bi-chevron-down ms-1" id="canvaFineTuneChevron" style="font-size: 9px; transition: transform 0.2s ease;"></i>
-                    </button>
                 </div>
 
                 <!-- Sağ: Canlı Net Fiyat (KDV ve Kargo Hariç) -->
@@ -1406,112 +1459,15 @@ require_once __DIR__ . '/includes/header.php';
                 </div>
             </div>
 
-            <!-- 2. Mobilde Ultra-Kompakt Baskı & Fiyat Şeridi (Tıklayınca İnce Ayar Açılır) -->
-            <div class="d-md-none bg-white border-bottom px-3 py-2 d-flex align-items-center justify-content-between shadow-2xs cursor-pointer" style="z-index: 25;" onclick="CanvaStudio.toggleFineTunePanel()">
+            <!-- 2. Mobilde Kompakt Fiyat Şeridi -->
+            <div class="d-md-none bg-white border-bottom px-3 py-2 d-flex align-items-center justify-content-between shadow-2xs" style="z-index: 25;">
                 <div class="d-flex align-items-center gap-2">
                     <span class="badge bg-primary text-white fw-bold px-2 py-1" id="mobilePkgBadge" style="font-size: 10.5px;">Standart</span>
                     <span class="text-dark fw-bold small" id="mobileQtyBadge" style="font-size: 11px;">1.000 Adet</span>
-                    <span class="text-muted" style="font-size: 10px;"><i class="bi bi-sliders text-primary me-1"></i>Ayarla <i class="bi bi-chevron-down ms-1" style="font-size: 8px;"></i></span>
                 </div>
                 <div class="text-end">
                     <span class="fw-bolder text-primary" id="mobileNetPrice" style="font-size: 13px;">0,00 ₺</span>
                     <span class="text-muted small" style="font-size: 9px; display: block; line-height: 1;">+KDV/Kargo</span>
-                </div>
-            </div>
-
-            <!-- 🛠️ AÇILIR İNCE AYAR ÇEKMECESİ / PANELİ (CANVA İÇİ - TÜM SEÇENEKLER & FİYAT FARKLARI) -->
-            <div id="canvaStudioFineTuneDrawer" class="bg-light border-bottom p-3 shadow-sm" style="display: none; z-index: 24; max-height: 280px; overflow-y: auto;">
-                <div class="container-fluid p-0">
-                    
-                    <!-- 1. Ölçü / Ebat Seçimi -->
-                    <div class="mb-3 p-2 bg-white rounded-3 border">
-                        <label class="small fw-bold text-dark mb-1 d-block"><i class="bi bi-aspect-ratio text-primary me-1"></i> 1. Ölçü / Ebat Seçimi</label>
-                        <div class="d-flex gap-3 mb-2">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="canva_size_mode" id="canvaSizeStd" value="standard" checked onchange="CanvaStudio.onSizeModeChange('standard')">
-                                <label class="form-check-label small fw-semibold cursor-pointer" for="canvaSizeStd">
-                                    Standart Ebat (<?= $product['standard_width'] ?> x <?= $product['standard_height'] ?> cm)
-                                </label>
-                            </div>
-                            <?php if ($product['is_custom_size']): ?>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="canva_size_mode" id="canvaSizeCustom" value="custom" onchange="CanvaStudio.onSizeModeChange('custom')">
-                                    <label class="form-check-label small fw-semibold cursor-pointer text-primary" for="canvaSizeCustom">
-                                        <i class="bi bi-pencil-square me-1"></i> Özel Ölçü Gir
-                                    </label>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-
-                        <?php if ($product['is_custom_size']): ?>
-                            <div id="canvaCustomDimInputs" class="row g-2 pt-2 border-top" style="display: none;">
-                                <div class="col-6">
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-text">En (cm)</span>
-                                        <input type="number" step="0.1" id="canvaInpWidth" class="form-control" value="<?= $product['standard_width'] ?>" min="1" max="100" oninput="CanvaStudio.onDimensionChange()">
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-text">Boy (cm)</span>
-                                        <input type="number" step="0.1" id="canvaInpHeight" class="form-control" value="<?= $product['standard_height'] ?>" min="1" max="100" oninput="CanvaStudio.onDimensionChange()">
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-
-                    <!-- 2. Kağıt Türü & Gramajı -->
-                    <!-- 2. Dinamik Matbaa Varyant Grupları (Türmatsan Standartları) -->
-                    <?php if (!empty($product['variant_groups'])): ?>
-                        <?php foreach ($product['variant_groups'] as $vGroup): ?>
-                            <div class="mb-3 p-2 bg-white rounded-3 border">
-                                <label class="small fw-semibold text-dark mb-1 d-block">
-                                    <span><?= htmlspecialchars($vGroup['name']) ?></span>
-                                    <?php if (!empty($vGroup['description'])): ?>
-                                        <span class="text-muted fw-normal ms-1" style="font-size: 10px;">(<?= htmlspecialchars($vGroup['description']) ?>)</span>
-                                    <?php endif; ?>
-                                </label>
-                                <div class="segmented-grid">
-                                    <?php foreach ($vGroup['options'] as $idx => $opt): 
-                                        $suppDelta = isset($opt['supplier_cost_1000']) ? (float)$opt['supplier_cost_1000'] : 0.00;
-                                        $badgeText = '';
-                                        $badgeClass = 'text-primary';
-
-                                        if ($suppDelta > 0) {
-                                            $badgeText = '+' . number_format($suppDelta, 0, '', '.') . ' ₺';
-                                        } elseif ($suppDelta < 0) {
-                                            $badgeText = number_format($suppDelta, 0, '', '.') . ' ₺';
-                                            $badgeClass = 'text-success';
-                                        } elseif ((float)$opt['fixed_fee_try'] > 0) {
-                                            $badgeText = '+' . number_format((float)$opt['fixed_fee_try'], 0, '', '.') . ' ₺';
-                                        } elseif ((float)$opt['per_unit_fee_try'] > 0) {
-                                            $badgeText = '+' . number_format((float)$opt['per_unit_fee_try'] * 1000, 0, '', '.') . ' ₺';
-                                        } elseif ($opt['calc_type'] === 'percent' && (float)$opt['percent_fee'] > 0) {
-                                            $badgeText = '+%' . (float)$opt['percent_fee'];
-                                        } else {
-                                            $badgeText = '0 ₺';
-                                            $badgeClass = 'text-muted';
-                                        }
-                                    ?>
-                                        <div class="segmented-option">
-                                            <input type="radio" 
-                                                   name="canva_options[<?= $vGroup['id'] ?>]" 
-                                                   id="canva_vopt_<?= $opt['id'] ?>" 
-                                                   value="<?= $opt['id'] ?>" 
-                                                   <?= ($opt['is_default'] || $idx === 0) ? 'checked' : '' ?>
-                                                   onchange="CanvaStudio.onFineTuneOptionChange('options[<?= $vGroup['id'] ?>]', '<?= $opt['id'] ?>')">
-                                            <label for="canva_vopt_<?= $opt['id'] ?>" class="segmented-label bg-white">
-                                                <span class="opt-title"><?= htmlspecialchars($opt['name']) ?></span>
-                                                <span class="opt-extra <?= $badgeClass ?> fw-bold"><?= $badgeText ?></span>
-                                            </label>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-
                 </div>
             </div>
 
@@ -2621,41 +2577,124 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Online Vektörel Şablon Düzenleyici Modalı
-    document.querySelectorAll('.open-editor-btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const template = JSON.parse(this.dataset.template);
-            openCanvaStudio(template.default_svg || null);
-        });
-    });
-
-    // Sektör / Meslek Dropdown Değişimi
-    window.onIndustrySelectChange = function(slug) {
-        const select = document.getElementById('industrySelectDropdown');
-        const selectedText = select ? select.options[select.selectedIndex]?.text : '';
-        const titleEl = document.getElementById('selectedIndustryNoticeTitle');
-        if (titleEl && selectedText && slug !== 'all') {
-            titleEl.textContent = selectedText + ' İçin Şablonlar';
-        } else if (titleEl) {
-            titleEl.textContent = 'Sektöre Özel Şablonlar';
+    // 👤 Hızlı Kurumsal Kimlik & Bilgi Doldurma Sistemi
+    window.loadQuickCardProfile = function() {
+        if (!window.CanvaTemplatesEngine) return;
+        const p = window.CanvaTemplatesEngine.getProfile();
+        if (p) {
+            const setVal = (id, val) => {
+                const el = document.getElementById(id);
+                if (el && val !== undefined) el.value = val;
+            };
+            setVal('quickCardName', p.name || 'Arif Uz');
+            setVal('quickCardTitle', p.title || 'Yönetici');
+            setVal('quickCardCompany', p.company || 'TamBaskı');
+            setVal('quickCardPhone', p.phone || '0850 308 00 00');
+            setVal('quickCardMail', p.mail || 'info@tambaski.com.tr');
+            setVal('quickCardWeb', p.web || 'tambaski.com.tr');
+            setVal('quickCardAddr', p.addr || 'Topkapı Matbaacılar Sitesi Zeytinburnu / İstanbul');
         }
-        
-        let visibleCount = 0;
-        document.querySelectorAll('.template-card-wrapper').forEach(card => {
-            const cardInd = card.dataset.industry;
-            if (slug === 'all' || cardInd === slug) {
-                card.style.display = 'block';
-                visibleCount++;
-            } else {
-                card.style.display = 'none';
+    };
+
+    window.onQuickInfoInput = function() {
+        if (window._quickCardTimer) clearTimeout(window._quickCardTimer);
+        window._quickCardTimer = setTimeout(() => {
+            window.applyQuickCardInfo(false);
+        }, 400);
+    };
+
+    window.applyQuickCardInfo = function(showNotice = true) {
+        if (!window.CanvaTemplatesEngine) return;
+        const getVal = (id) => (document.getElementById(id)?.value || '').trim();
+        const profile = {
+            name: getVal('quickCardName') || 'Arif Uz',
+            title: getVal('quickCardTitle') || 'Yönetici',
+            company: getVal('quickCardCompany') || 'TamBaskı',
+            phone: getVal('quickCardPhone') || '0850 308 00 00',
+            mail: getVal('quickCardMail') || 'info@tambaski.com.tr',
+            web: getVal('quickCardWeb') || 'tambaski.com.tr',
+            addr: getVal('quickCardAddr') || 'Topkapı Matbaacılar Sitesi Zeytinburnu / İstanbul'
+        };
+        window.CanvaTemplatesEngine.setProfile(profile);
+
+        // Şablon vitrinini yeniden çiz
+        const currentInd = document.getElementById('industrySelectDropdown')?.value || 'all';
+        window.renderProductPageTemplates(currentInd);
+
+        if (showNotice) {
+            const notice = document.getElementById('quickCardStatusNotice');
+            if (notice) {
+                notice.style.display = 'block';
+                setTimeout(() => { notice.style.display = 'none'; }, 3000);
             }
+        }
+    };
+
+    window.resetToTamBaskiCorporateInfo = function() {
+        if (!window.CanvaTemplatesEngine) return;
+        window.CanvaTemplatesEngine.resetProfileToTamBaski();
+        window.loadQuickCardProfile();
+        const currentInd = document.getElementById('industrySelectDropdown')?.value || 'all';
+        window.renderProductPageTemplates(currentInd);
+        const notice = document.getElementById('quickCardStatusNotice');
+        if (notice) {
+            notice.innerHTML = '<i class="bi bi-building-check me-1"></i> TamBaskı kurumsal kimlik bilgileri (Arif Uz, Yönetici) yüklendi!';
+            notice.style.display = 'block';
+            setTimeout(() => { notice.style.display = 'none'; }, 3000);
+        }
+    };
+
+    window.renderProductPageTemplates = function(sectorSlug) {
+        const container = document.getElementById('dynamicTemplatesRow');
+        const badge = document.getElementById('productTemplatesCountBadge');
+        const noNotice = document.getElementById('noTemplatesNoticeBox');
+        if (!container || !window.CanvaTemplatesEngine) return;
+
+        sectorSlug = (sectorSlug || 'all').toLowerCase();
+        const result = window.CanvaTemplatesEngine.getTemplates(sectorSlug, '', 1, 16);
+
+        if (badge) {
+            badge.textContent = `${result.total} Şablon Mevcut`;
+        }
+
+        if (!result.items || result.items.length === 0) {
+            container.innerHTML = '';
+            if (noNotice) noNotice.style.display = 'block';
+            return;
+        }
+
+        if (noNotice) noNotice.style.display = 'none';
+
+        let html = '';
+        result.items.forEach(tpl => {
+            html += `
+                <div class="col-6 col-md-4 mb-2">
+                    <div class="card p-2 h-100 border text-center shadow-2xs hover-lift bg-white">
+                        <div class="template-preview-box mb-2" style="height: 105px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #0f172a; border-radius: 6px; cursor: pointer;" onclick="openCanvaStudioWithTemplate('${tpl.key}')">
+                            ${tpl.previewSvg}
+                        </div>
+                        <div class="small fw-bold text-truncate text-dark mb-1" style="font-size: 11.5px;" title="${tpl.title}">${tpl.title}</div>
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="badge bg-light text-muted border text-capitalize" style="font-size: 9.5px;">${tpl.sectorName || tpl.sector}</span>
+                            <span class="badge bg-success-subtle text-success" style="font-size: 9.5px;"><i class="bi bi-magic me-1"></i>Bilgileriniz Hazır</span>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-primary rounded-pill w-100 fw-bold py-1 shadow-2xs" onclick="openCanvaStudioWithTemplate('${tpl.key}')" style="font-size: 11px;">
+                            <i class="bi bi-pencil-square me-1"></i> Bu Şablonu Kullan
+                        </button>
+                    </div>
+                </div>
+            `;
         });
 
-        const noticeBox = document.getElementById('noTemplatesNoticeBox');
-        if (noticeBox) {
-            noticeBox.style.display = visibleCount === 0 ? 'block' : 'none';
-        }
+        container.innerHTML = html;
+    };
+
+    window.openCanvaStudioWithTemplate = function(templateKey) {
+        openCanvaStudio(templateKey);
+    };
+
+    window.onIndustrySelectChange = function(slug) {
+        window.renderProductPageTemplates(slug);
     };
 
     // Sektöre Göre Şablon Filtreleme
@@ -2737,10 +2776,18 @@ document.addEventListener('DOMContentLoaded', function() {
         PackageShowcase.setPackage('<?= $firstPkgKey ?>');
     }
 
+    // Hızlı Kurumsal Bilgi Kartı ve Şablonları İlk Yükleme
+    if (typeof window.loadQuickCardProfile === 'function') {
+        window.loadQuickCardProfile();
+    }
+    if (typeof window.renderProductPageTemplates === 'function') {
+        const initialInd = document.getElementById('industrySelectDropdown')?.value || 'all';
+        window.renderProductPageTemplates(initialInd);
+    }
+
     <?php if ($selectedTplId): ?>
-        const autoBtn = document.querySelector('.open-editor-btn');
-        if (autoBtn) {
-            setTimeout(() => autoBtn.click(), 400);
+        if (typeof openCanvaStudioWithTemplate === 'function') {
+            setTimeout(() => openCanvaStudioWithTemplate('<?= $selectedTplId ?>'), 400);
         }
     <?php endif; ?>
 });
