@@ -142,24 +142,100 @@ function get_category_by_slug($slug) {
     return null;
 }
 
-// Ürünleri Getirme
+// Ürün Normalize Edici (title, name, starting_price uyumluluğu)
+function normalize_product($prod) {
+    if (!$prod || !is_array($prod)) return null;
+    if (empty($prod['title']) && !empty($prod['name'])) {
+        $prod['title'] = $prod['name'];
+    }
+    if (empty($prod['name']) && !empty($prod['title'])) {
+        $prod['name'] = $prod['title'];
+    }
+    $starting_price = 0;
+    if (!empty($prod['packages'])) {
+        $prices = array_column($prod['packages'], 'price');
+        $starting_price = min($prices);
+    } elseif (!empty($prod['base_sqm_price']) && (float)$prod['base_sqm_price'] > 0) {
+        $starting_price = (float)$prod['base_sqm_price'];
+    } elseif (!empty($prod['base_setup_fee'])) {
+        $starting_price = (float)$prod['base_setup_fee'];
+    }
+    $prod['starting_price'] = $starting_price;
+    $prod['base_price'] = $starting_price;
+    return $prod;
+}
+
+// Ürünleri Getirme (Veritabanı Öncelikli)
 function get_all_products($cat_slug = null, $featured_only = false, $urgent_only = false) {
+    $db = getDB();
+    if ($db) {
+        try {
+            $sql = "SELECT p.*, c.name as category_name, c.slug as category_slug 
+                    FROM products p 
+                    LEFT JOIN categories c ON p.category_id = c.id 
+                    WHERE p.is_active = 1";
+            $params = [];
+            if ($cat_slug) {
+                $sql .= " AND c.slug = ?";
+                $params[] = $cat_slug;
+            }
+            if ($featured_only) {
+                $sql .= " AND p.is_featured = 1";
+            }
+            if ($urgent_only) {
+                $sql .= " AND p.is_urgent_available = 1";
+            }
+            $sql .= " ORDER BY p.id ASC";
+            $stmt = $db->prepare($sql);
+            $stmt->execute($params);
+            $products = $stmt->fetchAll();
+            if (!empty($products)) {
+                $normalized = [];
+                foreach ($products as $prod) {
+                    $pkgStmt = $db->prepare("SELECT * FROM product_packages WHERE product_id = ? ORDER BY sort_order ASC, quantity ASC");
+                    $pkgStmt->execute([$prod['id']]);
+                    $prod['packages'] = $pkgStmt->fetchAll();
+                    $normalized[] = normalize_product($prod);
+                }
+                return $normalized;
+            }
+        } catch (Exception $e) {}
+    }
+
     $products = get_static_products();
     $result = [];
     foreach ($products as $p) {
         if ($cat_slug && $p['category_slug'] !== $cat_slug) continue;
         if ($featured_only && empty($p['is_featured'])) continue;
         if ($urgent_only && empty($p['is_urgent_available'])) continue;
-        $result[] = $p;
+        $result[] = normalize_product($p);
     }
     return $result;
 }
 
-// Ürün Detayı Getirme (Slug ile)
+// Ürün Detayı Getirme (Slug ile - Veritabanı Öncelikli)
 function get_product_by_slug($slug) {
+    $db = getDB();
+    if ($db) {
+        try {
+            $stmt = $db->prepare("SELECT p.*, c.name as category_name, c.slug as category_slug 
+                                  FROM products p 
+                                  LEFT JOIN categories c ON p.category_id = c.id 
+                                  WHERE p.slug = ? AND p.is_active = 1");
+            $stmt->execute([$slug]);
+            $product = $stmt->fetch();
+            if ($product) {
+                $pkgStmt = $db->prepare("SELECT * FROM product_packages WHERE product_id = ? ORDER BY sort_order ASC, quantity ASC");
+                $pkgStmt->execute([$product['id']]);
+                $product['packages'] = $pkgStmt->fetchAll();
+                return normalize_product($product);
+            }
+        } catch (Exception $e) {}
+    }
+
     $products = get_static_products();
     foreach ($products as $p) {
-        if ($p['slug'] === $slug) return $p;
+        if ($p['slug'] === $slug) return normalize_product($p);
     }
     return null;
 }

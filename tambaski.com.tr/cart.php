@@ -46,11 +46,11 @@ if (isset($_GET['remove'])) {
 $cart_items = $_SESSION['cart'] ?? [
     [
         'id' => 1,
-        'name' => 'Ultra Prestij Kartvizit',
-        'package' => 'Standart (350gr Mat Selefon)',
-        'quantity' => 3000,
-        'price' => 945.00,
-        'design_code' => '#NEXUS-ARCH-2025'
+        'name' => 'Kurumsal Prestij Kartvizit (350gr Mat Kuşe + Lak)',
+        'package' => 'Standart Paket (350gr Kuşe, Çift Yön, Mat Selefon)',
+        'quantity' => 1000,
+        'price' => 650.00,
+        'design_code' => '#TB-ONLINE-CANVA'
     ]
 ];
 
@@ -59,10 +59,10 @@ foreach ($cart_items as $item) {
     $subtotal += floatval($item['price']);
 }
 $kdv = $subtotal * 0.20;
-$shipping_cost = $subtotal >= 750 ? 0.00 : 85.00;
+$shipping_cost = $subtotal >= 750 ? 0.00 : 79.90;
 $grand_total = $subtotal + $kdv + $shipping_cost;
 
-$page_title = "Sepetim | TAM BASKI STUDIO";
+$page_title = "Alışveriş Sepetim | TamBaskı";
 require_once __DIR__ . '/includes/header.php';
 ?>
 

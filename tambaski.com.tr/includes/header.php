@@ -1,6 +1,6 @@
 <?php
 /**
- * TAMBASKI.COM.TR - Ana Header Şablonu (Precision Studio Print - Tailwind & Material Design)
+ * TAMBASKI.COM.TR - Ana Header Şablonu (Modern, Doğal & Yüksek Dönüşümlü)
  */
 require_once __DIR__ . '/functions.php';
 
@@ -13,8 +13,8 @@ $flash_message = get_flash_message();
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title><?= htmlspecialchars($page_title ?? 'TAM BASKI | Endüstriyel Baskı & Kurumsal Matbaa Çözümleri') ?></title>
-    <meta name="description" content="<?= htmlspecialchars($page_desc ?? 'Heidelberg ofset kalitesi, 420+ kurumsal şablon ve anında online vektör prova imkanıyla prestijli kurumsal baskı çözümleri.') ?>">
+    <title><?= htmlspecialchars($page_title ?? 'TamBaskı – Online Matbaa, Dijital Baskı & Pleksi Kesim') ?></title>
+    <meta name="description" content="<?= htmlspecialchars($page_desc ?? 'Türkiye’nin en hızlı ve uygun fiyatlı online matbaası. Kartvizit, broşür, rulo etiket, cepli dosya, dekota ve pleksi kesim çözümleri.') ?>">
     
     <!-- Favicon & App Icons -->
     <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg?v=2">
@@ -24,7 +24,7 @@ $flash_message = get_flash_message();
     <link rel="apple-touch-icon" sizes="180x180" href="assets/img/apple-touch-icon.png?v=2">
     <link rel="icon" type="image/png" sizes="192x192" href="assets/img/icon-192.png?v=2">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0F172A">
+    <meta name="theme-color" content="#f15a24">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
 
@@ -32,8 +32,9 @@ $flash_message = get_flash_message();
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
-    <!-- Material Symbols Outlined -->
+    <!-- Material Symbols Outlined & Bootstrap Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <!-- Tailwind CSS v3 -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -42,99 +43,30 @@ $flash_message = get_flash_message();
           darkMode: "class",
           theme: {
             extend: {
-              "colors": {
-                "on-tertiary": "#ffffff",
-                "on-tertiary-fixed-variant": "#005236",
-                "error-container": "#ffdad6",
-                "surface-dim": "#d8dadc",
-                "secondary-container": "#316bf3",
-                "primary-container": "#131b2e",
-                "secondary-fixed-dim": "#b4c5ff",
-                "tertiary-fixed-dim": "#4edea3",
-                "surface-container-high": "#e6e8ea",
-                "on-secondary-container": "#fefcff",
-                "on-primary-fixed": "#131b2e",
-                "surface": "#f7f9fb",
-                "tertiary-fixed": "#6ffbbe",
-                "surface-bright": "#f7f9fb",
-                "secondary": "#0051d5",
-                "on-error-container": "#93000a",
-                "outline-variant": "#c6c6cd",
-                "tertiary": "#000000",
-                "inverse-surface": "#2d3133",
-                "on-secondary-fixed": "#00174b",
-                "primary-fixed-dim": "#bec6e0",
-                "surface-container-highest": "#e0e3e5",
-                "on-secondary-fixed-variant": "#003ea8",
-                "on-surface-variant": "#45464d",
-                "primary-fixed": "#dae2fd",
-                "on-primary-container": "#7c839b",
-                "on-tertiary-container": "#009668",
-                "primary": "#000000",
-                "on-error": "#ffffff",
-                "on-primary": "#ffffff",
-                "surface-container-low": "#f2f4f6",
-                "secondary-fixed": "#dbe1ff",
-                "tertiary-container": "#002113",
-                "on-surface": "#191c1e",
-                "error": "#ba1a1a",
-                "on-secondary": "#ffffff",
-                "on-background": "#191c1e",
-                "surface-container": "#eceef0",
-                "surface-variant": "#e0e3e5",
-                "outline": "#76777d",
-                "background": "#f7f9fb",
-                "on-tertiary-fixed": "#002113",
-                "on-primary-fixed-variant": "#3f465c",
-                "inverse-on-surface": "#eff1f3",
-                "surface-tint": "#565e74",
-                "surface-container-lowest": "#ffffff",
-                "inverse-primary": "#bec6e0"
+              colors: {
+                brand: {
+                  DEFAULT: "#f15a24",
+                  50: "#fff7ed",
+                  100: "#ffedd5",
+                  200: "#fed7aa",
+                  300: "#fdba74",
+                  400: "#fb923c",
+                  500: "#f15a24",
+                  600: "#ea580c",
+                  700: "#c2410c",
+                  800: "#9a3412",
+                  900: "#7c2d12",
+                },
+                primary: "#0f172a",
+                secondary: "#2563eb",
+                surface: "#f8fafc",
+                "surface-card": "#ffffff",
+                "surface-muted": "#f1f5f9",
+                border: "#e2e8f0"
               },
-              "borderRadius": {
-                "DEFAULT": "0.25rem",
-                "lg": "0.5rem",
-                "xl": "0.75rem",
-                "2xl": "1rem",
-                "full": "9999px"
-              },
-              "spacing": {
-                "space-lg": "1.5rem",
-                "space-sm": "0.5rem",
-                "space-xl": "2.5rem",
-                "space-xs": "0.25rem",
-                "gutter": "1.5rem",
-                "space-md": "1rem",
-                "margin-mobile": "1rem",
-                "margin": "3rem",
-                "gutter-mobile": "0.75rem"
-              },
-              "fontFamily": {
-                "sans": ["Inter", "sans-serif"],
-                "headline-lg-mobile": ["Inter"],
-                "body-lg": ["Inter"],
-                "body-sm": ["Inter"],
-                "body-md": ["Inter"],
-                "headline-sm": ["Inter"],
-                "headline-md": ["Inter"],
-                "headline-lg": ["Inter"],
-                "label-numeric": ["JetBrains Mono", "monospace"],
-                "display-hero-mobile": ["Inter"],
-                "label-caps": ["Inter"],
-                "display-hero": ["Inter"]
-              },
-              "fontSize": {
-                "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
-                "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
-                "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
-                "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.005em", "fontWeight": "400" }],
-                "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
-                "label-numeric": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500" }],
-                "display-hero": ["56px", { "lineHeight": "64px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
-                "display-hero-mobile": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "600" }],
-                "label-caps": ["11px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "600" }],
-                "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
-                "headline-lg-mobile": ["26px", { "lineHeight": "34px", "letterSpacing": "-0.015em", "fontWeight": "600" }]
+              fontFamily: {
+                sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
+                mono: ["JetBrains Mono", "monospace"]
               }
             }
           }
@@ -148,108 +80,119 @@ $flash_message = get_flash_message();
           line-height: 1;
         }
         .frosted-glass {
-          background: rgba(255, 255, 255, 0.85);
-          backdrop-filter: blur(16px) saturate(180%);
-          border: 1px solid rgba(255, 255, 255, 0.6);
+          background: rgba(255, 255, 255, 0.88);
+          backdrop-filter: blur(16px);
+          border: 1px solid rgba(226, 232, 240, 0.8);
         }
-        .subtle-grid {
-          background-size: 32px 32px;
-          background-image: 
-            linear-gradient(to right, rgba(15, 23, 42, 0.03) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
+        .gold-foil-text {
+          background: linear-gradient(135deg, #d4af37 0%, #fff2b2 45%, #aa771c 70%, #ffd700 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
         }
+        .perspective-stage { perspective: 1200px; }
+        .tilt-card { transform-style: preserve-3d; transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.4, 1); }
     </style>
 </head>
-<body class="bg-background text-on-surface antialiased selection:bg-secondary-fixed-dim selection:text-primary min-h-screen flex flex-col font-sans">
+<body class="bg-[#f8fafc] text-slate-800 antialiased min-h-screen flex flex-col font-sans">
 
 <!-- ================= TOP ANNOUNCEMENT BAR ================= -->
-<div class="bg-primary-container text-on-primary py-1.5 px-4 text-xs border-b border-slate-800">
+<div class="bg-slate-900 text-slate-200 py-1.5 px-4 text-xs border-b border-slate-800">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
         <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span class="font-medium">🚀 <strong>750 ₺ ve Üzeri Siparişlerde</strong> Kargo Ücretsiz!</span>
-            <span class="hidden md:inline text-slate-400">• Heidelberg XL 10-Color Press Live</span>
+            <span class="font-medium text-white">🚀 <strong>750 ₺ ve Üzeri Siparişlerde Kargo Bedava!</strong></span>
+            <span class="hidden md:inline text-slate-400">• Aynı Gün Üretim &amp; Ücretsiz Tasarım Kontrolü</span>
         </div>
-        <div class="flex items-center gap-4 text-[11px] font-label-numeric text-slate-300">
-            <a href="dealer_apply.php" class="hover:text-white transition-colors flex items-center gap-1">
-                <span class="material-symbols-outlined text-[14px]">badge</span> E-Bayi %25 İndirim
+        <div class="flex items-center gap-4 text-[11px] font-mono text-slate-300">
+            <a href="https://wa.me/905440000000" target="_blank" class="hover:text-emerald-400 transition-colors flex items-center gap-1 font-sans">
+                <span class="material-symbols-outlined text-[14px] text-emerald-400">chat</span> WhatsApp Sipariş: 0544 000 00 00
             </a>
-            <span class="text-slate-600">|</span>
-            <a href="tel:08503080000" class="hover:text-white transition-colors flex items-center gap-1">
+            <span class="text-slate-700 hidden sm:inline">|</span>
+            <a href="dealer_apply.php" class="hover:text-brand-300 transition-colors hidden sm:flex items-center gap-1 font-sans">
+                <span class="material-symbols-outlined text-[14px] text-amber-400">badge</span> E-Bayi %25 İndirim
+            </a>
+            <span class="text-slate-700 hidden md:inline">|</span>
+            <a href="tel:08503080000" class="hover:text-white transition-colors hidden md:flex items-center gap-1 font-sans">
                 <span class="material-symbols-outlined text-[14px]">call</span> 0850 308 00 00
             </a>
         </div>
     </div>
 </div>
 
-<!-- ================= TOP NAVBAR (SHARED COMPONENT) ================= -->
-<header class="bg-surface-container-lowest border-b border-outline-variant shadow-xs top-0 sticky z-40 transition-all duration-150 ease-out">
+<!-- ================= MAIN NAVBAR ================= -->
+<header class="bg-white border-b border-slate-200 shadow-xs top-0 sticky z-40">
     <div class="flex justify-between items-center w-full px-4 sm:px-6 py-3 max-w-7xl mx-auto">
         <!-- Brand & Search Bar -->
         <div class="flex items-center gap-6">
-            <a class="flex items-center gap-2 group py-1" href="index.php" title="TamBaskı Online Matbaa">
+            <a class="flex items-center gap-2 group py-1 shrink-0" href="index.php" title="TamBaskı Online Matbaa">
                 <img src="assets/img/logo.svg?v=2" alt="TamBaskı" class="h-8 sm:h-9 w-auto">
             </a>
+            
             <!-- Search Bar Input -->
-            <form action="category.php" method="GET" class="hidden lg:flex items-center relative">
-                <span class="material-symbols-outlined absolute left-3 text-outline text-body-lg pointer-events-none">search</span>
-                <input name="q" value="<?= htmlspecialchars($_GET['q'] ?? '') ?>" class="pl-9 pr-12 py-1.5 bg-surface-container-low text-body-sm font-body-sm rounded-lg border border-outline-variant focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary w-64 transition-all" placeholder="Ürün, gramaj veya ICC kodu ara..." type="text"/>
-                <span class="absolute right-2.5 px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-numeric text-[10px]">⌘K</span>
+            <form action="category.php" method="GET" class="hidden md:flex items-center relative w-72 lg:w-96">
+                <span class="material-symbols-outlined absolute left-3 text-slate-400 text-lg pointer-events-none">search</span>
+                <input name="q" value="<?= htmlspecialchars($_GET['q'] ?? '') ?>" class="pl-9 pr-12 py-2 bg-slate-50 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-500/20 w-full transition-all" placeholder="Kartvizit, broşür, rulo etiket, pleksi ara..." type="text"/>
+                <button type="submit" class="absolute right-2 px-2 py-1 rounded bg-slate-200 hover:bg-brand-500 hover:text-white text-slate-600 text-[10px] font-bold transition-all">Ara</button>
             </form>
         </div>
 
         <!-- Navigation Links -->
-        <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
-            <a class="text-secondary font-semibold border-b-2 border-secondary pb-1 tracking-wider" href="index.php#products">Ürünler</a>
-            <a class="text-on-surface-variant hover:text-primary transition-colors tracking-wider flex items-center gap-1" href="product.php?slug=ekonomik-kartvizit-250gr">
-                <span class="material-symbols-outlined text-[16px] text-secondary">brush</span>
-                <span>Custom Studio</span>
-            </a>
-            <a class="text-on-surface-variant hover:text-primary transition-colors tracking-wider" href="category.php?slug=kartvizit">Kartvizit</a>
-            <a class="text-on-surface-variant hover:text-primary transition-colors tracking-wider" href="category.php?slug=el-ilani-brosur">Broşür</a>
-            <a class="text-on-surface-variant hover:text-primary transition-colors tracking-wider" href="category.php?slug=dekota-pleksi-kesim">Dekota &amp; Pleksi</a>
-            <a class="text-on-surface-variant hover:text-primary transition-colors tracking-wider" href="index.php#paper-stocks">Kağıtlar</a>
+        <nav class="hidden xl:flex items-center gap-6 text-xs font-semibold text-slate-700">
+            <a class="hover:text-brand-600 transition-colors py-1" href="category.php?slug=kartvizit">Kartvizit</a>
+            <a class="hover:text-brand-600 transition-colors py-1" href="category.php?slug=el-ilani-brosur">Broşür &amp; El İlanı</a>
+            <a class="hover:text-brand-600 transition-colors py-1" href="category.php?slug=kurumsal-urunler">Cepli Dosya &amp; Zarf</a>
+            <a class="hover:text-brand-600 transition-colors py-1" href="category.php?slug=dekota-pleksi-kesim">Dekota &amp; Pleksi Kesim</a>
+            <a class="hover:text-brand-600 transition-colors py-1" href="category.php?slug=etiket-sticker">Etiket &amp; Sticker</a>
+            <a class="hover:text-brand-600 transition-colors py-1" href="category.php?slug=promosyon-hediyelik">Promosyon</a>
         </nav>
 
         <!-- Trailing Action Hub -->
         <div class="flex items-center gap-3">
-            <a class="hidden sm:inline-flex items-center text-xs font-semibold text-on-surface hover:text-secondary px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-lowest transition-all" href="index.php#sample-kit">
-                Numune Kiti
-            </a>
-            <a class="inline-flex items-center gap-1.5 bg-primary text-on-primary text-xs font-semibold px-3.5 py-1.5 rounded-lg shadow-sm hover:bg-slate-800 transition-all active:scale-95" href="product.php?slug=ekonomik-kartvizit-250gr">
-                <span class="material-symbols-outlined text-[16px] text-amber-300">magic_button</span>
-                <span>Stüdyoyu Aç</span>
+            <a class="inline-flex items-center gap-1.5 bg-gradient-to-r from-brand-500 to-brand-600 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-xs hover:from-brand-600 hover:to-brand-700 transition-all active:scale-95" href="product.php?slug=ekonomik-kartvizit-250gr">
+                <span class="material-symbols-outlined text-[16px]">draw</span>
+                <span>Kendin Tasarla</span>
             </a>
 
-            <!-- Trailing Icons -->
-            <div class="flex items-center border-l border-outline-variant pl-3 ml-1 gap-1.5 text-on-surface-variant">
-                <a href="cart.php" class="p-1.5 hover:text-primary hover:bg-surface-container rounded-lg transition-colors relative" title="Sepet">
-                    <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
-                    <?php if ($cart_count > 0): ?>
-                        <span class="absolute -top-1 -right-1 w-4 h-4 bg-secondary text-white text-[10px] font-bold rounded-full flex items-center justify-center"><?= $cart_count ?></span>
-                    <?php endif; ?>
-                </a>
-                <a href="order_tracking.php" class="p-1.5 hover:text-primary hover:bg-surface-container rounded-lg transition-colors" title="Sipariş & Kargo Takibi">
+            <!-- Action Icons -->
+            <div class="flex items-center border-l border-slate-200 pl-3 gap-1.5 text-slate-600">
+                <a href="order_tracking.php" class="p-2 hover:text-brand-600 hover:bg-slate-100 rounded-xl transition-colors" title="Kargo ve Sipariş Takibi">
                     <span class="material-symbols-outlined text-[20px]">local_shipping</span>
                 </a>
+                
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="account.php" class="p-1.5 text-emerald-600 hover:bg-surface-container rounded-lg transition-colors" title="Hesabım">
+                    <a href="account.php" class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-xl transition-colors" title="Hesabım">
                         <span class="material-symbols-outlined text-[20px]">account_circle</span>
                     </a>
                 <?php else: ?>
-                    <a href="login.php" class="p-1.5 hover:text-primary hover:bg-surface-container rounded-lg transition-colors" title="Giriş Yap">
+                    <a href="login.php" class="p-2 hover:text-brand-600 hover:bg-slate-100 rounded-xl transition-colors" title="Giriş Yap">
                         <span class="material-symbols-outlined text-[20px]">person</span>
                     </a>
                 <?php endif; ?>
+
+                <a href="cart.php" class="p-2 hover:text-brand-600 hover:bg-slate-100 rounded-xl transition-colors relative" title="Sepetim">
+                    <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+                    <?php if ($cart_count > 0): ?>
+                        <span class="absolute 0 top-0.5 right-0.5 w-4 h-4 bg-brand-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center"><?= $cart_count ?></span>
+                    <?php endif; ?>
+                </a>
             </div>
         </div>
+    </div>
+
+    <!-- Mobile Subbar Navigation -->
+    <div class="xl:hidden bg-slate-50 border-t border-slate-200 px-4 py-2 overflow-x-auto scrollbar-none flex items-center gap-2 text-xs">
+        <a href="category.php?slug=kartvizit" class="px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-700 whitespace-nowrap hover:border-brand-500 font-medium">Kartvizit</a>
+        <a href="category.php?slug=el-ilani-brosur" class="px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-700 whitespace-nowrap hover:border-brand-500 font-medium">Broşür &amp; El İlanı</a>
+        <a href="category.php?slug=dekota-pleksi-kesim" class="px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-700 whitespace-nowrap hover:border-brand-500 font-medium">Dekota &amp; Pleksi</a>
+        <a href="category.php?slug=etiket-sticker" class="px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-700 whitespace-nowrap hover:border-brand-500 font-medium">Etiket &amp; Sticker</a>
+        <a href="category.php?slug=kurumsal-urunler" class="px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-700 whitespace-nowrap hover:border-brand-500 font-medium">Cepli Dosya &amp; Zarf</a>
     </div>
 </header>
 
 <?php if ($flash_message): ?>
-    <div class="max-w-7xl mx-auto px-6 mt-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 mt-4">
         <div class="p-4 rounded-xl border <?= $flash_message['type'] === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-red-50 border-red-200 text-red-800' ?> flex items-center justify-between shadow-xs">
-            <div class="flex items-center gap-2 text-sm font-medium">
+            <div class="flex items-center gap-2 text-xs sm:text-sm font-medium">
                 <span class="material-symbols-outlined text-[20px]"><?= $flash_message['type'] === 'success' ? 'check_circle' : 'error' ?></span>
                 <span><?= htmlspecialchars($flash_message['text']) ?></span>
             </div>

@@ -6,5 +6,5 @@
 | **Memo** | - | - | - | 🟢 [BOŞTA] |
 
 ---
-- **Son Eşitleme:** 2026-09-28 21:03
-- **Durum:** ✅ Yeni Stitch Precision Studio Print tasarımı tüm sayfalara (Header, Footer, Anasayfa, PDP, Studio, Sepet, Ödeme) 1:1 birebir uygulandı ve canlı cPanel sunucusuna deploy edildi.
+- **Son Eşitleme:** 2026-09-28 21:52
+- **Durum:** ✅ Sitedeki tüm veritabanı, başlık ve tasarım hataları giderildi. Yapay zeka soğukluğu kaldırılarak doğal Türk matbaa e-ticaret dili (`#f15a24` TamBaskı turuncusu, net paketler, gerçek tiraj fiyatlandırması) uygulandı. Meslek/sektör seçimi, tek tıkla Canva stüdyo ve kurumsal/bireysel checkout canlıya alındı.

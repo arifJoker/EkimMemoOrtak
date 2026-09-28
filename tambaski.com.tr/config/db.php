@@ -7,12 +7,22 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$db_host = getenv('DB_HOST') ?: '127.0.0.1';
-$db_name = getenv('DB_NAME') ?: 'tambaski_db';
-$db_user = getenv('DB_USER') ?: 'root';
-$db_pass = getenv('DB_PASS') ?: '';
-$db_charset = 'utf8mb4';
+// cPanel ve Yerel Otomatik Algılama
+$is_cpanel = file_exists('/home/arifuzco');
 
+if ($is_cpanel) {
+    $db_host = 'localhost';
+    $db_name = 'arifuzco_tambaski';
+    $db_user = 'arifuzco_tambaski';
+    $db_pass = 'TamBaski2026!Secure';
+} else {
+    $db_host = getenv('DB_HOST') ?: '127.0.0.1';
+    $db_name = getenv('DB_NAME') ?: 'tambaski_db';
+    $db_user = getenv('DB_USER') ?: 'root';
+    $db_pass = getenv('DB_PASS') ?: '';
+}
+
+$db_charset = 'utf8mb4';
 $dsn = "mysql:host=$db_host;dbname=$db_name;charset=$db_charset";
 $options = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
@@ -23,7 +33,6 @@ $options = [
 try {
     $pdo = new PDO($dsn, $db_user, $db_pass, $options);
 } catch (PDOException $e) {
-    // Veritabanı henüz sunucuda oluşturulmamışsa veya yerel test modundaysa SQLite veya mock fallback sağlanabilir
     $pdo = null;
     $db_error = $e->getMessage();
 }
