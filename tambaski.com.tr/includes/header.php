@@ -16,8 +16,13 @@ $flash_message = get_flash_message();
     <title><?= htmlspecialchars($page_title ?? 'TAM BASKI | Endüstriyel Baskı & Kurumsal Matbaa Çözümleri') ?></title>
     <meta name="description" content="<?= htmlspecialchars($page_desc ?? 'Heidelberg ofset kalitesi, 420+ kurumsal şablon ve anında online vektör prova imkanıyla prestijli kurumsal baskı çözümleri.') ?>">
     
-    <!-- Favicon & PWA -->
-    <link rel="icon" type="image/svg+xml" href="assets/img/logo.svg">
+    <!-- Favicon & App Icons -->
+    <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg?v=2">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32x32.png?v=2">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16x16.png?v=2">
+    <link rel="shortcut icon" href="assets/img/favicon.ico?v=2">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/img/apple-touch-icon.png?v=2">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/img/icon-192.png?v=2">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0F172A">
     <meta name="mobile-web-app-capable" content="yes">
@@ -182,10 +187,8 @@ $flash_message = get_flash_message();
     <div class="flex justify-between items-center w-full px-4 sm:px-6 py-3 max-w-7xl mx-auto">
         <!-- Brand & Search Bar -->
         <div class="flex items-center gap-6">
-            <a class="text-headline-sm font-semibold tracking-tight text-primary flex items-center gap-2 group" href="index.php">
-                <span class="w-8 h-8 rounded-lg bg-primary-container text-on-primary flex items-center justify-center font-label-numeric text-sm font-bold border border-outline-variant shadow-sm">TB</span>
-                <span class="font-extrabold tracking-tight">TAM BASKI</span>
-                <span class="hidden sm:inline bg-surface-container-high text-on-surface-variant text-[10px] font-semibold px-2 py-0.5 rounded tracking-wider uppercase border border-outline-variant">STUDIO</span>
+            <a class="flex items-center gap-2 group py-1" href="index.php" title="TamBaskı Online Matbaa">
+                <img src="assets/img/logo.svg?v=2" alt="TamBaskı" class="h-8 sm:h-9 w-auto">
             </a>
             <!-- Search Bar Input -->
             <form action="category.php" method="GET" class="hidden lg:flex items-center relative">

@@ -14,9 +14,10 @@ $tempZip = Join-Path $PSScriptRoot "deploy.zip"
 
 Write-Host "🚀 $ProjectName canlı sunucuya deploy ediliyor..." -ForegroundColor Cyan
 
-# 1. Zip oluştur
+# 1. Zip oluştur (.NET ZipFile ile standart formatta)
 if (Test-Path $tempZip) { Remove-Item $tempZip -Force }
-Compress-Archive -Path "$localDir\*" -DestinationPath $tempZip -Force
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+[System.IO.Compression.ZipFile]::CreateFromDirectory($localDir, $tempZip)
 
 # 2. cPanel'e Zip yükle
 Write-Host "📤 Zip paketi sunucuya yükleniyor..." -ForegroundColor Gray

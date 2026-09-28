@@ -8,9 +8,8 @@
     <div class="w-full px-6 py-12 max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
         <!-- Brand & Technical Specs -->
         <div class="flex flex-col md:flex-row items-center gap-4 text-center md:text-left">
-            <a class="text-headline-sm font-semibold text-primary tracking-tight flex items-center gap-2" href="index.php">
-                <span class="w-7 h-7 rounded bg-primary text-on-primary flex items-center justify-center font-label-numeric text-xs font-bold">TB</span>
-                <span>TAM BASKI STUDIO</span>
+            <a class="flex items-center gap-2 group" href="index.php" title="TamBaskı Online Matbaa">
+                <img src="assets/img/logo.svg?v=2" alt="TamBaskı" class="h-7 w-auto">
             </a>
             <span class="hidden md:inline text-outline-variant">|</span>
             <p class="text-xs text-on-surface-variant">
