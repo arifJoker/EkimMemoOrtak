@@ -10,34 +10,29 @@ $cpanelToken = "ZTI4T342FVZFFMRHVWL9MHBJEWZ3W58R"
 $authHeader = "cpanel ${cpanelUser}:${cpanelToken}"
 $targetDir = "/home/arifuzco/$ProjectName"
 $localDir = Join-Path $PSScriptRoot "..\$ProjectName"
+$tempZip = Join-Path $PSScriptRoot "..\temp_deploy.zip"
 
-Write-Host "🚀 $ProjectName cPanel'e canlıya yükleniyor..." -ForegroundColor Cyan
+Write-Host "🚀 $ProjectName canlı sunucuya deploy ediliyor..." -ForegroundColor Cyan
 
-# Find files to upload (excluding markdown docs and git files)
-$files = Get-ChildItem -Path $localDir -Recurse -File | Where-Object {
-    $_.FullName -notmatch '\.git' -and 
-    $_.Name -ne 'PROJECT_STATE.md' -and 
-    $_.Name -ne 'ACTIVITY_LOG.md' -and 
-    $_.Name -ne 'ARCHITECTURE.md' -and 
-    $_.Name -ne 'TECHNICAL_DOC.md'
-}
+# 1. Zip oluştur
+if (Test-Path $tempZip) { Remove-Item $tempZip -Force }
+Compress-Archive -Path "$localDir\*" -DestinationPath $tempZip -Force
 
-if ($files.Count -eq 0) {
-    Write-Host "ℹ️ Yüklenecek kod dosyası bulunamadı." -ForegroundColor Yellow
-    exit 0
-}
+# 2. cPanel'e Zip yükle
+Write-Host "📤 Zip paketi sunucuya yükleniyor..." -ForegroundColor Gray
+$uploadUrl = "https://$cpanelHost/execute/Fileman/upload_files"
+$uploadRes = curl.exe -s -k -H "Authorization: $authHeader" -F "dir=$targetDir" -F "file-1=@$tempZip;filename=deploy.zip" -F "overwrite=1" $uploadUrl
 
-foreach ($file in $files) {
-    $relativePath = $file.FullName.Substring($localDir.Length).TrimStart('\', '/')
-    $destSubDir = Split-Path -Path "$targetDir/$relativePath" -Parent
-    $destSubDir = $destSubDir.Replace('\', '/')
+# 3. Zip dosyasını sunucuda aç (Extract)
+Write-Host "📦 Sunucuda arşiv açılıyor (Extract)..." -ForegroundColor Gray
+$extractUrl = "https://$cpanelHost/json-api/cpanel?cpanel_jsonapi_user=$cpanelUser&cpanel_jsonapi_apiversion=2&cpanel_jsonapi_module=Fileman&cpanel_jsonapi_func=fileop&op=extract&sourcefiles=$targetDir/deploy.zip&destfiles=$targetDir&dir=$targetDir"
+$extractRes = curl.exe -s -k -H "Authorization: $authHeader" $extractUrl
 
-    Write-Host "📤 Yükleniyor: $relativePath -> $destSubDir" -ForegroundColor Gray
-    
-    # Upload via cPanel UAPI Fileman::upload_files
-    $uploadUrl = "https://$cpanelHost/execute/Fileman/upload_files"
-    
-    curl.exe -s -k -H "Authorization: $authHeader" -F "dir=$destSubDir" -F "file-1=@$($file.FullName);filename=$($file.Name)" -F "overwrite=1" $uploadUrl | Out-Null
-}
+# 4. Sunucudaki geçici deploy.zip dosyasını temizle
+$deleteUrl = "https://$cpanelHost/json-api/cpanel?cpanel_jsonapi_user=$cpanelUser&cpanel_jsonapi_apiversion=2&cpanel_jsonapi_module=Fileman&cpanel_jsonapi_func=fileop&op=unlink&sourcefiles=$targetDir/deploy.zip&dir=$targetDir"
+curl.exe -s -k -H "Authorization: $authHeader" $deleteUrl | Out-Null
 
-Write-Host "✅ $ProjectName başarıyla cPanel'e yüklendi!" -ForegroundColor Green
+# 5. Yerel zip'i temizle
+if (Test-Path $tempZip) { Remove-Item $tempZip -Force }
+
+Write-Host "✅ $ProjectName başarıyla canlı sunucuya aktarıldı ve yayınlandı!" -ForegroundColor Green
