@@ -12,19 +12,22 @@ Bu kural, `EkimMemoOrtak` altındaki her iki proje (`tambaski.com.tr` ve `bykcut
 
 ---
 
-## 🚀 YENİ SOHBET BAŞLANGIÇ PROTOKOLÜ (ZORUNLU 📌)
+## 🚀 YENİ SOHBET BAŞLANGIÇ & İNCELEME PROTOKOLÜ (ZORUNLU 📌)
 
-Kullanıcı yeni bir sohbet başlattığında veya projeyle ilgili ilk mesajı attığında:
+Kullanıcı yeni bir sohbet başlattığında veya **"projeyi incele / bi incele / durum nedir"** dediğinde:
 
-1. **Proje Seçimi Sorulacak:**
-   - *"Hangi proje üzerinde çalışacağız?"*
-     1. **`tambaski.com.tr`**
-     2. **`bykcut.com.tr`**
+1. **Proje Tespiti / Seçimi:**
+   - Kullanıcı belirtmediyse sor: *"Hangi proje üzerinde çalışacağız? (1: tambaski.com.tr, 2: bykcut.com.tr)"*
+   - Kullanıcı belirttiğinde (veya tek proje seçildiğinde) o projenin kök dizinine odaklan.
 
-2. **Son 5 İşlem & Durum Raporu:**
-   - Kullanıcı projeyi seçtiğinde (veya mesajında belirttiyse), ilgili projenin `ACTIVITY_LOG.md` dosyasını oku.
-   - **En son yapılan 5 işlemi** madde madde kullanıcıya göster (Tarih, Geliştirici, Yapılan İşlem).
-   - `PROJECT_STATE.md` dosyasındaki kilit durumunu kontrol edip bildir (Kilit boşta mı, dolu mu?).
+2. **Tam Sistem Taraması ve Özet Çıkarma (İncele Komutu):**
+   - `ARCHITECTURE.md` şemasını oku ➔ Sistemin görsel mimarisini, sayfalarını ve veri akışını açıkla.
+   - `TECHNICAL_DOC.md` dosyasını oku ➔ Hangi dosyanın ne iş yaptığını ve modülleri kavra.
+   - `ACTIVITY_LOG.md` dosyasını oku ➔ **En son yapılan 5 işlemi** (Tarih, Yapan, Detay) listele.
+   - `PROJECT_STATE.md` dosyasını oku ➔ Kilit durumunu bildir (Çakışma var mı?).
+
+3. **Kullanıcıya Sunum:**
+   - Projenin güncel durumunu, son yapılanları ve sıradaki adımları net, düzenli bir özet olarak kullanıcıya sun ve *"Ne yapmak istersiniz?"* diye sor.
 
 ---
 
