@@ -1401,6 +1401,65 @@ const CanvaStudio = {
         this.renderTemplatesSidebar(false);
     },
 
+    loadTemplateById: function(templateId) {
+        if (!window.CanvaTemplatesEngine) return;
+        const tpl = window.CanvaTemplatesEngine.templates.find(t => t.id === templateId);
+        if (!tpl) return;
+
+        this.canvas.clear();
+        if (tpl.bg) {
+            this.setBackgroundColor(tpl.bg);
+        }
+
+        if (tpl.elements && tpl.elements.length > 0) {
+            tpl.elements.forEach(el => {
+                if (el.type === 'rect') {
+                    const rect = new fabric.Rect({
+                        left: el.left,
+                        top: el.top,
+                        width: el.width,
+                        height: el.height,
+                        rx: el.rx || 0,
+                        ry: el.ry || 0,
+                        fill: el.fill,
+                        stroke: el.stroke || null,
+                        strokeWidth: el.strokeWidth || 0
+                    });
+                    this.canvas.add(rect);
+                } else if (el.type === 'circle') {
+                    const circle = new fabric.Circle({
+                        left: el.left,
+                        top: el.top,
+                        radius: el.radius,
+                        fill: el.fill
+                    });
+                    this.canvas.add(circle);
+                } else if (el.type === 'line') {
+                    const line = new fabric.Line([el.x1, el.y1, el.x2, el.y2], {
+                        stroke: el.stroke || '#e2e8f0',
+                        strokeWidth: el.strokeWidth || 2
+                    });
+                    this.canvas.add(line);
+                } else if (el.type === 'i-text') {
+                    const text = new fabric.IText(el.text, {
+                        left: el.left,
+                        top: el.top,
+                        fill: el.fill,
+                        fontSize: el.fontSize,
+                        fontWeight: el.fontWeight || 'normal',
+                        fontFamily: el.fontFamily || 'Inter',
+                        originX: el.originX || 'left',
+                        lineHeight: el.lineHeight || 1.2
+                    });
+                    this.canvas.add(text);
+                }
+            });
+        }
+        this.drawGuides();
+        this.canvas.renderAll();
+        this.saveState();
+    },
+
     addHeading: function() {
         if (window.innerWidth < 768) this.closeMobileDrawer();
         const text = new fabric.IText('BÜYÜK BAŞLIK', {
