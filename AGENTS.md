@@ -1,5 +1,7 @@
 # 🤖 AI ORTAK ÇALIŞMA KILAVUZU (AGENTS & CURSOR RULES)
 
+> 🔒 **GÜVENLİK VE İZOLASYON KURALI:** Bu çalışma alanında ve sunucuda **SADECE** `tambaski.com.tr` ve `bykcut.com.tr` klasörlerine erişim izni vardır. Sunucudaki veya yereldeki diğer hiçbir siteye, üst dizine veya özel dosyalara kesinlikle erişilemez / değiştirilemez.
+
 Herhangi bir AI asistanı (Antigravity, Cursor, Claude, Windsurf vb.) bu repoda çalışırken aşağıdaki kurallara kesinlikle uymalıdır:
 
 1. **Sohbet Başlangıcı:**

@@ -4,6 +4,14 @@ Bu kural, `EkimMemoOrtak` altındaki her iki proje (`tambaski.com.tr` ve `bykcut
 
 ---
 
+## 🔒 KESİNLİKLE UYULACAK GÜVENLİK VE İZOLASYON KURALLARI
+
+1. **Sadece 2 Proje Yetkisi:** Bu depoda ve sunucuda **YALNIZCA** `tambaski.com.tr` ve `bykcut.com.tr` klasörleri üzerinde çalışılabilir.
+2. **Dış Dizin Koruması:** Sunucudaki veya yereldeki diğer hiçbir siteye, üst dizine (`/home/arifuzco` altındaki diğer siteler: örn. gezisoft, cafe, erp vb.) veya özel dosyalara **kesinlikle erişilmeyecek, okunmayacak ve değiştirilmeyecektir.**
+3. **İzolasyon Garantisi:** Yapılan tüm işlemler, kilitler, şemalar ve cPanel yüklemeleri sadece bu iki projenin kendi sınırları içinde gerçekleşir.
+
+---
+
 ## 🚀 YENİ SOHBET BAŞLANGIÇ PROTOKOLÜ (ZORUNLU 📌)
 
 Kullanıcı yeni bir sohbet başlattığında veya projeyle ilgili ilk mesajı attığında:
