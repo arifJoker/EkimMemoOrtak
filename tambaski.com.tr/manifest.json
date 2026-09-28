@@ -1,0 +1,19 @@
+{
+  "name": "TamBaskı – Online Matbaa & Kesim Merkezi",
+  "short_name": "TamBaskı",
+  "description": "Türkiye'nin En Hızlı Online Matbaa, Dekota / Pleksi Kesim ve Promosyon Platformu",
+  "start_url": "index.php",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1d1d1f",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "assets/img/logo.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["shopping", "business", "utilities"]
+}

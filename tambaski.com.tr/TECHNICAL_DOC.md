@@ -3,6 +3,8 @@
 ## 1. Proje Özeti
 - **Alan Adı:** `tambaski.com.tr`
 - **Tasarım Dili:** Apple Clean UI / Bootstrap 5 / Modern Dark Header
+- **Mobil Deneyim:** PWA (Progressive Web App - Service Worker + Manifest)
+- **Tasarım Motoru:** Fabric.js Canlı Vektörel Editör + 3D Perspektif Mockup Önizleme
 - **Tür:** E-Ticaret / Online Matbaa, Dekota & Pleksi Kesim, Folyo, Branda ve Promosyon Platformu
 
 ## 2. Dizin ve Dosya Yapısı
@@ -12,7 +14,7 @@ tambaski.com.tr/
 │   ├── app.php                # Site sabitleri, kargo limitleri, flash mesajlar
 │   └── db.php                 # PDO MySQL bağlantısı ve ayarları
 ├── includes/
-│   ├── header.php             # Modern Apple header, kategori dropdown, arama, sepet rozeti
+│   ├── header.php             # Modern Apple header, PWA meta etiketleri, kategori menüsü, sepet rozeti
 │   ├── footer.php             # Footer bağlantıları, iletişim, kargo & ödeme ikonları
 │   └── functions.php          # Hibrit Fiyat Motoru (Paket, Özel Adet, m² Hesaplama), sepet ve veri yardımcıları
 ├── assets/
@@ -27,16 +29,24 @@ tambaski.com.tr/
 │   └── seed.sql               # Geniş ürün yelpazesi, kategoriler ve sabit paket fiyatları
 ├── uploads/
 │   ├── designs/               # Yüklenen müşteri tasarım dosyaları (PDF, AI, PSD, CDR, TIFF)
-│   └── products/              # Ürün kapak görselleri
+│   └── products/              # Ürün kapak ve galeri görselleri
 ├── admin/
 │   ├── auth_check.php         # Güvenlik ve oturum kontrolü
 │   ├── login.php              # Şifreli admin giriş ekranı
 │   ├── logout.php             # Güvenli çıkış işlemi
-│   ├── header.php             # Admin ortak navigasyon ve menü
-│   ├── footer.php             # Admin ortak altbilgi
+│   ├── header.php             # Sol sabit sidebar navigasyon şablonu
+│   ├── footer.php             # Admin ortak altbilgi ve sidebar scripti
 │   ├── index.php              # Sipariş yönetimi, tasarım indirme, ciro ve durum takibi
+│   ├── products.php           # Tüm ürünler listesi, filtreleme ve durum yönetimi
+│   ├── product_add.php        # Kapsamlı ürün, video, hazır paket, özel adet, varyant ve mockup ekleme
+│   ├── mockups.php            # 3D Mockup şablonları yönetimi (Kartvizit, Bayrak, Kupa, Tabela)
+│   ├── categories.php         # Kategori yönetimi
+│   ├── dealers.php            # E-Bayi ve B2B ajans başvuru onayı
 │   ├── campaigns.php          # İndirim kuponları, otomatik sepet kurguları, duyuru bandı
 │   └── settings.php           # Telefon, WhatsApp, adres, PayTR, banka hesapları, analitik
+├── manifest.json              # PWA Manifest dosyası
+├── sw.js                      # PWA Service Worker (çevrimdışı önbellekleme)
+├── designer.php               # Gelişmiş "Kendin Tasarla" & Canlı 3D Mockup editörü
 ├── index.php                  # Anasayfa (Hero slider, çok satanlar, kategori grid, B2B alanı)
 ├── category.php               # Kategori ve arama filtreleme sayfası
 ├── product.php                # İnteraktif ürün yapılandırıcı & canlı hesaplayıcı
@@ -50,7 +60,7 @@ tambaski.com.tr/
 └── TECHNICAL_DOC.md           # Teknik dizin kılavuzu
 ```
 
-## 3. Yönetim Paneli Giriş Bilgileri (Varsayılan)
+## 3. Yönetim Paneli Giriş Bilgileri
 - **Giriş URL:** `/admin/login.php`
 - **Kullanıcı Adı:** `admin` (veya `arif`)
 - **Şifre:** `admin123` (veya `tambaski2026`)
