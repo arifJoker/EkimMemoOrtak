@@ -6,5 +6,5 @@
 | **Memo** | - | - | - | 🟢 [BOŞTA] |
 
 ---
-- **Son Eşitleme:** 2026-09-28 22:05
-- **Durum:** ✅ Sitedeki tüm veritabanı, başlık, logo ve tasarım hataları giderildi. İnce ayar akordiyonu kaldırılarak 4 hazır paket, 1 tıkla online tasarım, meslek/sektör seçimi ve sürükle-bırak dosya yükleme devreye alındı. Canlı sunucuya aktarıldı.
+- **Son Eşitleme:** 2026-09-28 22:20
+- **Durum:** ✅ 1. Faz tamamlandı: 100x70 tabaka hesabı kaldırıldı, sade paket ve kademe fiyatlandırma motoru devreye alındı. Admin kategori ve ürün ekleme/düzenleme paneli modern ve hatasız hale getirilip canlıya aktarıldı.

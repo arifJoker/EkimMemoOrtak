@@ -11,29 +11,81 @@ $authHeader = "cpanel ${cpanelUser}:${cpanelToken}"
 $targetDir = "/home/arifuzco/$ProjectName"
 $localDir = (Resolve-Path (Join-Path $PSScriptRoot "..\$ProjectName")).Path
 $tempZip = Join-Path $PSScriptRoot "deploy.zip"
+$unpackerLocal = Join-Path $PSScriptRoot "unpacker_auto.php"
 
-Write-Host "🚀 $ProjectName canlı sunucuya deploy ediliyor..." -ForegroundColor Cyan
+Write-Host ">>> $ProjectName canli sunucuya deploy ediliyor..." -ForegroundColor Cyan
 
-# 1. Zip oluştur (.NET ZipFile ile standart formatta)
+# 1. Zip olustur (Linux uyumlu FORWARD SLASH / yapisi ile)
 if (Test-Path $tempZip) { Remove-Item $tempZip -Force }
+Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem
-[System.IO.Compression.ZipFile]::CreateFromDirectory($localDir, $tempZip)
 
-# 2. cPanel'e Zip yükle
-Write-Host "📤 Zip paketi sunucuya yükleniyor..." -ForegroundColor Gray
+$zip = [System.IO.Compression.ZipFile]::Open($tempZip, [System.IO.Compression.ZipArchiveMode]::Create)
+$files = Get-ChildItem -Path $localDir -Recurse -File
+foreach ($file in $files) {
+    # .git veya gecici dosyalari atla
+    if ($file.FullName -like "*\.git\*" -or $file.Name -eq "deploy.zip") {
+        continue
+    }
+    $relative = $file.FullName.Substring($localDir.Length + 1).Replace("\", "/")
+    [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $file.FullName, $relative) | Out-Null
+}
+$zip.Dispose()
+
+Write-Host ">>> Zip olusturuldu (Forward slash standardi ile)." -ForegroundColor Gray
+
+# 2. cPanel'e Zip yukle
+Write-Host ">>> Zip paketi sunucuya yukleniyor..." -ForegroundColor Gray
 $uploadUrl = "https://$cpanelHost/execute/Fileman/upload_files"
 $resUpload = & curl.exe -s -k -H "Authorization: $authHeader" -F "dir=$targetDir" -F "file-1=@$tempZip" -F "overwrite=1" "$uploadUrl"
 
-# 3. Zip dosyasını sunucuda aç (Extract)
-Write-Host "📦 Sunucuda arşiv açılıyor (Extract)..." -ForegroundColor Gray
-$extractUrl = "https://$cpanelHost/json-api/cpanel?cpanel_jsonapi_user=$cpanelUser&cpanel_jsonapi_apiversion=2&cpanel_jsonapi_module=Fileman&cpanel_jsonapi_func=fileop&op=extract&sourcefiles=$targetDir/deploy.zip&destfiles=$targetDir&dir=$targetDir"
-$resExtract = & curl.exe -s -k -H "Authorization: $authHeader" "$extractUrl"
+# 3. Zip dosyasini sunucuda ac (Extract - PHP ZipArchive ile %100 Overwrite garantili + OPCache temizligi)
+Write-Host ">>> Sunucuda arsiv aciliyor (ZipArchive extract)..." -ForegroundColor Gray
+$unpackerCode = @"
+<?php
+set_time_limit(180);
+`$zipPath = '$targetDir/deploy.zip';
+`$dest = '$targetDir';
+`$res = 'ZIP_NOT_FOUND';
 
-# 4. Sunucudaki geçici deploy.zip dosyasını temizle
-$deleteUrl = "https://$cpanelHost/json-api/cpanel?cpanel_jsonapi_user=$cpanelUser&cpanel_jsonapi_apiversion=2&cpanel_jsonapi_module=Fileman&cpanel_jsonapi_func=fileop&op=unlink&sourcefiles=$targetDir/deploy.zip&dir=$targetDir"
-& curl.exe -s -k -H "Authorization: $authHeader" "$deleteUrl" | Out-Null
+if (file_exists(`$zipPath)) {
+    `$zip = new ZipArchive();
+    if (`$zip->open(`$zipPath) === TRUE) {
+        if (`$zip->extractTo(`$dest)) {
+            `$res = 'EXTRACT_OK';
+        } else {
+            `$res = 'EXTRACT_FAILED_OVERWRITE';
+        }
+        `$zip->close();
+    } else {
+        `$res = 'EXTRACT_OPEN_FAILED';
+    }
+    @unlink(`$zipPath);
+}
 
-# 5. Yerel zip'i temizle
+// Opcache temizle
+if (function_exists('opcache_reset')) {
+    @opcache_reset();
+}
+
+// Gecmisten kalan yanlis backslashli dosyalari temizle
+foreach (glob('$targetDir/*\\\\*') as `$brokenFile) {
+    @unlink(`$brokenFile);
+}
+
+echo `$res;
+@unlink(__FILE__);
+"@
+
+[System.IO.File]::WriteAllText($unpackerLocal, $unpackerCode)
+$resUnpacker = & curl.exe -s -k -H "Authorization: $authHeader" -F "dir=$targetDir" -F "file-1=@$unpackerLocal" -F "overwrite=1" "$uploadUrl"
+if (Test-Path $unpackerLocal) { Remove-Item $unpackerLocal -Force }
+
+$unpackerDomain = if ($ProjectName -eq "tambaski.com.tr") { "https://tambaski.com.tr" } else { "https://bykcut.com.tr" }
+$extractResult = & curl.exe -s -k "$unpackerDomain/unpacker_auto.php"
+Write-Host "   Sunucu Acma Sonucu: $extractResult" -ForegroundColor Yellow
+
+# 4. Yerel zip'i temizle
 if (Test-Path $tempZip) { Remove-Item $tempZip -Force }
 
-Write-Host "✅ $ProjectName başarıyla canlı sunucuya aktarıldı ve yayınlandı!" -ForegroundColor Green
+Write-Host ">>> $ProjectName basariyla canli sunucuya aktarildi ve yayinlandi!" -ForegroundColor Green

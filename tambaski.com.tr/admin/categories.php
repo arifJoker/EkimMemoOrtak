@@ -5,68 +5,171 @@ Auth::requireAdmin();
 $db = Database::getInstance()->getConnection();
 $action = $_GET['action'] ?? 'list';
 
+// 1. Silme İşlemi
 if ($action === 'delete') {
     $id = (int)($_GET['id'] ?? 0);
-    $stmt = $db->prepare("DELETE FROM categories WHERE id = ?");
-    $stmt->execute([$id]);
-    Helper::setFlash('success', 'Kategori silindi.');
-    header("Location: " . SITE_URL . "/admin/categories.php");
-    exit;
-}
+    // Kategoriye bağlı ürün var mı kontrol et
+    $countStmt = $db->prepare("SELECT COUNT(*) FROM products WHERE category_id = ?");
+    $countStmt->execute([$id]);
+    $prodCount = (int)$countStmt->fetchColumn();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = trim($_POST['name'] ?? '');
-    $slug = !empty($_POST['slug']) ? Helper::slugify($_POST['slug']) : Helper::slugify($name);
-    $icon = trim($_POST['icon'] ?? 'bi bi-grid');
-    $sortOrder = (int)($_POST['sort_order'] ?? 0);
-    $catId = (int)($_POST['category_id'] ?? 0);
-
-    if ($catId > 0) {
-        $stmt = $db->prepare("UPDATE categories SET name = ?, slug = ?, icon = ?, sort_order = ? WHERE id = ?");
-        $stmt->execute([$name, $slug, $icon, $sortOrder, $catId]);
-        Helper::setFlash('success', 'Kategori güncellendi.');
+    if ($prodCount > 0) {
+        Helper::setFlash('danger', "Bu kategoriye bağlı {$prodCount} adet ürün bulunmaktadır. Önce ürünlerin kategorisini değiştirin veya ürünleri silin.");
     } else {
-        $stmt = $db->prepare("INSERT INTO categories (name, slug, icon, sort_order) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$name, $slug, $icon, $sortOrder]);
-        Helper::setFlash('success', 'Yeni kategori eklendi.');
+        $stmt = $db->prepare("DELETE FROM categories WHERE id = ?");
+        $stmt->execute([$id]);
+        Helper::setFlash('success', 'Kategori başarıyla silindi.');
     }
     header("Location: " . SITE_URL . "/admin/categories.php");
     exit;
 }
 
-$categories = $db->query("SELECT * FROM categories ORDER BY sort_order ASC, id ASC")->fetchAll();
-$pageTitle = 'Kategori Yönetimi';
+// 2. Ekleme / Güncelleme POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $name = trim($_POST['name'] ?? '');
+    $slug = !empty($_POST['slug']) ? Helper::slugify($_POST['slug']) : Helper::slugify($name);
+    $icon = trim($_POST['icon'] ?? 'bi bi-grid');
+    $sortOrder = (int)($_POST['sort_order'] ?? 0);
+    $status = !empty($_POST['status']) ? 1 : 0;
+    $catId = (int)($_POST['category_id'] ?? 0);
+
+    if (empty($name)) {
+        Helper::setFlash('danger', 'Kategori adı boş bırakılamaz.');
+        header("Location: " . SITE_URL . "/admin/categories.php");
+        exit;
+    }
+
+    if ($catId > 0) {
+        $stmt = $db->prepare("UPDATE categories SET name = ?, slug = ?, icon = ?, sort_order = ?, status = ? WHERE id = ?");
+        $stmt->execute([$name, $slug, $icon, $sortOrder, $status, $catId]);
+        Helper::setFlash('success', "<strong>{$name}</strong> kategorisi güncellendi.");
+    } else {
+        $stmt = $db->prepare("INSERT INTO categories (name, slug, icon, sort_order, status) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([$name, $slug, $icon, $sortOrder, $status]);
+        Helper::setFlash('success', "Yeni kategori <strong>{$name}</strong> başarıyla eklendi.");
+    }
+    header("Location: " . SITE_URL . "/admin/categories.php");
+    exit;
+}
+
+// Düzenleme Modu Kontrolü
+$editCategory = null;
+if (isset($_GET['edit'])) {
+    $editId = (int)$_GET['edit'];
+    $stmt = $db->prepare("SELECT * FROM categories WHERE id = ?");
+    $stmt->execute([$editId]);
+    $editCategory = $stmt->fetch();
+}
+
+// Tüm Kategorileri ve Ürün Sayılarını Çek
+$categories = $db->query("
+    SELECT c.*, COUNT(p.id) AS product_count 
+    FROM categories c 
+    LEFT JOIN products p ON p.category_id = c.id 
+    GROUP BY c.id 
+    ORDER BY c.sort_order ASC, c.id ASC
+")->fetchAll();
+
+$pageTitle = 'Kategori Yönetimi (1. Faz)';
 require_once __DIR__ . '/header.php';
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h4 class="fw-bold mb-0">Kategoriler</h4>
-        <p class="text-muted small mb-0">Matbaa ürün kategorilerini ve menü simgelerini yönetin.</p>
+        <h4 class="fw-bold mb-1"><i class="bi bi-folder2-open text-primary me-2"></i>Kategori Yönetimi</h4>
+        <p class="text-muted small mb-0">Ürün kategorilerini ekleyin, menü ikonlarını belirleyin ve sıralamayı yönetin.</p>
     </div>
+    <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill font-monospace">
+        Toplam: <?= count($categories) ?> Kategori
+    </span>
 </div>
 
 <div class="row g-4">
-    <!-- Sol: Kategori Ekleme Formu -->
+    <!-- Sol: Kategori Ekleme / Düzenleme Formu -->
     <div class="col-lg-4">
-        <div class="apple-card p-4">
-            <h6 class="fw-bold mb-3 border-bottom pb-2">Yeni Kategori Ekle</h6>
+        <div class="apple-card p-4 sticky-top" style="top: 20px;">
+            <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                <h6 class="fw-bold mb-0 text-dark">
+                    <?php if ($editCategory): ?>
+                        <i class="bi bi-pencil-square text-warning me-1"></i> Kategoriyi Düzenle
+                    <?php else: ?>
+                        <i class="bi bi-plus-circle-fill text-success me-1"></i> Yeni Kategori Ekle
+                    <?php endif; ?>
+                </h6>
+                <?php if ($editCategory): ?>
+                    <a href="<?= SITE_URL ?>/admin/categories.php" class="btn btn-sm btn-outline-secondary py-0">İptal</a>
+                <?php endif; ?>
+            </div>
+
             <form action="<?= SITE_URL ?>/admin/categories.php" method="POST">
+                <input type="hidden" name="category_id" value="<?= $editCategory['id'] ?? 0 ?>">
+
                 <div class="mb-3">
-                    <label class="form-label small fw-bold">Kategori Adı *</label>
-                    <input type="text" name="name" class="form-control" required placeholder="Örn: Etiket & Sticker">
+                    <label class="form-label small fw-bold text-dark">Kategori Adı *</label>
+                    <input type="text" name="name" id="catNameInput" class="form-control" required 
+                           placeholder="Örn: Kartvizitler, Broşürler, Tabelalar" 
+                           value="<?= htmlspecialchars($editCategory['name'] ?? '') ?>"
+                           oninput="autoGenerateSlug(this.value)">
                 </div>
+
                 <div class="mb-3">
-                    <label class="form-label small fw-bold">Bootstrap İkon Sınıfı</label>
-                    <input type="text" name="icon" class="form-control" value="bi bi-tag" placeholder="bi bi-tag">
-                    <small class="text-muted" style="font-size: 11px;">Örn: bi bi-person-badge, bi bi-flag, bi bi-stamp</small>
+                    <label class="form-label small fw-bold text-dark">Slug (URL)</label>
+                    <input type="text" name="slug" id="catSlugInput" class="form-control font-monospace" 
+                           placeholder="kartvizitler" 
+                           value="<?= htmlspecialchars($editCategory['slug'] ?? '') ?>">
+                    <small class="text-muted" style="font-size: 11px;">Boş bırakılırsa isimden otomatik üretilir.</small>
                 </div>
+
                 <div class="mb-3">
-                    <label class="form-label small fw-bold">Sıralama</label>
-                    <input type="number" name="sort_order" class="form-control" value="0">
+                    <label class="form-label small fw-bold text-dark d-flex justify-content-between">
+                        <span>Bootstrap İkon Sınıfı</span>
+                        <span id="iconPreview" class="text-primary"><i class="<?= htmlspecialchars($editCategory['icon'] ?? 'bi bi-tag') ?> fs-6"></i></span>
+                    </label>
+                    <input type="text" name="icon" id="catIconInput" class="form-control font-monospace" 
+                           value="<?= htmlspecialchars($editCategory['icon'] ?? 'bi bi-tag') ?>" 
+                           placeholder="bi bi-tag"
+                           oninput="updateIconPreview(this.value)">
+                    
+                    <!-- Hızlı İkon Seçici -->
+                    <div class="mt-2">
+                        <small class="text-muted d-block mb-1" style="font-size: 11px;">Hızlı İkon Seç:</small>
+                        <div class="d-flex flex-wrap gap-1">
+                            <?php 
+                            $quickIcons = [
+                                'bi bi-person-badge', 'bi bi-file-earmark-text', 'bi bi-tag', 
+                                'bi bi-card-text', 'bi bi-flag', 'bi bi-stamp', 'bi bi-cup-hot', 
+                                'bi bi-scissors', 'bi bi-box-seam', 'bi bi-grid', 'bi bi-printer', 'bi bi-stars'
+                            ];
+                            foreach ($quickIcons as $qIcon):
+                            ?>
+                                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" 
+                                        onclick="selectQuickIcon('<?= $qIcon ?>')" title="<?= $qIcon ?>">
+                                    <i class="<?= $qIcon ?>"></i>
+                                </button>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">
-                    <i class="bi bi-plus-lg me-1"></i> Kategoriyi Kaydet
+
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-dark">Sıralama</label>
+                        <input type="number" name="sort_order" class="form-control" 
+                               value="<?= (int)($editCategory['sort_order'] ?? 0) ?>">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-dark">Durum</label>
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" name="status" id="catStatus" value="1" 
+                                   <?= (!isset($editCategory) || !empty($editCategory['status'])) ? 'checked' : '' ?>>
+                            <label class="form-check-label small fw-semibold" for="catStatus">Aktif</label>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2.5 fw-bold shadow-xs">
+                    <i class="bi bi-check-lg me-1"></i> 
+                    <?= $editCategory ? 'Değişiklikleri Kaydet' : 'Kategoriyi Ekle' ?>
                 </button>
             </form>
         </div>
@@ -75,37 +178,116 @@ require_once __DIR__ . '/header.php';
     <!-- Sağ: Kategori Listesi -->
     <div class="col-lg-8">
         <div class="apple-card p-4">
-            <h6 class="fw-bold mb-3 border-bottom pb-2">Kayıtlı Kategoriler (<?= count($categories) ?>)</h6>
+            <h6 class="fw-bold mb-3 border-bottom pb-2">Kayıtlı Kategoriler</h6>
+            
             <div class="table-responsive">
-                <table class="table table-hover align-middle small">
+                <table class="table table-hover align-middle small mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th>İkon</th>
+                            <th style="width: 50px;">İkon</th>
                             <th>Kategori Adı</th>
                             <th>Slug (URL)</th>
-                            <th>Sıra</th>
+                            <th class="text-center">Ürün Sayısı</th>
+                            <th class="text-center">Sıra</th>
+                            <th class="text-center">Durum</th>
                             <th class="text-end">İşlemler</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($categories as $cat): ?>
+                        <?php if (empty($categories)): ?>
                             <tr>
-                                <td style="width: 40px;"><i class="<?= $cat['icon'] ?> fs-5 text-primary"></i></td>
-                                <td class="fw-bold"><?= htmlspecialchars($cat['name']) ?></td>
-                                <td><code><?= htmlspecialchars($cat['slug']) ?></code></td>
-                                <td><?= $cat['sort_order'] ?></td>
-                                <td class="text-end">
-                                    <a href="<?= SITE_URL ?>/admin/categories.php?action=delete&id=<?= $cat['id'] ?>" class="btn btn-sm btn-outline-danger py-0" onclick="return confirm('Bu kategoriyi silmek istediğinize emin misiniz?');">
-                                        Sil
-                                    </a>
-                                </td>
+                                <td colspan="7" class="text-center py-4 text-muted">Henüz kayıtlı kategori bulunmuyor.</td>
                             </tr>
-                        <?php endforeach; ?>
+                        <?php else: ?>
+                            <?php foreach ($categories as $cat): ?>
+                                <tr class="<?= (isset($editCategory) && $editCategory['id'] == $cat['id']) ? 'table-warning' : '' ?>">
+                                    <td class="text-center">
+                                        <div class="rounded-3 bg-light p-2 d-inline-flex align-items-center justify-content-center text-primary shadow-xs" style="width: 36px; height: 36px;">
+                                            <i class="<?= htmlspecialchars($cat['icon']) ?> fs-5"></i>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold text-dark fs-6"><?= htmlspecialchars($cat['name']) ?></div>
+                                        <a href="<?= SITE_URL ?>/category.php?slug=<?= $cat['slug'] ?>" target="_blank" class="text-muted" style="font-size: 11px;">
+                                            <i class="bi bi-box-arrow-up-right me-1"></i>Sitede Gör
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <code class="text-secondary"><?= htmlspecialchars($cat['slug']) ?></code>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-light text-dark border font-monospace px-2.5 py-1">
+                                            <?= (int)$cat['product_count'] ?> Ürün
+                                        </span>
+                                    </td>
+                                    <td class="text-center font-monospace">
+                                        <?= (int)$cat['sort_order'] ?>
+                                    </td>
+                                    <td class="text-center">
+                                        <?php if (!empty($cat['status'])): ?>
+                                            <span class="badge bg-success-subtle text-success rounded-pill px-2 py-1">Aktif</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2 py-1">Pasif</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="<?= SITE_URL ?>/admin/categories.php?edit=<?= $cat['id'] ?>" class="btn btn-outline-primary" title="Düzenle">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="<?= SITE_URL ?>/admin/categories.php?action=delete&id=<?= $cat['id'] ?>" 
+                                               class="btn btn-outline-danger" 
+                                               onclick="return confirm('Bu kategoriyi silmek istediğinize emin misiniz?');" 
+                                               title="Sil">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+function autoGenerateSlug(text) {
+    const slugInput = document.getElementById('catSlugInput');
+    if (!slugInput.dataset.manual) {
+        const trMap = {
+            'ç':'c', 'Ç':'c', 'ğ':'g', 'Ğ':'g', 'ı':'i', 'İ':'i',
+            'ö':'o', 'Ö':'o', 'ş':'s', 'Ş':'s', 'ü':'u', 'Ü':'u'
+        };
+        let slug = text.toLowerCase();
+        for (let key in trMap) {
+            slug = slug.split(key).join(trMap[key]);
+        }
+        slug = slug.replace(/[^a-z0-9 -]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
+        slugInput.value = slug;
+    }
+}
+
+document.getElementById('catSlugInput')?.addEventListener('input', function() {
+    this.dataset.manual = 'true';
+});
+
+function updateIconPreview(iconClass) {
+    const preview = document.getElementById('iconPreview');
+    if (preview) {
+        preview.innerHTML = '<i class="' + iconClass + ' fs-6"></i>';
+    }
+}
+
+function selectQuickIcon(iconClass) {
+    const input = document.getElementById('catIconInput');
+    if (input) {
+        input.value = iconClass;
+        updateIconPreview(iconClass);
+    }
+}
+</script>
 
 <?php require_once __DIR__ . '/footer.php'; ?>

@@ -1,21 +1,21 @@
-# 📜 PROJE ETKİNLİK VE DEĞİŞİKLİK GÜNLÜĞÜ (ACTIVITY LOG)
+# 📜 TAMBASKI.COM.TR - ETKİNLİK GÜNLÜĞÜ (ACTIVITY LOG)
 
-> Bu dosya her işlem sonrasında Antigravity tarafından **otomatik** olarak güncellenir.
-> En son yapılan işlemler en üstte yer alır.
-
----
-
-## 📌 Son Yapılan İşlemler
-
-### [2026-09-28 19:26] - Arif & Antigravity
-- **Görev:** Ortak çalışma altyapısı, kilit mekanizması ve dokümantasyon standartlarının kurulması.
-- **Değiştirilen / Eklenen Dosyalar:**
-  - `PROJECT_STATE.md` (Canlı durum ve kilit takibi)
-  - `ACTIVITY_LOG.md` (Detaylı kim ne yaptı log defteri)
-  - `ARCHITECTURE.md` (Canlı mimari şeması)
-  - `TECHNICAL_DOC.md` (Modül & teknik dizin kılavuzu)
-  - `.gemini/rules/collaboration_protocol.md` (Antigravity ortak çalışma protokolü)
-- **Durum:** ✅ Başarıyla tamamlandı ve kilit serbest bırakıldı.
+> En son yapılan 5 işlem her yeni sohbette otomatik olarak okunur ve gösterilir.
 
 ---
-*(Yeni yapılan her işlem bu çizginin hemen altına eklenecektir)*
+
+## 📌 Yapılan İşlemler (En Güncel En Üstte)
+
+1. **[2026-09-28 22:20] - Arif & Antigravity:** 1. Faz Gerçekleştirildi: (1) 100x70 tabaka yerleşim, kağıt döviz formülü ve karmaşık fire hesapları kaldırıldı; doğrudan taban fiyat, 4 hazır paket (Ekonomik, Standart, Premium, VIP) ve 5 tiraj indirimi (1.000, 2.000, 3.000, 5.000, 10.000) bazlı sade fiyat motoru (`classes/Product.php`) devreye alındı. (2) `admin/categories.php` baştan sona modernize edildi; ürün sayacı, dinamik ikon seçici ve silme koruması eklendi. (3) `admin/products.php` 5 sade karta bölünerek sıfırdan yeniden yazıldı; temel bilgiler, doğrudan 4 paket fiyatı, adet iskontoları, kapak görseli ve rozet izinleri eksiksiz bağlandı. (4) Deploy scripti Windows/Linux ayracı düzeltilerek canlı sunucuya aktarıldı ve test edildi.
+2. **[2026-09-28 22:05] - Arif & Antigravity:** Kullanıcının tüm istekleri eksiksiz uygulandı: (1) `baski.arifuz.com.tr` üzerindeki tüm çalışan sınıf mimarisi (`classes/`), veritabanı şeması (`arifuzco_baski`), orijinal logo ve faviconlar `tambaski.com.tr`'ye 1:1 aktarıldı. (2) Ürün detay sayfasındaki karmaşık "İnce Ayar" akordiyonu tamamen kaldırıldı; müşteri doğrudan 4 standart paketten birini seçer duruma getirildi. (3) Tasarım tercihi 4 net sekmeye bölündü: 1 tıkla anında açılan online "Kendin Tasarla" stüdyosu, meslek/sektör filtreli "Hazır Şablonlar", sürükle-bırak "Dosya Yükleme" alanı ve WhatsApp grafik desteği. (4) Canlı sunucuya deploy edilip test edildi.
+2. **[2026-09-28 21:52] - Arif & Antigravity:** Sitedeki tüm veritabanı, başlık ve tasarım hataları kökten çözüldü. Yapay zeka soğukluğu ve yabancı metinler kaldırılıp gerçek Türk matbaa e-ticaret dili (`#f15a24` TamBaskı turuncusu, net paketler, gerçek adet tirajları) uygulandı. `index.php` dinamik kategoriler ve öne çıkan ürünlerle zenginleştirildi; `product.php` üzerinde 4 hazır paket, 5 tiraj seçeneği, meslek/sektör seçimi, dosya yükleme ve tek tıkla çalışan Fabric.js Vektörel Canva Stüdyo entegre edildi. `cart.php` ve `checkout.php` kurumsal/bireysel fatura desteğiyle canlıya alındı.
+2. **[2026-09-28 21:32] - Arif & Antigravity:** `baski.arifuz.com.tr` üzerindeki orijinal yüksek kaliteli vektörel **TAM BASKI** logosu (`logo.svg`) ve tüm favicon paketi (`favicon.svg`, `favicon-32x32.png`, `favicon-16x16.png`, `apple-touch-icon.png`, `icon-192.png`) projeye 1:1 aktarıldı, Header ve Footer'a entegre edilip canlı sunucuya deploy edildi.
+2. **[2026-09-28 21:03] - Arif & Antigravity:** Yeni `stitch_print_commerce_design_studio` tasarım sistemi (Precision Studio Print) tüm siteye 1:1 birebir uygulandı. Header, Footer, Anasayfa (`index.php`), Ürün Detay & Online Vektör Stüdyosu (`product.php`), Sepet (`cart.php`), Kategori (`category.php`) ve Ödeme (`checkout.php`) tamamen yeni tasarımla modernize edilip canlı sunucuya aktarıldı (deploy edildi).
+2. **[2026-09-28 20:53] - Arif & Antigravity:** Tasarım PDF'ine %100 birebir uyum sağlandı. İnce ayar akordiyonu kaldırıldı; 4 hazır paket, 6'lı adet butonları, tek tıkla Canva Editörü başlatma, meslek/sektör bazlı hazır şablon seçici, koyu üst bar, mm cetvelleri ve taşma/güvenli alan kılavuzları entegre edildi.
+3. **[2026-09-28 20:44] - Arif & Antigravity:** `baski.arifuz.com.tr/product.php?slug=test` üzerindeki tam teşekküllü Canva Studio (`canva_studio.js`, `canva_templates_engine.js`, 1.800+ şablon kütüphanesi, sektör filtresi, 40+ vektör ikon, QR kod ve 3D flip mockup motoru) `tambaski.com.tr` içine 1:1 eksiksiz entegre edildi.
+4. **[2026-09-28 20:33] - Arif & Antigravity:** Ürün sayfası (`product.php`) Apple & `baski.arifuz.com.tr` standartlarında baştan tasarlandı; canlı 3D farenin hareketini takip eden interaktif kart sahnesi, 3 aşamalı sipariş akışı, entegre "Kendin Tasarla" Fabric.js modalı eklendi. `mockups-design.com` mockup kaynağı teknik dokümana kaydedildi.
+5. **[2026-09-28 20:30] - Arif & Antigravity:** Admin paneli modern Sol Sidebar menü mimarisine geçirildi. Kapsamlı Ürün/Görsel/Video/Paket/Sınırsız Varyant ekleme motoru, 3D Mockup yöneticisi, Online "Kendin Tasarla" editörü ve PWA altyapısı entegre edildi.
+6. **[2026-09-28 20:11] - Arif & Antigravity:** Admin paneli şifreli giriş altyapısı, detaylı Kampanya & Kupon Kurguları modülü ve İletişim / WhatsApp / PayTR / Banka hesapları ayar merkezi geliştirildi.
+7. **[2026-09-28 20:07] - Arif & Antigravity:** `baski.arifuz.com.tr` tasarım ve logo diliyle tam uyumlu E-Ticaret altyapısı inşa edildi. Sabit Hazır Paketler, Özel Adet Çarpanı ve m² Dekota/Pleksi Kesim fiyat motoru kuruldu.
+8. **[2026-09-28 19:35] - Sistem:** Depo oluşturuldu ve altyapı hazırlandı.
+
