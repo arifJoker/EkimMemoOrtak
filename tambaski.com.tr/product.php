@@ -60,14 +60,15 @@ require_once __DIR__ . '/includes/header.php';
                 
                 $galleryImages = [
                     SITE_URL . '/uploads/mockups/tambaski_kartvizit_desk_mockup.jpg',
-                    SITE_URL . '/uploads/mockups/tambaski_kartvizit_hand_mockup.jpg',
                     SITE_URL . '/uploads/mockups/tambaski_kartvizit_vip_mockup.jpg'
                 ];
                 
                 if (!empty($product['gallery_array'])) {
                     foreach ($product['gallery_array'] as $gImg) {
                         $full = str_starts_with($gImg, 'http') ? $gImg : SITE_URL . '/' . $gImg;
-                        if (!in_array($full, $galleryImages)) $galleryImages[] = $full;
+                        if (!in_array($full, $galleryImages) && !str_contains($full, 'hand_mockup') && !str_contains($full, 'mockup_hand')) {
+                            $galleryImages[] = $full;
+                        }
                     }
                 }
                 ?>
@@ -1841,34 +1842,36 @@ require_once __DIR__ . '/includes/header.php';
 <!-- 🔍 ULTRA HD TAM EKRAN GÖRSEL İNCELEME MODALI (LIGHTBOX) -->
 <!-- ========================================================================= -->
 <div class="modal fade" id="imageFullscreenModal" tabindex="-1" aria-labelledby="imageFullscreenTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl" style="max-width: 95vw;">
+    <div class="modal-dialog modal-dialog-centered modal-xl" style="max-width: 98vw;">
         <div class="modal-content border-0 shadow-2xl rounded-4 overflow-hidden text-white" style="background: #090d16;">
             <div class="modal-header border-secondary border-opacity-25 px-4 py-3 d-flex justify-content-between align-items-center" style="background: #060910;">
                 <div class="d-flex align-items-center gap-2">
                     <span class="badge bg-primary-subtle text-primary p-2 rounded-circle"><i class="bi bi-arrows-fullscreen fs-6"></i></span>
                     <div>
-                        <h6 class="modal-title fw-bold text-white mb-0" id="imageFullscreenTitle">TamBaskı Kurumsal Baskı & Doku İncelemesi</h6>
-                        <small class="text-secondary" style="font-size: 11px;">Ultra HD 8K Çözünürlükte Stüdyo Çekimi</small>
+                        <h6 class="modal-title fw-bold text-white mb-0" id="imageFullscreenTitle">TamBaskı Kurumsal Baskı &amp; Doku İncelemesi</h6>
+                        <small class="text-secondary" style="font-size: 11px;">Ultra HD Stüdyo Çekimi Mockup İnceleme</small>
                     </div>
                 </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
             </div>
-            <div class="modal-body p-2 d-flex align-items-center justify-content-center position-relative" style="background: radial-gradient(circle at center, #1e293b 0%, #060910 100%); min-height: 72vh;">
+            <div class="modal-body p-2 p-md-3 d-flex align-items-center justify-content-center position-relative" style="background: radial-gradient(circle at center, #1e293b 0%, #060910 100%); min-height: 75vh;">
                 <!-- Önceki Butonu -->
-                <button type="button" class="btn btn-dark position-absolute start-0 top-50 translate-middle-y ms-3 rounded-circle shadow d-flex align-items-center justify-content-center" onclick="navigateFullscreenGallery(-1)" style="width: 48px; height: 48px; z-index: 30; background: rgba(0,0,0,0.65); border: 1px solid rgba(255,255,255,0.25);" title="Önceki Görsel">
+                <button type="button" class="btn btn-dark position-absolute start-0 top-50 translate-middle-y ms-2 ms-md-3 rounded-circle shadow d-flex align-items-center justify-content-center" onclick="navigateFullscreenGallery(-1)" style="width: 48px; height: 48px; z-index: 30; background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.25);" title="Önceki Görsel">
                     <i class="bi bi-chevron-left fs-5"></i>
                 </button>
 
                 <!-- Tam Ekran Görsel -->
-                <img id="fullscreenModalImg" src="" alt="Tam Ekran Ürün İnceleme" class="img-fluid rounded-3 shadow-2xl" style="max-height: 75vh; width: auto; object-fit: contain;">
+                <div class="w-100 h-100 d-flex align-items-center justify-content-center p-1">
+                    <img id="fullscreenModalImg" src="" alt="Tam Ekran Ürün İnceleme" class="img-fluid rounded-3 shadow-2xl" style="max-height: 82vh; max-width: 90vw; width: auto; height: auto; object-fit: contain;">
+                </div>
 
                 <!-- Sonraki Butonu -->
-                <button type="button" class="btn btn-dark position-absolute end-0 top-50 translate-middle-y me-3 rounded-circle shadow d-flex align-items-center justify-content-center" onclick="navigateFullscreenGallery(1)" style="width: 48px; height: 48px; z-index: 30; background: rgba(0,0,0,0.65); border: 1px solid rgba(255,255,255,0.25);" title="Sonraki Görsel">
+                <button type="button" class="btn btn-dark position-absolute end-0 top-50 translate-middle-y me-2 ms-md-3 rounded-circle shadow d-flex align-items-center justify-content-center" onclick="navigateFullscreenGallery(1)" style="width: 48px; height: 48px; z-index: 30; background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.25);" title="Sonraki Görsel">
                     <i class="bi bi-chevron-right fs-5"></i>
                 </button>
             </div>
             <div class="modal-footer border-secondary border-opacity-25 px-4 py-2 d-flex justify-content-between align-items-center" style="background: #060910;">
-                <span class="text-secondary small" style="font-size: 11px;" id="fullscreenModalCounter"><i class="bi bi-image me-1"></i> Görsel 1 / 4</span>
+                <span class="text-secondary small" style="font-size: 11px;" id="fullscreenModalCounter"><i class="bi bi-image me-1"></i> Görsel 1 / 2</span>
                 <button type="button" class="btn btn-outline-light rounded-pill px-4 btn-sm fw-bold" data-bs-dismiss="modal">
                     Kapat (ESC)
                 </button>
@@ -2106,7 +2109,7 @@ window.selectDesignOption = function(type) {
     }
 };
 
-window.productGalleryList = <?= json_encode(array_values(array_map(function($g) { return str_starts_with($g, 'http') ? $g : SITE_URL . '/' . $g; }, $product['gallery_array'] ?? []))) ?>;
+window.productGalleryList = <?= json_encode(array_values($galleryImages)) ?>;
 window.currentFullscreenIdx = 0;
 
 window.openFullscreenImage = function(imgUrl) {
@@ -2118,7 +2121,11 @@ window.openFullscreenImage = function(imgUrl) {
     }
     
     let idx = window.productGalleryList.indexOf(imgUrl);
-    if (idx === -1) idx = 0;
+    if (idx === -1) {
+        // Tam URL karşılaştırması
+        idx = window.productGalleryList.findIndex(url => url.endsWith(imgUrl) || imgUrl.endsWith(url));
+        if (idx === -1) idx = 0;
+    }
     window.currentFullscreenIdx = idx;
     
     updateFullscreenModalView();
@@ -2140,8 +2147,12 @@ function updateFullscreenModalView() {
     const counterEl = document.getElementById('fullscreenModalCounter');
     if (window.productGalleryList && window.productGalleryList[window.currentFullscreenIdx]) {
         const url = window.productGalleryList[window.currentFullscreenIdx];
-        if (imgEl) imgEl.src = url;
-        if (counterEl) counterEl.innerHTML = `<i class="bi bi-image me-1"></i> Görsel ${window.currentFullscreenIdx + 1} / ${window.productGalleryList.length}`;
+        if (imgEl) {
+            imgEl.src = url;
+        }
+        if (counterEl) {
+            counterEl.innerHTML = `<i class="bi bi-image me-1"></i> Görsel ${window.currentFullscreenIdx + 1} / ${window.productGalleryList.length}`;
+        }
     }
 }
 
