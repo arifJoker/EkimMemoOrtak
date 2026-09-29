@@ -2267,10 +2267,22 @@ require_once __DIR__ . '/includes/header.php';
                                         </div>
                                     </div>
 
-                                    <div class="d-flex align-items-center gap-2">
-                                        <span class="small text-muted" style="font-size: 11px;">Çizgi Tipi:</span>
-                                        <button type="button" class="btn btn-xs btn-outline-dark rounded-pill px-2.5" style="font-size: 10.5px;" onclick="SignStudio.setBorderStyle('solid')">Düz Çizgi</button>
-                                        <button type="button" class="btn btn-xs btn-outline-dark rounded-pill px-2.5" style="font-size: 10.5px;" onclick="SignStudio.setBorderStyle('dashed')">Kesik Çizgili İkaz</button>
+                                    <div class="row g-2 align-items-center mb-2">
+                                        <div class="col-6">
+                                            <label class="form-label small text-muted mb-1" style="font-size: 11px;">Çizgi Tipi:</label>
+                                            <div class="d-flex gap-1">
+                                                <button type="button" class="btn btn-xs btn-outline-dark rounded-pill px-2" style="font-size: 10.5px;" onclick="SignStudio.setBorderStyle('solid')">Düz Çizgi</button>
+                                                <button type="button" class="btn btn-xs btn-outline-dark rounded-pill px-2" style="font-size: 10.5px;" onclick="SignStudio.setBorderStyle('dashed')">Kesik Çizgili</button>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label small text-muted mb-1" style="font-size: 11px;">Kenar Payı (Boşluk):</label>
+                                            <select class="form-select form-select-sm" onchange="SignStudio.setBorderInset(this.value)">
+                                                <option value="0">Sıfır (Tam Kenar)</option>
+                                                <option value="8" selected>Standart (8 px)</option>
+                                                <option value="16">Geniş (16 px)</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

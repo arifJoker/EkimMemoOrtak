@@ -658,11 +658,15 @@ window.SignStudio = (function() {
                 // Eğer çerçeve varsa yeni tuval boyutuna göre yeniden boyutlandır
                 if (currentBorderObj) {
                     const strokeWidth = borderConfig.width || 10;
+                    const inset = (borderConfig.inset !== undefined) ? borderConfig.inset : 8;
                     currentBorderObj.set({
-                        left: strokeWidth / 2,
-                        top: strokeWidth / 2,
-                        width: Math.max(10, displayW - strokeWidth),
-                        height: Math.max(10, displayH - strokeWidth)
+                        originX: 'center',
+                        originY: 'center',
+                        left: displayW / 2,
+                        top: displayH / 2,
+                        width: Math.max(10, displayW - (inset * 2) - strokeWidth),
+                        height: Math.max(10, displayH - (inset * 2) - strokeWidth),
+                        strokeUniform: true
                     });
                     ensureBorderAtBack();
                 }
@@ -709,13 +713,14 @@ window.SignStudio = (function() {
         },
 
         // =====================================================================
-        // 🛡️ İKAZ KENAR ÇERÇEVESİ (ASLA NESNELERİ BLOKE ETMEZ)
+        // 🛡️ İKAZ KENAR ÇERÇEVESİ (KUSURSUZ ORTALAMA & ASLA NESNELERİ BLOKE ETMEZ)
         // =====================================================================
         applyHazardBorder: function(options = {}) {
             if (!canvas) return;
 
             if (options.color) borderConfig.color = options.color;
             if (options.width) borderConfig.width = parseInt(options.width);
+            if (options.inset !== undefined) borderConfig.inset = parseInt(options.inset);
             if (options.style) borderConfig.style = options.style;
             if (options.type) borderConfig.type = options.type;
             borderConfig.enabled = true;
@@ -727,6 +732,7 @@ window.SignStudio = (function() {
 
             const strokeWidth = borderConfig.width || 10;
             const strokeColor = borderConfig.color || '#ffcc00';
+            const inset = (borderConfig.inset !== undefined) ? borderConfig.inset : 8;
             let strokeDash = null;
 
             if (borderConfig.style === 'dashed' || borderConfig.type === 'striped') {
@@ -737,14 +743,19 @@ window.SignStudio = (function() {
             const h = canvas.getHeight();
 
             currentBorderObj = new fabric.Rect({
-                left: strokeWidth / 2,
-                top: strokeWidth / 2,
-                width: Math.max(10, w - strokeWidth),
-                height: Math.max(10, h - strokeWidth),
+                originX: 'center',
+                originY: 'center',
+                left: w / 2,
+                top: h / 2,
+                width: Math.max(10, w - (inset * 2) - strokeWidth),
+                height: Math.max(10, h - (inset * 2) - strokeWidth),
                 fill: 'transparent',
                 stroke: strokeColor,
                 strokeWidth: strokeWidth,
                 strokeDashArray: strokeDash,
+                strokeUniform: true,
+                rx: 4,
+                ry: 4,
                 selectable: false,       // 🔒 TUVALDE ASLA SEÇİLEMEZ
                 evented: false,          // 🖱️ TIKLAMALAR TAMAMEN ALTTAKİ NESNELERE GEÇER
                 hasControls: false,
@@ -792,6 +803,10 @@ window.SignStudio = (function() {
 
         setBorderWidth: function(widthPx) {
             this.applyHazardBorder({ width: parseInt(widthPx) });
+        },
+
+        setBorderInset: function(insetPx) {
+            this.applyHazardBorder({ inset: parseInt(insetPx) });
         },
 
         setBorderStyle: function(style) {
