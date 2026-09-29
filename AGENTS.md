@@ -18,7 +18,7 @@
   - Arif'in açtığı kategorilere yeni ürün ekleme, ürün düzenleme.
   - Ürün başlıkları, SEO açıklamaları, ürün etiketleri girme.
   - Ürün fotoğrafları ve mockup görsellerini `uploads/products/` altına ekleme.
-  - `CATEGORIES_AND_VARIANTS.md` dosyasında Arif'in belirttiği varyantları (boyut, adet, kağıt türü vb.) ürüne atama.
+  - `CATEGORIES_AND_VARIANTS.md` ve `MEMO_PRODUCT_GUIDE.md` dosyalarında Arif'in belirttiği varyantları (boyut, adet, paket, m² fiyatları) ürüne atama.
 - 🚫 **KESİNLİKLE YASAK ALANLAR (AI ENGELİ):**
   - Tasarım değiştirme, tema/CSS düzenleme, HTML/şablon kodlarına müdahale etme.
   - Çekirdek PHP dosyalarını, API'leri veya veritabanı şemasını değiştirme.
@@ -32,7 +32,7 @@
    - Hangi proje (`tambaski.com.tr` veya `bykcut.com.tr`) üzerinde çalışılacağını teyit et.
    - İlgili projenin `ACTIVITY_LOG.md` dosyasından **son 5 işlemi** listele.
    - `PROJECT_STATE.md` kilit durumunu kontrol et.
-   - Memo ile çalışılıyorsa: `CATEGORIES_AND_VARIANTS.md` dosyasındaki güncel kategori ve varyant notlarını oku.
+   - Memo ile çalışılıyorsa: `MEMO_PRODUCT_GUIDE.md` ve `CATEGORIES_AND_VARIANTS.md` dosyalarındaki güncel ürün yükleme kurallarını oku.
 
 2. **Kilit Kontrolü:** İstenen modül kilitliyse kullanıcıyı uyar. Değilse `PROJECT_STATE.md` kilidini al.
 

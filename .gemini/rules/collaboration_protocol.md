@@ -21,7 +21,7 @@ Kullanıcı yeni bir sohbet başlattığında veya **"projeyi incele / bi incele
    - Hangi proje üzerinde çalışılacağını teyit et (`tambaski.com.tr` veya `bykcut.com.tr`).
 2. **Tam Sistem Taraması ve Özet Çıkarma:**
    - `ARCHITECTURE.md` ve `TECHNICAL_DOC.md` dosyalarını incele.
-   - `CATEGORIES_AND_VARIANTS.md` dosyasını oku ➔ Açılan kategorileri ve varyant listesini tespit et.
+   - `CATEGORIES_AND_VARIANTS.md` ve `MEMO_PRODUCT_GUIDE.md` dosyalarını oku ➔ Açılan kategorileri, paketleri ve ürün yükleme kılavuzunu tespit et.
    - `ACTIVITY_LOG.md` dosyasından **en son yapılan 5 işlemi** listele.
    - `PROJECT_STATE.md` kilit durumunu kontrol et.
 
