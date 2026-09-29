@@ -2,6 +2,8 @@
 /**
  * TAMBASKI.COM.TR - Admin İletişim, Şirket & Site Ayarları Modülü
  */
+require_once __DIR__ . '/../config/config.php';
+Auth::requireDesignPermission();
 $page_title = "İletişim & Genel Site Ayarları";
 require_once __DIR__ . '/header.php';
 

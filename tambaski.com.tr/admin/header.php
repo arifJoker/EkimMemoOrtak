@@ -214,6 +214,7 @@ $isSettingsMenuOpen = in_array($activePage, ['payment_settings.php', 'cargo_sett
                 </div>
             </div>
 
+            <?php if (Auth::canManageDesign()): ?>
             <div class="admin-nav-group-title">Tasarım & Müşteri</div>
             <a href="<?= SITE_URL ?>/admin/templates.php" class="admin-nav-link <?= $activePage == 'templates.php' ? 'active' : '' ?>">
                 <i class="bi bi-vector-pen text-primary"></i> Sektörel Şablonlar
@@ -253,18 +254,28 @@ $isSettingsMenuOpen = in_array($activePage, ['payment_settings.php', 'cargo_sett
                     </a>
                 </div>
             </div>
+            <?php endif; ?>
 
         </nav>
 
         <!-- Kullanıcı & Çıkış -->
         <div class="pt-3 border-top border-secondary border-opacity-25 px-1 mt-auto">
-            <div class="d-flex align-items-center justify-content-between text-muted small px-1">
-                <span class="text-truncate fw-medium text-light" style="max-width: 140px;">
-                    <i class="bi bi-person-circle me-1 text-primary"></i> <?= htmlspecialchars($currentAdmin['full_name']) ?>
-                </span>
-                <a href="<?= SITE_URL ?>/logout.php" class="text-danger text-decoration-none small fw-bold"><i class="bi bi-power"></i> Çıkış</a>
+            <div class="mb-2">
+                <div class="d-flex align-items-center justify-content-between text-muted small px-1">
+                    <span class="text-truncate fw-medium text-light" style="max-width: 140px;">
+                        <i class="bi bi-person-circle me-1 <?= Auth::isAdmin() ? 'text-primary' : 'text-info' ?>"></i> <?= htmlspecialchars($currentAdmin['full_name']) ?>
+                    </span>
+                    <a href="<?= SITE_URL ?>/logout.php" class="text-danger text-decoration-none small fw-bold"><i class="bi bi-power"></i> Çıkış</a>
+                </div>
+                <div class="px-1 mt-1">
+                    <?php if (Auth::isAdmin()): ?>
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-0.5 rounded-pill" style="font-size: 10px;">👑 Yönetici (Tam Yetkili)</span>
+                    <?php else: ?>
+                        <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-0.5 rounded-pill" style="font-size: 10px;">📦 Ürün Editörü (Yalnızca Ürün Ekleme)</span>
+                    <?php endif; ?>
+                </div>
             </div>
-            <a href="<?= SITE_URL ?>/" target="_blank" class="btn btn-sm btn-outline-light w-100 mt-2 py-1 small rounded-3">
+            <a href="<?= SITE_URL ?>/" target="_blank" class="btn btn-sm btn-outline-light w-100 mt-1 py-1 small rounded-3">
                 <i class="bi bi-box-arrow-up-right me-1"></i> Siteyi Görüntüle
             </a>
         </div>

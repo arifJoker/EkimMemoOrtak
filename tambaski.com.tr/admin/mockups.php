@@ -2,6 +2,8 @@
 /**
  * TAMBASKI.COM.TR - Admin Mockup & Vektörel Şablon Yönetimi
  */
+require_once __DIR__ . '/../config/config.php';
+Auth::requireDesignPermission();
 $page_title = "3D Mockup & Baskı Şablonları";
 require_once __DIR__ . '/header.php';
 

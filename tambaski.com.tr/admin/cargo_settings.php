@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
-Auth::requireAdmin();
+Auth::requireDesignPermission();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Helper::saveSetting('cargo_default_company', trim($_POST['cargo_default_company'] ?? 'Yurtiçi Kargo'));

@@ -1,22 +1,43 @@
-# 🤖 AI ORTAK ÇALIŞMA KILAVUZU (AGENTS & CURSOR RULES)
+# 🤖 AI ORTAK ÇALIŞMA VE YETKİ KILAVUZU (AGENTS & CURSOR RULES)
 
-> 🔒 **GÜVENLİK VE İZOLASYON KURALI:** Bu çalışma alanında ve sunucuda **SADECE** `tambaski.com.tr` ve `bykcut.com.tr` klasörlerine erişim izni vardır. Sunucudaki veya yereldeki diğer hiçbir siteye, üst dizine veya özel dosyalara kesinlikle erişilemez / değiştirilemez.
+> 🔒 **GÜVENLİK VE İZOLASYON KURALI:** Bu çalışma alanında ve sunucuda **SADECE** `tambaski.com.tr` ve `bykcut.com.tr` klasörlerine erişim izni vardır. Sunucudaki veya yereldeki diğer hiçbir siteye veya üst dizine kesinlikle erişilemez.
 
-Herhangi bir AI asistanı (Antigravity, Cursor, Claude, Windsurf vb.) bu repoda çalışırken aşağıdaki kurallara kesinlikle uymalıdır:
+---
+
+## 👥 ROL VE YETKİ MATRİSİ (ROLE-BASED PERMISSIONS)
+
+### 👑 1. ARİF (Sistem Mimarı, Tasarımcı & Kurucu):
+- **Tam Yetkili (Full Access):**
+  - Tüm arayüz tasarımı, HTML/CSS/JS, UI/UX şablonları.
+  - Sistem mimarisi, çekirdek PHP/API kodları, veritabanı yapısı.
+  - Yeni kategori açma, varyant grupları ve fiyat algoritmaları belirleme.
+  - Açılan kategorileri ve varyantları `CATEGORIES_AND_VARIANTS.md` dosyasına not olarak yazar.
+
+### 📦 2. MEMO (Ürün ve İçerik Yöneticisi):
+- **YETKİ ALANI (SADECE ÜRÜN GİRİŞİ):**
+  - Arif'in açtığı kategorilere yeni ürün ekleme, ürün düzenleme.
+  - Ürün başlıkları, SEO açıklamaları, ürün etiketleri girme.
+  - Ürün fotoğrafları ve mockup görsellerini `uploads/products/` altına ekleme.
+  - `CATEGORIES_AND_VARIANTS.md` dosyasında Arif'in belirttiği varyantları (boyut, adet, kağıt türü vb.) ürüne atama.
+- 🚫 **KESİNLİKLE YASAK ALANLAR (AI ENGELİ):**
+  - Tasarım değiştirme, tema/CSS düzenleme, HTML/şablon kodlarına müdahale etme.
+  - Çekirdek PHP dosyalarını, API'leri veya veritabanı şemasını değiştirme.
+  - *Kural:* Eğer Memo veya Memo'nun AI asistanı tasarım/kod değiştirme talebi alırsa, AI bunu **kesinlikle reddedecek** ve *"Bu işlem yalnızca Arif'in yetkisindedir. Memo rolü yalnızca ürün yükleme ve içerik girişine yetkilidir."* uyarısı verecektir.
+
+---
+
+## 🚀 SOHBET BAŞLANGIÇ & İŞLEM PROTOKOLÜ
 
 1. **Sohbet Başlangıcı:**
-   - Hangi proje üzerinde çalışılacağını teyit et (`tambaski.com.tr` veya `bykcut.com.tr`).
-   - Seçilen projenin `ACTIVITY_LOG.md` dosyasından **en son yapılan 5 işlemi** kullanıcıya listele.
+   - Hangi proje (`tambaski.com.tr` veya `bykcut.com.tr`) üzerinde çalışılacağını teyit et.
+   - İlgili projenin `ACTIVITY_LOG.md` dosyasından **son 5 işlemi** listele.
    - `PROJECT_STATE.md` kilit durumunu kontrol et.
+   - Memo ile çalışılıyorsa: `CATEGORIES_AND_VARIANTS.md` dosyasındaki güncel kategori ve varyant notlarını oku.
 
-2. **Kilit Kontrolü:** İstenen dosya kilitliyse kullanıcıyı uyar. Değilse kilidi `[DOLU]` yap.
+2. **Kilit Kontrolü:** İstenen modül kilitliyse kullanıcıyı uyar. Değilse `PROJECT_STATE.md` kilidini al.
 
-3. **Mimari & Şema:** Projenin `ARCHITECTURE.md` şemasına ve `TECHNICAL_DOC.md` dosyasına bakarak geliştirme yap.
-
-4. **Canlı Güncelleme (Zorunlu):**
-   - `ARCHITECTURE.md` Mermaid şemasına yeni modülü/sayfayı ekle.
-   - `ACTIVITY_LOG.md` içine yapılan işlemi en üste log olarak yaz.
-   - `TECHNICAL_DOC.md` dizin yapısını güncelle.
-   - `PROJECT_STATE.md` kilidini tekrar `[BOŞTA]` durumuna getir.
-
-5. **Eşitleme:** Kodları Git ile senkronize et.
+3. **Canlı Güncelleme (Zorunlu):**
+   - Yeni ürün eklendiğinde `ACTIVITY_LOG.md` içine log düş.
+   - Eğer Arif yeni kategori/şablon eklediyse `ARCHITECTURE.md` ve `CATEGORIES_AND_VARIANTS.md` dosyalarını güncelle.
+   - `PROJECT_STATE.md` kilidini tekrar **🟢 [BOŞTA]** yap.
+   - Kodları/verileri Git ile senkronize et.

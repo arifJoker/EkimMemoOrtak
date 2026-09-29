@@ -18,8 +18,8 @@ if ($db) {
     }
 }
 
-// Zaten yönetici girişi yapılmışsa doğrudan panele yönlendir
-if (Auth::isAdmin()) {
+// Zaten yönetici veya editör girişi yapılmışsa doğrudan panele yönlendir
+if (Auth::hasAdminAccess()) {
     header("Location: " . SITE_URL . "/admin/index.php");
     exit;
 }
@@ -46,13 +46,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $res = Auth::login($email, $password);
     if ($res['success']) {
-        if (Auth::isAdmin()) {
+        if (Auth::hasAdminAccess()) {
             $redirect = !empty($_GET['redirect']) ? $_GET['redirect'] : (SITE_URL . '/admin/index.php');
             header("Location: " . $redirect);
             exit;
         } else {
             Auth::logout();
-            $error = 'Giriş yapılan hesabın Yönetici (Admin) yetkisi bulunmuyor.';
+            $error = 'Giriş yapılan hesabın Yönetim Paneli (Admin/Editör) yetkisi bulunmuyor.';
         }
     } else {
         $error = $res['error'] ?? 'Hatalı e-posta adresi veya şifre girdiniz.';

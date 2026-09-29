@@ -29,6 +29,31 @@ class Auth {
         return $user && $user['role'] === 'admin';
     }
 
+    public static function isEditor() {
+        $user = self::user();
+        return $user && in_array($user['role'], ['editor', 'product_manager']);
+    }
+
+    public static function hasAdminAccess() {
+        $user = self::user();
+        return $user && in_array($user['role'], ['admin', 'editor', 'product_manager']);
+    }
+
+    public static function canManageProducts() {
+        $user = self::user();
+        return $user && in_array($user['role'], ['admin', 'editor', 'product_manager']);
+    }
+
+    public static function canManageDesign() {
+        $user = self::user();
+        return $user && $user['role'] === 'admin';
+    }
+
+    public static function canManageSettings() {
+        $user = self::user();
+        return $user && $user['role'] === 'admin';
+    }
+
     public static function isDealer() {
         $user = self::user();
         return $user && $user['role'] === 'dealer' && $user['dealer_status'] === 'approved';
@@ -116,9 +141,18 @@ class Auth {
     }
 
     public static function requireAdmin() {
-        if (!self::isAdmin()) {
+        if (!self::hasAdminAccess()) {
             Helper::setFlash('danger', 'Bu sayfaya erişim yetkiniz bulunmuyor.');
             header("Location: " . SITE_URL . "/admin/login.php?redirect=" . urlencode($_SERVER['REQUEST_URI']));
+            exit;
+        }
+    }
+
+    public static function requireDesignPermission() {
+        self::requireAdmin();
+        if (!self::canManageDesign()) {
+            Helper::setFlash('danger', 'Tasarım ve sistem ayarlarını değiştirme yetkiniz bulunmamaktadır. Yetkiniz yalnızca ürün yönetimi ve ürün yükleme ile sınırlandırılmıştır.');
+            header("Location: " . SITE_URL . "/admin/products.php");
             exit;
         }
     }

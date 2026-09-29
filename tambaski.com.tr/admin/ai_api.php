@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
-Auth::requireAdmin();
+Auth::requireDesignPermission();
 
 $db = Database::getInstance()->getConnection();
 $action = $_GET['action'] ?? 'list';

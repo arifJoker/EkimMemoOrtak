@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
-Auth::requireAdmin();
+Auth::requireDesignPermission();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // PayTR Ayarları
