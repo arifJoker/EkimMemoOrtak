@@ -7,13 +7,14 @@ class Product {
 
     public function __construct() {
         $this->db = Database::getInstance()->getConnection();
+        $this->ensureDekotaCategoryAndProduct();
     }
 
     /**
      * Tüm Aktif Ürünleri Getirir
      */
     public function getAll($limit = null, $categoryId = null, $onlyFeatured = false, $onlyUrgent = false) {
-        $sql = "SELECT p.*, c.name AS category_name, c.slug AS category_slug 
+        $sql = "SELECT p.*, c.name AS category_name, c.slug AS category_slug, c.pricing_model AS category_pricing_model 
                 FROM products p 
                 LEFT JOIN categories c ON p.category_id = c.id 
                 WHERE p.status = 1";
@@ -113,7 +114,7 @@ class Product {
      * Slug ile Ürün ve Detaylarını Getirir
      */
     public function getBySlug($slug) {
-        $stmt = $this->db->prepare("SELECT p.*, c.name AS category_name, c.slug AS category_slug 
+        $stmt = $this->db->prepare("SELECT p.*, c.name AS category_name, c.slug AS category_slug, c.pricing_model AS category_pricing_model 
                                     FROM products p 
                                     LEFT JOIN categories c ON p.category_id = c.id 
                                     WHERE p.slug = ? AND p.status = 1");
@@ -136,7 +137,10 @@ class Product {
      * ID ile Ürün Getirir
      */
     public function getById($id) {
-        $stmt = $this->db->prepare("SELECT * FROM products WHERE id = ?");
+        $stmt = $this->db->prepare("SELECT p.*, c.name AS category_name, c.slug AS category_slug, c.pricing_model AS category_pricing_model 
+                                    FROM products p 
+                                    LEFT JOIN categories c ON p.category_id = c.id 
+                                    WHERE p.id = ?");
         $stmt->execute([$id]);
         $product = $stmt->fetch();
 
@@ -440,8 +444,81 @@ class Product {
             $basePrice = (float)($product['manual_base_price'] ?? 750.00);
         }
 
-        // 1. Paket Fiyatı / Çarpanı Tespiti
         $presets = !empty($product['package_presets']) ? json_decode($product['package_presets'], true) : [];
+
+        // 0. Sert Zemin & Levha Modeli (rigid_board - Dekota Uyarı Levhaları vb.) Fiyat Hesaplama
+        if (!empty($product['category_pricing_model']) && $product['category_pricing_model'] === 'rigid_board') {
+            $isCustomSize = ($selectedPackage === 'ozel' || ($customWidth > 0 && $customHeight > 0));
+            $unitBasePrice = 95.00;
+
+            if ($isCustomSize && $customWidth > 0 && $customHeight > 0) {
+                // Dinamik m2 hesabı (m2 birim fiyatı 550 TL)
+                $areaM2 = ($customWidth * $customHeight) / 10000;
+                $unitBasePrice = max(65.00, round($areaM2 * 550.00, 2));
+            } else {
+                if (!empty($presets[$selectedPackage]['price'])) {
+                    $unitBasePrice = (float)$presets[$selectedPackage]['price'];
+                }
+            }
+
+            // Kalınlık Seçimi (5mm ise +%25)
+            $thickness = $selectedOptions['thickness'] ?? '3mm';
+            if ($thickness === '5mm') {
+                $unitBasePrice = round($unitBasePrice * 1.25, 2);
+            }
+
+            // Montaj Seçeneği
+            $mounting = $selectedOptions['mounting'] ?? 'none';
+            if ($mounting === 'tape') {
+                $unitBasePrice += 15.00; // Çift taraflı köpük bant
+            } elseif ($mounting === 'holes') {
+                $unitBasePrice += 10.00; // 4 Köşeden delikli
+            }
+
+            // Kademeli Toplu Adet İndirimi
+            $discountPercent = 0.0;
+            if ($quantity >= 100) $discountPercent = 40.0;
+            elseif ($quantity >= 50) $discountPercent = 30.0;
+            elseif ($quantity >= 25) $discountPercent = 20.0;
+            elseif ($quantity >= 10) $discountPercent = 10.0;
+
+            $unitPrice = round($unitBasePrice * (1 - ($discountPercent / 100)), 2);
+            $calculatedSubtotal = round($unitPrice * $quantity, 2);
+
+            if ($includeDesignService && !empty($product['allow_design_service'])) {
+                $calculatedSubtotal += (float)($product['design_service_price'] ?? 150.0);
+            }
+
+            $dealerDiscountRate = Auth::getDiscountRate();
+            if ($dealerDiscountRate > 0) {
+                $calculatedSubtotal -= ($calculatedSubtotal * ($dealerDiscountRate / 100));
+            }
+
+            $taxRate = (float)($product['tax_rate'] ?? 20.0);
+            $taxAmount = $calculatedSubtotal * ($taxRate / 100);
+            $totalWithTax = $calculatedSubtotal + $taxAmount;
+
+            return [
+                'success'               => true,
+                'product_id'            => (int)$productId,
+                'quantity'              => $quantity,
+                'package'               => $selectedPackage,
+                'unit_price'            => $unitPrice,
+                'unit_base_price'       => $unitBasePrice,
+                'discount_percent'      => $discountPercent,
+                'subtotal'              => $calculatedSubtotal,
+                'tax_rate'              => $taxRate,
+                'tax_amount'            => round($taxAmount, 2),
+                'total'                 => round($totalWithTax, 2),
+                'formatted_total'       => Helper::formatPrice($totalWithTax),
+                'formatted_subtotal'    => Helper::formatPrice($calculatedSubtotal),
+                'formatted_unit_price'  => Helper::formatPrice($unitPrice),
+                'currency'              => 'TRY',
+                'pricing_model'         => 'rigid_board'
+            ];
+        }
+
+        // 1. Standart Paket Fiyatı / Çarpanı Tespiti (Kartvizit vb.)
         $packagePrice = $basePrice;
 
         if (!empty($presets[$selectedPackage])) {
@@ -741,6 +818,110 @@ class Product {
         } catch (Exception $e) {
             return [];
         }
+    }
+
+    public function ensureDekotaCategoryAndProduct() {
+        if (!$this->db) return;
+        try {
+            // 1. Dekota Uyarı Levhaları Kategorisi
+            $catStmt = $this->db->prepare("SELECT id FROM categories WHERE slug = 'dekota-uyari-levhalari' LIMIT 1");
+            $catStmt->execute();
+            $catId = $catStmt->fetchColumn();
+
+            if (!$catId) {
+                $insCat = $this->db->prepare("INSERT INTO categories (name, slug, icon, pricing_model, sort_order, status) VALUES (?, ?, ?, ?, ?, ?)");
+                $insCat->execute(['Dekota Uyarı Levhaları', 'dekota-uyari-levhalari', 'bi bi-exclamation-triangle-fill', 'rigid_board', 2, 1]);
+                $catId = $this->db->lastInsertId();
+            } else {
+                $this->db->prepare("UPDATE categories SET pricing_model = 'rigid_board', icon = 'bi bi-exclamation-triangle-fill' WHERE id = ?")->execute([$catId]);
+            }
+
+            // 2. Dekota Ürünü
+            $prodStmt = $this->db->prepare("SELECT id FROM products WHERE slug = 'dekota-isg-guvenlik-uyari-levhasi' LIMIT 1");
+            $prodStmt->execute();
+            $prodId = $prodStmt->fetchColumn();
+
+            $dekotaPackages = [
+                'kucuk' => [
+                    'name'   => 'Küçük Boy (25x35 cm)',
+                    'active' => 1,
+                    'price'  => 95.00,
+                    'desc'   => 'Kapı üstü, pano yanı, ofis ve atölye içi kullanım',
+                    'badge'  => 'Kompakt (25x35 cm)',
+                    'width'  => 25,
+                    'height' => 35
+                ],
+                'orta' => [
+                    'name'   => 'Orta Boy (35x50 cm)',
+                    'active' => 1,
+                    'price'  => 145.00,
+                    'desc'   => 'Koridorlar, üretim hatları ve elektrik panoları',
+                    'badge'  => 'Standart (35x50 cm)',
+                    'width'  => 35,
+                    'height' => 50
+                ],
+                'buyuk' => [
+                    'name'   => 'Büyük Boy (50x70 cm)',
+                    'active' => 1,
+                    'price'  => 240.00,
+                    'desc'   => 'Fabrika girişleri, şantiyeler ve geniş depo alanları',
+                    'badge'  => 'Çok Satan (50x70 cm)',
+                    'width'  => 50,
+                    'height' => 70
+                ],
+                'mega' => [
+                    'name'   => 'Mega Boy (70x100 cm)',
+                    'active' => 1,
+                    'price'  => 420.00,
+                    'desc'   => 'Dış cephe, nizamiyeler ve otopark yönlendirme',
+                    'badge'  => 'Dev Ebat (70x100 cm)',
+                    'width'  => 70,
+                    'height' => 100
+                ]
+            ];
+            $pkgJson = json_encode($dekotaPackages, JSON_UNESCAPED_UNICODE);
+            $galleryJson = json_encode([
+                'uploads/mockups/tambaski_dekota_mockup.jpg',
+                'uploads/mockups/tambaski_dekota_collection.jpg'
+            ], JSON_UNESCAPED_SLASHES);
+
+            if (!$prodId) {
+                $insProd = $this->db->prepare("INSERT INTO products 
+                    (category_id, name, slug, sku, short_description, full_description, base_price, package_presets, featured_image, gallery, allow_online_editor, allow_design_upload, is_featured, is_urgent, status) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $insProd->execute([
+                    $catId,
+                    'Dekota İSG & Güvenlik Uyarı Levhası',
+                    'dekota-isg-guvenlik-uyari-levhasi',
+                    'TB-LEVH-01',
+                    '3mm / 5mm Sert Dekota (Forex) zemin üzerine yüksek çözünürlüklü UV baskılı İSG, fabrika ve tesis güvenlik uyarı levhaları.',
+                    '3mm veya 5mm Sert Dekota (Forex) zemin üzerine direkt UV baskı teknolojisiyle üretilen yüksek dayanımlı uyarı levhaları. Solmaz, neme, suya ve güneşe tam dayanıklıdır.',
+                    95.00,
+                    $pkgJson,
+                    'uploads/mockups/tambaski_dekota_mockup.jpg',
+                    $galleryJson,
+                    1, 1, 1, 1, 1
+                ]);
+                $prodId = $this->db->lastInsertId();
+
+                // Kademeli Adet İskontoları
+                $tiers = [
+                    ['quantity' => 1, 'multiplier' => 1.0, 'discount_percent' => 0],
+                    ['quantity' => 5, 'multiplier' => 1.0, 'discount_percent' => 0],
+                    ['quantity' => 10, 'multiplier' => 0.90, 'discount_percent' => 10],
+                    ['quantity' => 25, 'multiplier' => 0.80, 'discount_percent' => 20],
+                    ['quantity' => 50, 'multiplier' => 0.70, 'discount_percent' => 30],
+                    ['quantity' => 100, 'multiplier' => 0.60, 'discount_percent' => 40],
+                ];
+                $insTier = $this->db->prepare("INSERT INTO product_quantity_tiers (product_id, quantity, multiplier, discount_percent) VALUES (?, ?, ?, ?)");
+                foreach ($tiers as $t) {
+                    $insTier->execute([$prodId, $t['quantity'], $t['multiplier'], $t['discount_percent']]);
+                }
+            } else {
+                $this->db->prepare("UPDATE products SET category_id = ?, package_presets = ?, featured_image = ?, gallery = ?, allow_online_editor = 1, status = 1 WHERE id = ?")
+                         ->execute([$catId, $pkgJson, 'uploads/mockups/tambaski_dekota_mockup.jpg', $galleryJson, $prodId]);
+            }
+        } catch (Exception $e) {}
     }
 }
 

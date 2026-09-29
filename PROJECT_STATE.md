@@ -6,5 +6,5 @@
 | **Memo** | - | - | - | 🟢 [BOŞTA] |
 
 ---
-- **Son Eşitleme:** 2026-09-29 21:10
-- **Durum:** ✅ Kartvizit kategorisi (4 Paket, Tiraj, Canva Studio, 3D Mockup) izole edildi, Kategori bazlı hesaplama modelleri (m², sert zemin, adet) ve RBAC editör yetki sınırlandırması tamamlandı.
+- **Son Eşitleme:** 2026-09-29 21:35
+- **Durum:** ✅ Dekota Uyarı Levhaları kategorisi ve test ürünü (4 Ebat Paketi + Özel m² + Kalınlık + Montaj + Adet İndirimi + 100+ Türkçe İSG Piktogramlı Sign & Safety Studio) canlıya alındı. Memo için rehber dokümante edildi.

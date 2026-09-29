@@ -20,6 +20,9 @@ $pageDesc = $product['short_description'] ?? 'En uygun fiyatlarla kaliteli ' . $
 // Seçili gelen şablon parametresi varsa
 $selectedTplId = (int)($_GET['tpl'] ?? 0);
 
+$pricingModel = $product['category_pricing_model'] ?? 'package_tier';
+$isDekota = ($pricingModel === 'rigid_board') || str_contains($product['slug'], 'dekota') || str_contains($product['category_slug'] ?? '', 'dekota');
+
 require_once __DIR__ . '/includes/header.php';
 ?>
 
@@ -42,13 +45,19 @@ require_once __DIR__ . '/includes/header.php';
                 
                 <div class="product-top-feature-chips mb-2 d-none d-lg-flex flex-wrap gap-1">
                     <?php if ($product['is_urgent']): ?>
-                        <span class="badge bg-danger text-white fw-bold rounded-pill px-2 py-1" style="font-size: 11px;"><i class="bi bi-lightning-fill"></i> 24 Saatte Acil Baskı</span>
+                        <span class="badge bg-danger text-white fw-bold rounded-pill px-2 py-1" style="font-size: 11px;"><i class="bi bi-lightning-fill"></i> 24 Saatte Hızlı Üretim</span>
                     <?php endif; ?>
-                    <span class="badge bg-info-subtle text-info fw-bold rounded-pill px-2 py-1" style="font-size: 11px;">
-                        <i class="bi bi-droplet-fill me-1"></i> Su & Nem Korumalı
-                    </span>
+                    <?php if ($isDekota): ?>
+                        <span class="badge bg-warning text-dark fw-bold rounded-pill px-2 py-1" style="font-size: 11px;">
+                            <i class="bi bi-shield-shaded me-1"></i> Sert Forex &amp; Dış Mekan UV Baskı
+                        </span>
+                    <?php else: ?>
+                        <span class="badge bg-info-subtle text-info fw-bold rounded-pill px-2 py-1" style="font-size: 11px;">
+                            <i class="bi bi-droplet-fill me-1"></i> Su &amp; Nem Korumalı
+                        </span>
+                    <?php endif; ?>
                     <?php if ($product['allow_online_editor']): ?>
-                        <span class="badge bg-primary-subtle text-primary fw-bold rounded-pill px-2 py-1" style="font-size: 11px;"><i class="bi bi-palette-fill"></i> Online Vektörel Tasarımlı</span>
+                        <span class="badge bg-primary-subtle text-primary fw-bold rounded-pill px-2 py-1" style="font-size: 11px;"><i class="bi bi-palette-fill"></i> <?= $isDekota ? 'Vektörel Levha Stüdyosu' : 'Online Vektörel Tasarımlı' ?></span>
                     <?php endif; ?>
                 </div>
 
@@ -56,12 +65,19 @@ require_once __DIR__ . '/includes/header.php';
                 <!-- 📸 ÜRÜN GÖRSELİ & GALERİ -->
                 <!-- ========================================================================= -->
                 <?php
-                $mainProductImage = SITE_URL . '/uploads/mockups/tambaski_kartvizit_desk_mockup.jpg';
-                
-                $galleryImages = [
-                    SITE_URL . '/uploads/mockups/tambaski_kartvizit_desk_mockup.jpg',
-                    SITE_URL . '/uploads/mockups/tambaski_kartvizit_vip_mockup.jpg'
-                ];
+                if ($isDekota) {
+                    $mainProductImage = SITE_URL . '/uploads/mockups/tambaski_dekota_mockup.jpg';
+                    $galleryImages = [
+                        SITE_URL . '/uploads/mockups/tambaski_dekota_mockup.jpg',
+                        SITE_URL . '/uploads/mockups/tambaski_dekota_collection.jpg'
+                    ];
+                } else {
+                    $mainProductImage = SITE_URL . '/uploads/mockups/tambaski_kartvizit_desk_mockup.jpg';
+                    $galleryImages = [
+                        SITE_URL . '/uploads/mockups/tambaski_kartvizit_desk_mockup.jpg',
+                        SITE_URL . '/uploads/mockups/tambaski_kartvizit_vip_mockup.jpg'
+                    ];
+                }
                 
                 if (!empty($product['gallery_array'])) {
                     foreach ($product['gallery_array'] as $gImg) {
@@ -705,8 +721,8 @@ require_once __DIR__ . '/includes/header.php';
 
                 <div class="d-flex justify-content-between align-items-baseline mb-2">
                     <div>
-                        <h5 class="fw-bold mb-0">1. Baskı Paketini Seçin</h5>
-                        <span class="text-muted small d-none d-md-inline">İhtiyacınıza en uygun hazır paketi belirleyin</span>
+                        <h5 class="fw-bold mb-0"><?= $isDekota ? '1. Levha Boyutunu &amp; Ölçüsünü Seçin' : '1. Baskı Paketini Seçin' ?></h5>
+                        <span class="text-muted small d-none d-md-inline"><?= $isDekota ? 'Kullanım alanınıza en uygun levha ebatını belirleyin' : 'İhtiyacınıza en uygun hazır paketi belirleyin' ?></span>
                     </div>
                 </div>
 
@@ -721,7 +737,7 @@ require_once __DIR__ . '/includes/header.php';
                     <input type="hidden" name="design_back_svg" id="selectedDesignBackSvg" value="">
 
                     <!-- ========================================================================= -->
-                    <!-- 📦 4'LÜ HAZIR PAKET KARTLARI (Admin Ayarlarına Göre Dinamik) -->
+                    <!-- 📦 4'LÜ HAZIR PAKET / EBAT KARTLARI (Admin Ayarlarına Göre Dinamik) -->
                     <!-- ========================================================================= -->
                     <?php
                     $presets = !empty($product['package_presets']) ? json_decode($product['package_presets'], true) : [];
@@ -742,29 +758,53 @@ require_once __DIR__ . '/includes/header.php';
                                 $ribbon = '';
                                 $ribbonClass = '';
 
-                                if (str_contains($pKey, 'eko')) {
-                                    $icon = 'bi-wallet2';
-                                    $iconClass = 'text-secondary';
-                                    if (empty($badge)) $badge = 'Uygun Fiyat';
-                                    $badgeClass = 'bg-success-subtle text-success';
-                                } elseif (str_contains($pKey, 'std') || str_contains($pKey, 'standart')) {
-                                    $icon = 'bi-award-fill';
-                                    $iconClass = 'text-primary';
-                                    if (empty($badge)) $badge = 'Çok Satan';
-                                    $badgeClass = 'bg-primary-subtle text-primary';
-                                    $ribbon = 'Popüler';
-                                } elseif (str_contains($pKey, 'prem')) {
-                                    $icon = 'bi-stars';
-                                    $iconStyle = 'color: #8b5cf6;';
-                                    if (empty($badge)) $badge = 'Özel Doku';
-                                    $badgeStyle = 'background: #8b5cf6; color: #fff;';
-                                } elseif (str_contains($pKey, 'vip')) {
-                                    $icon = 'bi-gem';
-                                    $iconClass = 'text-warning';
-                                    if (empty($badge)) $badge = 'VIP Prestij';
-                                    $badgeClass = 'bg-warning-subtle text-dark';
-                                    $ribbon = 'VIP';
-                                    $ribbonClass = 'ribbon-vip';
+                                if ($isDekota) {
+                                    if ($pKey === 'kucuk') {
+                                        $icon = 'bi-aspect-ratio';
+                                        $iconClass = 'text-secondary';
+                                        $badgeClass = 'bg-secondary-subtle text-dark';
+                                    } elseif ($pKey === 'orta') {
+                                        $icon = 'bi-grid-1x2-fill';
+                                        $iconClass = 'text-primary';
+                                        $badgeClass = 'bg-primary-subtle text-primary';
+                                        $ribbon = 'Standart';
+                                    } elseif ($pKey === 'buyuk') {
+                                        $icon = 'bi-fullscreen';
+                                        $iconClass = 'text-success';
+                                        $badgeClass = 'bg-success-subtle text-success';
+                                        $ribbon = 'Çok Satan';
+                                        $ribbonClass = 'ribbon-vip';
+                                    } elseif ($pKey === 'mega') {
+                                        $icon = 'bi-arrows-angle-expand';
+                                        $iconClass = 'text-warning';
+                                        $badgeClass = 'bg-warning-subtle text-dark';
+                                        $ribbon = 'Mega';
+                                    }
+                                } else {
+                                    if (str_contains($pKey, 'eko')) {
+                                        $icon = 'bi-wallet2';
+                                        $iconClass = 'text-secondary';
+                                        if (empty($badge)) $badge = 'Uygun Fiyat';
+                                        $badgeClass = 'bg-success-subtle text-success';
+                                    } elseif (str_contains($pKey, 'std') || str_contains($pKey, 'standart')) {
+                                        $icon = 'bi-award-fill';
+                                        $iconClass = 'text-primary';
+                                        if (empty($badge)) $badge = 'Çok Satan';
+                                        $badgeClass = 'bg-primary-subtle text-primary';
+                                        $ribbon = 'Popüler';
+                                    } elseif (str_contains($pKey, 'prem')) {
+                                        $icon = 'bi-stars';
+                                        $iconStyle = 'color: #8b5cf6;';
+                                        if (empty($badge)) $badge = 'Özel Doku';
+                                        $badgeStyle = 'background: #8b5cf6; color: #fff;';
+                                    } elseif (str_contains($pKey, 'vip')) {
+                                        $icon = 'bi-gem';
+                                        $iconClass = 'text-warning';
+                                        if (empty($badge)) $badge = 'VIP Prestij';
+                                        $badgeClass = 'bg-warning-subtle text-dark';
+                                        $ribbon = 'VIP';
+                                        $ribbonClass = 'ribbon-vip';
+                                    }
                                 }
 
                                 $activePackages[$pKey] = [
@@ -785,21 +825,28 @@ require_once __DIR__ . '/includes/header.php';
                         }
                     }
 
-                    if (empty($activePackages)) {
-                        $activePackages = [
-                            'standart' => [
-                                'key' => 'standart', 'title' => 'Standart', 'ribbon' => 'Popüler', 'ribbon_class' => '',
-                                'icon' => 'bi-award-fill', 'icon_class' => 'text-primary', 'icon_style' => '',
-                                'desc' => '350gr Kuşe, Çift Taraf Mat Selefon', 'badge' => 'Çok Satan',
-                                'badge_class' => 'bg-primary-subtle text-primary', 'badge_style' => '', 'price' => ($product['base_price'] ?? 900)
-                            ]
+                    if ($isDekota) {
+                        // Dekota için Özel Ölçü opsiyonu
+                        $activePackages['ozel'] = [
+                            'key'         => 'ozel',
+                            'title'       => 'Özel Ölçü',
+                            'ribbon'      => 'm²',
+                            'ribbon_class'=> 'bg-info text-white',
+                            'icon'        => 'bi-pencil-square',
+                            'icon_class'  => 'text-info',
+                            'icon_style'  => '',
+                            'desc'        => 'En x Boy cm kendiniz belirleyin',
+                            'badge'       => 'Dinamik m²',
+                            'badge_class' => 'bg-info-subtle text-info',
+                            'badge_style' => '',
+                            'price'       => 95.00
                         ];
                     }
 
                     $pkgKeys = array_keys($activePackages);
-                    $firstPkgKey = in_array('standart', $pkgKeys) ? 'standart' : ($pkgKeys[0] ?? 'standart');
+                    $firstPkgKey = in_array('orta', $pkgKeys) ? 'orta' : (in_array('standart', $pkgKeys) ? 'standart' : ($pkgKeys[0] ?? 'standart'));
                     ?>
-                    <div class="package-grid mb-2 mb-lg-4">
+                    <div class="package-grid mb-2 mb-lg-3 <?= $isDekota ? 'dekota-package-grid' : '' ?>">
                         <?php foreach ($activePackages as $pKey => $pkg): ?>
                             <div class="pkg-card <?= $pKey === $firstPkgKey ? 'active' : '' ?>" id="card_pkg_<?= $pKey ?>" onclick="selectPackage('<?= $pKey ?>', this)">
                                 <?php if (!empty($pkg['ribbon'])): ?>
@@ -816,9 +863,58 @@ require_once __DIR__ . '/includes/header.php';
                         <?php endforeach; ?>
                     </div>
 
+                    <?php if ($isDekota): ?>
+                    <!-- Dekota: Özel Ölçü Giriş Kutusu -->
+                    <div id="dekotaCustomSizeBox" class="p-3 rounded-4 border mb-3 shadow-2xs" style="display: none; background: #f0fdf4; border-color: #86efac !important;">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="small fw-bold text-success"><i class="bi bi-aspect-ratio me-1"></i> İstediğiniz Özel Levha Ölçüsünü Girin:</span>
+                            <span class="badge bg-success text-white" id="dekotaCustomM2Badge">0.24 m²</span>
+                        </div>
+                        <div class="row g-2 align-items-center">
+                            <div class="col-6">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-white">En (cm)</span>
+                                    <input type="number" name="dekota_width_cm" id="dekotaWidthCm" class="form-control" value="40" min="10" max="200" oninput="onDekotaCustomSizeChange()">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-white">Boy (cm)</span>
+                                    <input type="number" name="dekota_height_cm" id="dekotaHeightCm" class="form-control" value="60" min="10" max="300" oninput="onDekotaCustomSizeChange()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dekota: Kalınlık & Montaj Seçimi -->
+                    <div class="p-3 bg-light rounded-4 border mb-3 shadow-2xs">
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark mb-1">
+                                    <i class="bi bi-layers-fill text-primary me-1"></i> Levha Kalınlığı
+                                </label>
+                                <select name="thickness" id="dekotaThicknessSelect" class="form-select form-select-sm" onchange="calculateLivePrice()">
+                                    <option value="3mm" selected>3 mm Sert Dekota (Standart Rijit)</option>
+                                    <option value="5mm">5 mm Sert Dekota (Ekstra Dayanıklı Dış Mekan +%25)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark mb-1">
+                                    <i class="bi bi-tools text-primary me-1"></i> Montaj Hazırlığı
+                                </label>
+                                <select name="mounting" id="dekotaMountingSelect" class="form-select form-select-sm" onchange="calculateLivePrice()">
+                                    <option value="none" selected>Montajsız (Düz Levha)</option>
+                                    <option value="tape">Çift Taraflı Güçlü Köpük Bant (+15 ₺)</option>
+                                    <option value="holes">4 Köşeden Delikli (Vida Uygun +10 ₺)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
                     <!-- 📱 Mobilde 1 Satırlık Dinamik Paket Özeti -->
                     <div id="mobilePkgDesc" class="d-lg-none text-center small text-primary bg-primary-subtle border border-primary-subtle rounded-pill py-1 px-3 mb-3 fw-semibold shadow-xs" style="font-size: 11px;">
-                        💧 Mat Selefonlu & Suya Dayanıklı
+                        <?= $isDekota ? '🛡️ 3mm/5mm Sert Dekota & UV Baskı' : '💧 Mat Selefonlu & Suya Dayanıklı' ?>
                     </div>
 
                     <!-- ========================================================================= -->
@@ -827,9 +923,9 @@ require_once __DIR__ . '/includes/header.php';
                     <div class="mb-4">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <label class="option-group-title mb-0">
-                                <span><i class="bi bi-layers me-1 text-primary"></i> 2. Baskı Adedi</span>
+                                <span><i class="bi bi-layers me-1 text-primary"></i> <?= $isDekota ? '2. Levha Adedi' : '2. Baskı Adedi' ?></span>
                             </label>
-                            <span class="text-muted small">Tiraj arttıkça birim fiyat %50'ye varan oranda düşer</span>
+                            <span class="text-muted small"><?= $isDekota ? 'Toplu alımlarda %40\'a varan adet indirimi' : 'Tiraj arttıkça birim fiyat %50\'ye varan oranda düşer' ?></span>
                         </div>
                         
                         <div class="qty-grid mb-2">
@@ -848,13 +944,13 @@ require_once __DIR__ . '/includes/header.php';
                                 <!-- ✏️ Özel Adet Kutusu -->
                                 <div class="qty-box" id="qty_box_custom" onclick="activateCustomQty(this)" style="border-style: dashed;">
                                     <span class="position-absolute top-0 end-0 translate-middle-y badge bg-info rounded-pill" style="font-size: 9px; right: 4px;">Özel</span>
-                                    <input type="radio" name="quantity" id="customQtyRadio" value="500" style="display:none;">
+                                    <input type="radio" name="quantity" id="customQtyRadio" value="<?= $isDekota ? 5 : 500 ?>" style="display:none;">
                                     <div class="fw-bold text-primary fs-6"><i class="bi bi-pencil-square"></i></div>
                                     <div class="text-muted" style="font-size: 11px;">Özel Adet</div>
                                 </div>
                             <?php else: ?>
                                 <div style="grid-column: span 5;">
-                                    <input type="number" name="quantity" class="form-control" value="1000" min="1">
+                                    <input type="number" name="quantity" class="form-control" value="<?= $isDekota ? 1 : 1000 ?>" min="1">
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -867,58 +963,60 @@ require_once __DIR__ . '/includes/header.php';
                                 </div>
                                 <div class="col">
                                     <div class="input-group input-group-sm">
-                                        <input type="number" id="manualCustomQtyInput" class="form-control" min="10" step="10" value="500" placeholder="Örn: 250, 500, 1500, 7500">
+                                        <input type="number" id="manualCustomQtyInput" class="form-control" min="1" step="1" value="<?= $isDekota ? 5 : 500 ?>" placeholder="Örn: <?= $isDekota ? '5, 12, 30, 75' : '250, 500, 1500, 7500' ?>">
                                         <span class="input-group-text">Adet</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- 💡 Avantajlı Üretim & Akıllı Adet Tavsiyesi -->
-                        <div id="liveUpsellCard" class="p-3 rounded-4 border mt-2 shadow-sm" style="display: none; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-color: #f59e0b !important;">
-                            <div class="d-flex align-items-start justify-content-between flex-wrap gap-2">
-                                <div>
-                                    <span class="badge bg-warning text-dark fw-bold mb-1"><i class="bi bi-stars me-1 text-danger"></i> AVANTAJLI ADET TAVSİYESİ</span>
-                                    <div class="small text-dark" id="upsellMessageText"></div>
-                                </div>
-                                <button type="button" class="btn btn-sm btn-warning text-dark fw-bold rounded-pill px-3 shadow-sm text-nowrap" id="btnApplyUpsell">
-                                    <i class="bi bi-fire text-danger me-1"></i> Fırsatı Uygula
-                                </button>
-                            </div>
+                        <?php if ($isDekota): ?>
+                        <div class="d-flex align-items-center gap-1 text-muted small mt-1" style="font-size: 11px;">
+                            <i class="bi bi-info-circle text-primary"></i>
+                            <span>Özel tasarım veya özel ölçülü levhalarda minimum sipariş miktarı <strong>5 adettir</strong>.</span>
                         </div>
+                        <?php endif; ?>
 
                     </div>
 
-                    <!-- Standart Ölçü Sabitleri (İnce ayar kaldırıldı, standart paketler devrede) -->
+                    <!-- Standart Ölçü Sabitleri -->
                     <input type="hidden" name="size_type" value="standard">
-                    <input type="hidden" name="custom_width" id="customWidth" value="<?= $product['standard_width'] ?? 8.4 ?>">
-                    <input type="hidden" name="custom_height" id="customHeight" value="<?= $product['standard_height'] ?? 5.2 ?>">
+                    <input type="hidden" name="custom_width" id="customWidth" value="<?= $product['standard_width'] ?? 35 ?>">
+                    <input type="hidden" name="custom_height" id="customHeight" value="<?= $product['standard_height'] ?? 50 ?>">
 
                     <!-- ========================================================================= -->
                     <!-- 3. TASARIM TERCİHİ (Sadece Tek Buton & Tıklanınca Popup Modal Açılır) -->
                     <!-- ========================================================================= -->
                     <div class="design-choice-box" id="designSectionBox">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <label class="fw-bold small mb-0 text-dark" id="designSectionTitle"><i class="bi bi-palette text-primary me-1"></i> 3. Tasarım Tercihi</label>
+                            <label class="fw-bold small mb-0 text-dark" id="designSectionTitle"><i class="bi bi-palette text-primary me-1"></i> <?= $isDekota ? '3. Levha Tasarımı &amp; Kişiselleştirme' : '3. Tasarım Tercihi' ?></label>
                             <span class="badge bg-primary-subtle text-primary shadow-2xs" id="designSectionStatusBadge" style="font-size: 10px;">
-                                <i class="bi bi-stars me-1"></i> İnteraktif Tasarım &amp; Şablonlar
+                                <i class="bi bi-stars me-1"></i> <?= $isDekota ? 'İSG &amp; Güvenlik Vektör Stüdyosu' : 'İnteraktif Tasarım &amp; Şablonlar' ?>
                             </span>
                         </div>
                         
                         <!-- 1. HENÜZ TASARIM OLUŞTURULMAMIŞKEN GÖRÜNEN TEK ANA BUTON -->
                         <div id="designInitialSelector">
                             <div class="p-3 rounded-4 bg-white border shadow-2xs text-center">
-                                <button type="button" class="btn btn-danger w-100 py-3 fw-bold rounded-pill shadow-sm d-flex align-items-center justify-content-center gap-2" id="btnMainStartDesign" onclick="openDesignChoiceModal()" style="background: linear-gradient(135deg, #f15a24, #e11d48); border: none; font-size: 16px;">
+                                <button type="button" class="btn btn-danger w-100 py-3 fw-bold rounded-pill shadow-sm d-flex align-items-center justify-content-center gap-2" id="btnMainStartDesign" onclick="openProductDesignAction()" style="background: linear-gradient(135deg, #f15a24, #e11d48); border: none; font-size: 16px;">
                                     <i class="bi bi-palette-fill fs-5"></i>
-                                    <span>🎨 Tasarlamaya Başla</span>
+                                    <span><?= $isDekota ? '🎨 Levhayı Tasarla / Özelleştir' : '🎨 Tasarlamaya Başla' ?></span>
                                 </button>
                                 
                                 <div class="d-flex align-items-center justify-content-center gap-2 flex-wrap mt-2 text-muted" style="font-size: 11px;">
-                                    <span class="d-inline-flex align-items-center gap-1"><i class="bi bi-magic text-warning"></i> 100+ Hazır Şablon</span>
-                                    <span>•</span>
-                                    <span class="d-inline-flex align-items-center gap-1"><i class="bi bi-cloud-arrow-up text-primary"></i> Kendi Görselini Yükle</span>
-                                    <span>•</span>
-                                    <span class="d-inline-flex align-items-center gap-1"><i class="bi bi-whatsapp text-success"></i> Grafiker Desteği</span>
+                                    <?php if ($isDekota): ?>
+                                        <span class="d-inline-flex align-items-center gap-1"><i class="bi bi-shield-check text-warning"></i> 100+ İSG Vektör Piktogramı</span>
+                                        <span>•</span>
+                                        <span class="d-inline-flex align-items-center gap-1"><i class="bi bi-fonts text-primary"></i> Özel Başlık &amp; Yazı</span>
+                                        <span>•</span>
+                                        <span class="d-inline-flex align-items-center gap-1"><i class="bi bi-image text-success"></i> Firma Logosu Ekle</span>
+                                    <?php else: ?>
+                                        <span class="d-inline-flex align-items-center gap-1"><i class="bi bi-magic text-warning"></i> 100+ Hazır Şablon</span>
+                                        <span>•</span>
+                                        <span class="d-inline-flex align-items-center gap-1"><i class="bi bi-cloud-arrow-up text-primary"></i> Kendi Görselini Yükle</span>
+                                        <span>•</span>
+                                        <span class="d-inline-flex align-items-center gap-1"><i class="bi bi-whatsapp text-success"></i> Grafiker Desteği</span>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -1881,8 +1979,183 @@ require_once __DIR__ . '/includes/header.php';
 </div>
 
 <!-- ========================================================================= -->
-<!-- ONLINE VEKTÖREL SVG DÜZENLEYİCİ MODAL (Eski Şablon Editörü) -->
+<!-- 🛡️ DEKOTA İSG & GÜVENLİK UYARI LEVHALARI TASARIM STÜDYOSU MODAL -->
 <!-- ========================================================================= -->
+<div class="modal fade" id="signStudioModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content border-0 rounded-0 bg-light">
+            
+            <!-- Stüdyo Başlık Çubuğu -->
+            <div class="modal-header bg-dark text-white py-2 px-3 border-0 d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-light rounded-pill px-3" data-bs-dismiss="modal">
+                        <i class="bi bi-arrow-left me-1"></i> Geri Dön
+                    </button>
+                    <div>
+                        <span class="fw-bold text-white small d-block">
+                            <i class="bi bi-shield-fill-exclamation text-warning me-1"></i> Dekota &amp; İSG Levha Tasarım Stüdyosu
+                        </span>
+                        <span class="text-secondary small" style="font-size: 11px;">
+                            Baskı Ebatı: <span id="signStudioDimBadge" class="badge bg-warning text-dark fw-bold">35 x 50 cm</span> • UV Sert Dekota Levha
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Aksiyon Butonları -->
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-3" onclick="SignStudio.addHazardBorder('yellow_black')">
+                        <i class="bi bi-border-style me-1"></i> İkaz Çerçevesi Ekle
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-2.5" onclick="if(confirm('Tüm levha tasarımı sıfırlansın mı?')) SignStudio.clearCanvas();">
+                        <i class="bi bi-trash me-1"></i> Temizle
+                    </button>
+                    <button type="button" class="btn btn-sm btn-success fw-bold rounded-pill px-4 shadow-sm" onclick="saveSignStudioDesign()">
+                        <i class="bi bi-check2-circle me-1"></i> Tasarımı Kaydet &amp; Siparişe Ekle
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stüdyo Ana Çalışma Alanı (Sol Araçlar + Sağ Canvas) -->
+            <div class="modal-body p-0 d-flex flex-column flex-lg-row overflow-hidden" style="height: calc(100vh - 56px);">
+                
+                <!-- SOL PANEL: Piktogramlar, Başlıklar, Yazı, Logo, Zemin -->
+                <div class="sign-studio-sidebar bg-white border-end d-flex flex-column" style="width: 100%; max-width: 420px; z-index: 10;">
+                    
+                    <!-- Sekme Başlıkları -->
+                    <ul class="nav nav-pills nav-fill p-2 bg-light border-bottom gap-1" id="signStudioTabs" role="tablist" style="font-size: 11px;">
+                        <li class="nav-item">
+                            <button class="nav-link active py-2 px-1 fw-bold" id="tab-sign-vectors-btn" data-bs-toggle="pill" data-bs-target="#tab-sign-vectors">
+                                <i class="bi bi-shield-check d-block fs-6 mb-1 text-primary"></i> Piktogramlar
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link py-2 px-1 fw-bold" id="tab-sign-headers-btn" data-bs-toggle="pill" data-bs-target="#tab-sign-headers">
+                                <i class="bi bi-badge-ad d-block fs-6 mb-1 text-danger"></i> Başlıklar
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link py-2 px-1 fw-bold" id="tab-sign-text-btn" data-bs-toggle="pill" data-bs-target="#tab-sign-text">
+                                <i class="bi bi-type d-block fs-6 mb-1 text-success"></i> Özel Yazı
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link py-2 px-1 fw-bold" id="tab-sign-logo-btn" data-bs-toggle="pill" data-bs-target="#tab-sign-logo">
+                                <i class="bi bi-image d-block fs-6 mb-1 text-info"></i> Logo Yükle
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Sekme İçerikleri -->
+                    <div class="tab-content flex-grow-1 overflow-auto p-3" id="signStudioTabContent">
+                        
+                        <!-- 1. PİKTOGRAMLAR & İSG VEKTÖRLERİ -->
+                        <div class="tab-pane fade show active" id="tab-sign-vectors" role="tabpanel">
+                            <!-- Arama -->
+                            <div class="input-group input-group-sm mb-2 shadow-2xs">
+                                <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                                <input type="text" id="signVectorSearchInput" class="form-control" placeholder="Piktogram ara (Baret, Sigara, Yangın, Elektrik...)" oninput="filterSignVectors(this.value)">
+                            </div>
+
+                            <!-- Kategori Filtre Butonları -->
+                            <div class="d-flex gap-1 flex-wrap mb-3" id="signStudioCategoryFilters">
+                                <!-- JS ile dinamik render edilir -->
+                            </div>
+
+                            <!-- Piktogram Grid Listesi -->
+                            <div id="signStudioVectorList" class="row g-2">
+                                <!-- JS ile doldurulur -->
+                            </div>
+                        </div>
+
+                        <!-- 2. BAŞLIK BANTLARI (DİKKAT, TEHLİKE, UYARI vb.) -->
+                        <div class="tab-pane fade" id="tab-sign-headers" role="tabpanel">
+                            <div class="text-muted small mb-2" style="font-size: 11.5px;">Levhanızın üst kısmına eklemek için hazır uyarı bandı seçin:</div>
+                            <div id="signStudioHeaderPresets" class="d-flex flex-column gap-2">
+                                <!-- JS ile doldurulur -->
+                            </div>
+                        </div>
+
+                        <!-- 3. ÖZEL YAZI EKLE -->
+                        <div class="tab-pane fade" id="tab-sign-text" role="tabpanel">
+                            <h6 class="fw-bold small text-dark mb-2"><i class="bi bi-fonts text-primary me-1"></i> Levhaya Özel Yazı Ekleyin</h6>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted mb-1">Uyarı / Bilgilendirme Metniniz:</label>
+                                <textarea id="signCustomTextInput" class="form-control form-control-sm rounded-3 fw-bold" rows="3" placeholder="Örn: BARETSİZ VE İŞ AYAKKABISIZ GİRİLMEZ"></textarea>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold text-muted mb-1">Yazı Rengi:</label>
+                                    <select id="signCustomTextColor" class="form-select form-select-sm">
+                                        <option value="#111827">Siyah (#111827)</option>
+                                        <option value="#dd2222">Kırmızı (#dd2222)</option>
+                                        <option value="#0055aa">Mavi (#0055aa)</option>
+                                        <option value="#d97706">Turuncu (#d97706)</option>
+                                        <option value="#16a34a">Yeşil (#16a34a)</option>
+                                        <option value="#ffffff">Beyaz (#ffffff)</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold text-muted mb-1">Punto Boyutu:</label>
+                                    <select id="signCustomTextSize" class="form-select form-select-sm">
+                                        <option value="18">Küçük (18 px)</option>
+                                        <option value="26" selected>Orta (26 px)</option>
+                                        <option value="36">Büyük (36 px)</option>
+                                        <option value="48">Ekstra Büyük (48 px)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-primary w-100 py-2 rounded-pill fw-bold shadow-xs" onclick="addSignCustomTextFromInput()">
+                                <i class="bi bi-plus-circle me-1"></i> Metni Levhaya Ekle
+                            </button>
+                        </div>
+
+                        <!-- 4. FİRMA LOGOSU YÜKLE -->
+                        <div class="tab-pane fade" id="tab-sign-logo" role="tabpanel">
+                            <h6 class="fw-bold small text-dark mb-2"><i class="bi bi-building text-info me-1"></i> Firma Logosu Ekleyin</h6>
+                            <p class="text-muted small mb-3" style="font-size: 11.5px;">Şirket veya kurum logonuzu yükleyerek levhanın alt/üst köşesine yerleştirebilirsiniz.</p>
+                            
+                            <div class="p-4 border-2 border-dashed rounded-4 text-center bg-light cursor-pointer mb-3" onclick="document.getElementById('signLogoFileInput').click()">
+                                <i class="bi bi-cloud-arrow-up text-primary fs-2"></i>
+                                <div class="fw-bold small text-dark mt-1">Logo Seçin veya Sürükleyin</div>
+                                <div class="text-muted" style="font-size: 10.5px;">PNG, JPG, SVG (Şeffaf arka plan önerilir)</div>
+                                <input type="file" id="signLogoFileInput" style="display: none;" accept="image/png,image/jpeg,image/svg+xml" onchange="handleSignLogoUpload(this)">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- SAĞ PANEL: Levha Çalışma Tuvali (Canvas) -->
+                <div class="sign-studio-workspace flex-grow-1 d-flex flex-column align-items-center justify-content-center p-3 bg-secondary bg-opacity-10 position-relative overflow-auto">
+                    
+                    <!-- Hızlı Nesne Kontrol Butonları -->
+                    <div class="position-absolute top-0 end-0 m-3 d-flex gap-1 z-3 bg-white p-1 rounded-pill shadow-sm border">
+                        <button type="button" class="btn btn-sm btn-light rounded-circle" onclick="if(SignStudio.canvas) { const obj = SignStudio.canvas.getActiveObject(); if(obj) { SignStudio.canvas.remove(obj); SignStudio.canvas.renderAll(); } }" title="Seçili Nesneyi Sil">
+                            <i class="bi bi-trash text-danger"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-light rounded-circle" onclick="if(SignStudio.canvas) { const obj = SignStudio.canvas.getActiveObject(); if(obj) { obj.centerH(); SignStudio.canvas.renderAll(); } }" title="Yatay Ortala">
+                            <i class="bi bi-align-center text-primary"></i>
+                        </button>
+                    </div>
+
+                    <!-- Canvas Çerçevesi -->
+                    <div class="shadow-2xl rounded-3 overflow-hidden bg-white border border-secondary border-opacity-25 position-relative" id="signStudioCanvasHolder" style="line-height: 0;">
+                        <canvas id="signStudioMainCanvas" width="500" height="714"></canvas>
+                    </div>
+
+                    <!-- Alt Bilgilendirme -->
+                    <div class="text-muted small mt-2 d-flex align-items-center gap-2" style="font-size: 11px;">
+                        <i class="bi bi-info-circle-fill text-primary"></i>
+                        <span>Levha üzerindeki nesneleri tıklayarak taşıyabilir, köşelerinden tutup boyutlandırabilirsiniz.</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
 <!-- Fabric.js Kütüphanesi -->
 <script src="<?= SITE_URL ?>/assets/js/fabric.min.js?v=<?= time() ?>"></script>
 
@@ -1890,10 +2163,12 @@ require_once __DIR__ . '/includes/header.php';
 <script src="<?= SITE_URL ?>/assets/js/editor.js?v=<?= time() ?>"></script>
 <script src="<?= SITE_URL ?>/assets/js/canva_templates_engine.js?v=<?= time() ?>"></script>
 <script src="<?= SITE_URL ?>/assets/js/canva_studio.js?v=<?= time() ?>"></script>
+<script src="<?= SITE_URL ?>/assets/js/sign_studio.js?v=<?= time() ?>"></script>
 <script src="<?= SITE_URL ?>/assets/js/package_showcase.js?v=<?= time() ?>"></script>
 <script src="<?= SITE_URL ?>/assets/js/cinematic_player.js?v=<?= time() ?>"></script>
 
 <script>
+const isDekotaProduct = <?= $isDekota ? 'true' : 'false' ?>;
 const packageData = {
     ekonomik: {
         name: 'Ekonomik Paket',
@@ -1980,6 +2255,15 @@ function selectPackage(pkg, element) {
         if (radio) {
             radio.checked = true;
             radio.dispatchEvent(new Event('change'));
+        }
+    }
+
+    // Dekota Özel Ölçü Kutusu Kontrolü
+    const dekotaCustomBox = document.getElementById('dekotaCustomSizeBox');
+    if (dekotaCustomBox) {
+        dekotaCustomBox.style.display = (pkg === 'ozel') ? 'block' : 'none';
+        if (pkg === 'ozel' && typeof onDekotaCustomSizeChange === 'function') {
+            onDekotaCustomSizeChange();
         }
     }
 
@@ -2259,7 +2543,166 @@ document.addEventListener('DOMContentLoaded', function() {
     window.availableTemplates = <?= json_encode($product['templates'] ?? []) ?>;
     window.availableIndustries = <?= json_encode($industries ?? []) ?>;
 
-    // 🎨 Tasarım Tercihi Popup Yönetimi
+    // 🎨 Tasarım Aksiyonu (Dekota ise SignStudio, Kartvizit ise Canva/Choice Modal)
+    window.openProductDesignAction = function() {
+        if (isDekotaProduct) {
+            openSignStudioModal();
+        } else {
+            openDesignChoiceModal();
+        }
+    };
+
+    // 🛡️ Dekota Sign Studio Modalını Aç ve Başlat
+    window.openSignStudioModal = function() {
+        const modalEl = document.getElementById('signStudioModal');
+        if (!modalEl) return;
+
+        const modal = bootstrap.Modal.getOrCreateInstance ? bootstrap.Modal.getOrCreateInstance(modalEl) : new bootstrap.Modal(modalEl);
+        modal.show();
+
+        modalEl.addEventListener('shown.bs.modal', function onSignShown() {
+            modalEl.removeEventListener('shown.bs.modal', onSignShown);
+
+            let w = 35;
+            let h = 50;
+            const activePkg = window.currentSelectedPackageKey || document.querySelector('input[name="selected_package"]:checked')?.value || 'orta';
+            if (activePkg === 'kucuk') { w = 25; h = 35; }
+            else if (activePkg === 'orta') { w = 35; h = 50; }
+            else if (activePkg === 'buyuk') { w = 50; h = 70; }
+            else if (activePkg === 'mega') { w = 70; h = 100; }
+            else if (activePkg === 'ozel') {
+                w = parseFloat(document.getElementById('dekotaWidthCm')?.value) || 40;
+                h = parseFloat(document.getElementById('dekotaHeightCm')?.value) || 60;
+            }
+
+            const dimBadge = document.getElementById('signStudioDimBadge');
+            if (dimBadge) dimBadge.textContent = `${w} x ${h} cm`;
+
+            if (window.SignStudio) {
+                SignStudio.init('signStudioMainCanvas', w, h);
+                SignStudio.renderVectorPicker('signStudioVectorList');
+                SignStudio.renderCategoryButtons('signStudioCategoryFilters');
+                SignStudio.renderHeaderPicker('signStudioHeaderPresets');
+            }
+        });
+    };
+
+    window.filterSignVectors = function(term) {
+        if (window.SignStudio) {
+            SignStudio.renderVectorPicker('signStudioVectorList', null, term);
+        }
+    };
+
+    window.filterSignVectorsByCategory = function(category) {
+        if (window.SignStudio) {
+            SignStudio.renderVectorPicker('signStudioVectorList', category, null);
+        }
+    };
+
+    window.addSignCustomTextFromInput = function() {
+        const textVal = document.getElementById('signCustomTextInput')?.value || 'DİKKAT VE UYARI METNİ';
+        const colorVal = document.getElementById('signCustomTextColor')?.value || '#111827';
+        const sizeVal = parseInt(document.getElementById('signCustomTextSize')?.value) || 26;
+
+        if (window.SignStudio) {
+            SignStudio.addCustomText(textVal, sizeVal, true, colorVal);
+        }
+    };
+
+    window.handleSignLogoUpload = function(inputEl) {
+        if (inputEl.files && inputEl.files[0] && window.SignStudio) {
+            const file = inputEl.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    SignStudio.loadCompanyLogo(img);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    window.saveSignStudioDesign = function() {
+        if (!window.SignStudio) return;
+
+        const svgData = SignStudio.exportSvg();
+        const pngData = SignStudio.exportPngDataUrl();
+
+        const svgInput = document.getElementById('selectedDesignSvg');
+        const fileInput = document.getElementById('selectedDesignFile');
+        const designTypeInput = document.getElementById('designTypeInput');
+
+        if (svgInput) svgInput.value = svgData;
+        if (fileInput) fileInput.value = pngData;
+        if (designTypeInput) designTypeInput.value = 'sign_studio';
+
+        const initSelector = document.getElementById('designInitialSelector');
+        const savedContainer = document.getElementById('designSavedContainer');
+        const titleEl = document.getElementById('designSectionTitle');
+        const badgeEl = document.getElementById('designSectionStatusBadge');
+        const badgeLabel = document.getElementById('savedDesignBadgeLabel');
+        const previewBox = document.getElementById('savedDesignPreviewBox');
+        const previewCard = document.getElementById('savedDesignPreviewCard');
+
+        if (initSelector) initSelector.style.display = 'none';
+        if (savedContainer) savedContainer.style.display = 'block';
+
+        if (titleEl) titleEl.innerHTML = '<i class="bi bi-check-circle-fill text-success me-1"></i> 3. Tasarımınız Hazır';
+        if (badgeEl) {
+            badgeEl.className = 'badge bg-success-subtle text-success shadow-2xs';
+            badgeEl.innerHTML = '<i class="bi bi-check2-all me-1"></i> Vektörel Baskıya Hazır';
+        }
+        if (badgeLabel) {
+            badgeLabel.textContent = 'Özel Dekota Levha Tasarımınız Kaydedildi';
+        }
+
+        if (previewCard) {
+            const activePkg = window.currentSelectedPackageKey || document.querySelector('input[name="selected_package"]:checked')?.value || 'orta';
+            let w = 35, h = 50;
+            if (activePkg === 'kucuk') { w = 25; h = 35; }
+            else if (activePkg === 'orta') { w = 35; h = 50; }
+            else if (activePkg === 'buyuk') { w = 50; h = 70; }
+            else if (activePkg === 'mega') { w = 70; h = 100; }
+            else if (activePkg === 'ozel') {
+                w = parseFloat(document.getElementById('dekotaWidthCm')?.value) || 40;
+                h = parseFloat(document.getElementById('dekotaHeightCm')?.value) || 60;
+            }
+            previewCard.style.aspectRatio = `${w} / ${h}`;
+            previewCard.style.maxWidth = (w < h) ? '220px' : '360px';
+        }
+
+        if (previewBox) {
+            previewBox.innerHTML = svgData;
+        }
+
+        const modalEl = document.getElementById('signStudioModal');
+        if (modalEl) {
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+        }
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Tasarımınız Kaydedildi!',
+                text: 'Dekota levha tasarımınız siparişinize eklendi. Şimdi sepete ekleyebilirsiniz.',
+                confirmButtonText: 'Harika'
+            });
+        }
+    };
+
+    window.onDekotaCustomSizeChange = function() {
+        const w = parseFloat(document.getElementById('dekotaWidthCm')?.value) || 40;
+        const h = parseFloat(document.getElementById('dekotaHeightCm')?.value) || 60;
+        const m2 = ((w * h) / 10000).toFixed(2);
+        const badge = document.getElementById('dekotaCustomM2Badge');
+        if (badge) badge.textContent = m2 + ' m²';
+        if (typeof calculateLivePrice === 'function') calculateLivePrice();
+    };
+
+    // 🎨 Tasarım Tercihi Popup Yönetimi (Kartvizit vb.)
     window.openDesignChoiceModal = function() {
         const modalEl = document.getElementById('designChoiceModal');
         if (!modalEl) return;

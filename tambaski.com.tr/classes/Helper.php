@@ -13,6 +13,10 @@ class Helper {
         return $formatted . $currency;
     }
 
+    public static function formatCurrency($amount, $currency = ' ₺') {
+        return self::formatPrice($amount, $currency);
+    }
+
     /**
      * Türkçe Karakter Uyumlu SEO URL (Slug) Üretici
      */
