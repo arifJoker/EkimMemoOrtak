@@ -102,19 +102,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    $m2UsdPrice = (float)str_replace(',', '.', $_POST['m2_usd_price'] ?? 0.00);
+
     try {
         if ($productId > 0) {
             // Güncelle
             $stmt = $db->prepare("UPDATE products SET 
                 category_id = ?, name = ?, slug = ?, sku = ?, short_description = ?, full_description = ?,
-                base_price = ?, manual_base_price = ?, tax_rate = ?, package_presets = ?,
+                base_price = ?, manual_base_price = ?, m2_usd_price = ?, tax_rate = ?, package_presets = ?,
                 allow_online_editor = ?, allow_design_upload = ?, allow_design_service = ?, design_service_price = ?,
                 is_featured = ?, is_urgent = ?, status = ?, featured_image = ?, mockup_image = ?
                 WHERE id = ?");
             
             $stmt->execute([
                 $categoryId, $name, $slug, $sku, $shortDesc, $fullDesc,
-                $basePrice, $basePrice, $taxRate, $packagePresets,
+                $basePrice, $basePrice, $m2UsdPrice, $taxRate, $packagePresets,
                 $allowOnlineEditor, $allowDesignUpload, $allowDesignService, $designServicePrice,
                 $isFeatured, $isUrgent, $status, $featuredImage, $mockupImage, $productId
             ]);
@@ -124,14 +126,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Yeni Ekle
             $stmt = $db->prepare("INSERT INTO products (
                 category_id, name, slug, sku, short_description, full_description,
-                base_price, manual_base_price, tax_rate, package_presets,
+                base_price, manual_base_price, m2_usd_price, tax_rate, package_presets,
                 allow_online_editor, allow_design_upload, allow_design_service, design_service_price,
                 is_featured, is_urgent, status, featured_image, mockup_image
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
             $stmt->execute([
                 $categoryId, $name, $slug, $sku, $shortDesc, $fullDesc,
-                $basePrice, $basePrice, $taxRate, $packagePresets,
+                $basePrice, $basePrice, $m2UsdPrice, $taxRate, $packagePresets,
                 $allowOnlineEditor, $allowDesignUpload, $allowDesignService, $designServicePrice,
                 $isFeatured, $isUrgent, $status, $featuredImage, $mockupImage
             ]);
@@ -142,21 +144,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Adet Tiraj Kademelerini Güncelle / Ekle
         $db->prepare("DELETE FROM product_quantity_tiers WHERE product_id = ?")->execute([$productId]);
-        $tiersInput = $_POST['tiers'] ?? [
-            1000  => 0,
-            2000  => 15,
-            3000  => 22,
-            5000  => 30,
-            10000 => 38
-        ];
-        foreach ($tiersInput as $qty => $discount) {
-            $q = (int)$qty;
-            $d = (float)$discount;
-            if ($q > 0) {
-                $m = max(0.1, 1 - ($d / 100));
-                $tStmt = $db->prepare("INSERT INTO product_quantity_tiers (product_id, quantity, multiplier, discount_percent) VALUES (?, ?, ?, ?)");
-                $tStmt->execute([$productId, $q, $m, $d]);
+        $tiersToSave = [];
+        if (!empty($_POST['dynamic_tiers']) && is_array($_POST['dynamic_tiers'])) {
+            foreach ($_POST['dynamic_tiers'] as $dt) {
+                $q = (int)($dt['quantity'] ?? 0);
+                $d = (float)($dt['discount_percent'] ?? 0);
+                if ($q > 0) {
+                    $tiersToSave[$q] = $d;
+                }
             }
+        } elseif (!empty($_POST['tiers']) && is_array($_POST['tiers'])) {
+            foreach ($_POST['tiers'] as $qty => $discount) {
+                $q = (int)$qty;
+                $d = (float)$discount;
+                if ($q > 0) {
+                    $tiersToSave[$q] = $d;
+                }
+            }
+        }
+
+        if (empty($tiersToSave)) {
+            $tiersToSave = [1000 => 0, 2000 => 15, 3000 => 22, 5000 => 30, 10000 => 38];
+        }
+
+        ksort($tiersToSave);
+        $tStmt = $db->prepare("INSERT INTO product_quantity_tiers (product_id, quantity, multiplier, discount_percent) VALUES (?, ?, ?, ?)");
+        foreach ($tiersToSave as $q => $d) {
+            $m = max(0.1, 1 - ($d / 100));
+            $tStmt->execute([$productId, $q, $m, $d]);
         }
 
     } catch (Exception $e) {
@@ -281,8 +296,8 @@ if ($action === 'add' || $action === 'edit') {
                     </div>
 
                     <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold text-dark">1.000 Adet Standart Taban Fiyatı (₺) *</label>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-dark">Standart Taban Fiyatı (₺) *</label>
                             <div class="input-group">
                                 <span class="input-group-text fw-bold text-primary">₺</span>
                                 <input type="number" step="0.01" name="base_price" id="basePriceInput" class="form-control form-control-lg fw-bold text-dark" required
@@ -290,10 +305,21 @@ if ($action === 'add' || $action === 'edit') {
                                        value="<?= htmlspecialchars($product['base_price'] ?? '900.00') ?>"
                                        oninput="updatePackagePriceSuggestions(this.value)">
                             </div>
-                            <small class="text-muted" style="font-size: 11px;">1.000 adet için geçerli baz fiyattır (+KDV).</small>
+                            <small class="text-muted" style="font-size: 11px;">1.000 adet veya baz paket fiyattır (+KDV).</small>
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-dark">
+                                <i class="bi bi-currency-dollar text-success me-1"></i>Metrekare Fiyatı ($ / USD)
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-success-subtle text-success fw-bold">$</span>
+                                <input type="number" step="0.01" name="m2_usd_price" class="form-control form-control-lg fw-bold" placeholder="Örn: 14.50" value="<?= htmlspecialchars($product['m2_usd_price'] ?? '14.50') ?>">
+                            </div>
+                            <small class="text-muted" style="font-size: 11px;">1 USD ≈ <?= number_format(Helper::getUsdRate(), 2, ',', '.') ?> ₺ (Canlı Kur)</small>
+                        </div>
+
+                        <div class="col-md-4">
                             <label class="form-label small fw-bold text-dark">KDV Oranı (%)</label>
                             <div class="input-group">
                                 <input type="number" step="1" name="tax_rate" class="form-control form-control-lg" value="<?= htmlspecialchars($product['tax_rate'] ?? '20.00') ?>">
@@ -317,7 +343,7 @@ if ($action === 'add' || $action === 'edit') {
                                     <th style="width: 45px;" class="text-center">Aktif</th>
                                     <th style="width: 140px;">Paket Adı</th>
                                     <th style="width: 110px;">Kod (Key)</th>
-                                    <th style="width: 145px;">1.000 Adet Fiyatı (₺)</th>
+                                    <th style="width: 145px;">Paket Fiyatı (₺)</th>
                                     <th>Paket Özellik Açıklaması</th>
                                     <th style="width: 110px;">Rozet (Badge)</th>
                                     <th style="width: 45px;" class="text-center">Sil</th>
@@ -377,56 +403,64 @@ if ($action === 'add' || $action === 'edit') {
                     </div>
                 </div>
 
-                <!-- 3. Adet Tiraj İndirimleri Kartı -->
+                <!-- 3. Dinamik Adet / Tiraj İndirimleri Kartı -->
                 <div class="apple-card p-4">
-                    <h6 class="fw-bold mb-3 border-bottom pb-2 text-dark">
-                        <i class="bi bi-layers text-primary me-2"></i>3. Adet / Tiraj İndirim Oranları (%)
-                    </h6>
-                    <p class="text-muted small mb-3">Tiraj arttıkça birim fiyata uygulanacak indirim yüzdesidir. 1.000 adet fiyatı baz alınarak sistem otomatik çarpar.</p>
+                    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                        <div>
+                            <h6 class="fw-bold mb-0 text-dark">
+                                <i class="bi bi-layers text-primary me-2"></i>3. Adet / Tiraj İndirim Kademeleri (%)
+                            </h6>
+                            <small class="text-muted" style="font-size: 11px;">Hem standart paketlerde hem de özel ölçülü levha baskılarında bu adet indirimleri otomatik uygulanır.</small>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 shadow-2xs" onclick="addTierRow()">
+                            <i class="bi bi-plus-circle me-1"></i> Yeni Kademe Ekle
+                        </button>
+                    </div>
 
-                    <?php
-                    $tierMap = [];
-                    foreach ($tiers as $t) {
-                        $tierMap[(int)$t['quantity']] = (float)$t['discount_percent'];
-                    }
-                    ?>
-                    <div class="row g-2">
-                        <div class="col">
-                            <label class="form-label small fw-bold text-center d-block mb-1">1.000 Adet</label>
-                            <div class="input-group input-group-sm">
-                                <input type="number" name="tiers[1000]" class="form-control text-center font-monospace" value="<?= $tierMap[1000] ?? 0 ?>" readonly>
-                                <span class="input-group-text">%</span>
-                            </div>
-                            <small class="text-muted text-center d-block" style="font-size: 10px;">(Baz Fiyat)</small>
-                        </div>
-                        <div class="col">
-                            <label class="form-label small fw-bold text-center d-block mb-1">2.000 Adet</label>
-                            <div class="input-group input-group-sm">
-                                <input type="number" name="tiers[2000]" class="form-control text-center font-monospace" value="<?= $tierMap[2000] ?? 15 ?>">
-                                <span class="input-group-text">%</span>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <label class="form-label small fw-bold text-center d-block mb-1">3.000 Adet</label>
-                            <div class="input-group input-group-sm">
-                                <input type="number" name="tiers[3000]" class="form-control text-center font-monospace" value="<?= $tierMap[3000] ?? 22 ?>">
-                                <span class="input-group-text">%</span>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <label class="form-label small fw-bold text-center d-block mb-1">5.000 Adet</label>
-                            <div class="input-group input-group-sm">
-                                <input type="number" name="tiers[5000]" class="form-control text-center font-monospace" value="<?= $tierMap[5000] ?? 30 ?>">
-                                <span class="input-group-text">%</span>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <label class="form-label small fw-bold text-center d-block mb-1">10.000 Adet</label>
-                            <div class="input-group input-group-sm">
-                                <input type="number" name="tiers[10000]" class="form-control text-center font-monospace" value="<?= $tierMap[10000] ?? 38 ?>">
-                                <span class="input-group-text">%</span>
-                            </div>
-                        </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle small mb-0" id="tiersTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 220px;">Baskı / Sipariş Adedi</th>
+                                    <th style="width: 200px;">İndirim Oranı (%)</th>
+                                    <th style="width: 60px;" class="text-center">Sil</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tiersTbody">
+                                <?php
+                                $tierIdx = 0;
+                                $displayTiers = !empty($tiers) ? $tiers : [
+                                    ['quantity' => 1000, 'discount_percent' => 0],
+                                    ['quantity' => 2000, 'discount_percent' => 15],
+                                    ['quantity' => 3000, 'discount_percent' => 22],
+                                    ['quantity' => 5000, 'discount_percent' => 30],
+                                    ['quantity' => 10000, 'discount_percent' => 38]
+                                ];
+                                foreach ($displayTiers as $tRow):
+                                    $tierIdx++;
+                                ?>
+                                <tr class="tier-row" id="tier_row_<?= $tierIdx ?>">
+                                    <td>
+                                        <div class="input-group input-group-sm">
+                                            <input type="number" name="dynamic_tiers[<?= $tierIdx ?>][quantity]" class="form-control font-monospace fw-bold text-center" value="<?= (int)$tRow['quantity'] ?>" required placeholder="Örn: 10">
+                                            <span class="input-group-text">Adet</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group input-group-sm">
+                                            <input type="number" step="0.5" name="dynamic_tiers[<?= $tierIdx ?>][discount_percent]" class="form-control font-monospace fw-bold text-center" value="<?= (float)$tRow['discount_percent'] ?>" required placeholder="0">
+                                            <span class="input-group-text">% İndirim</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-xs btn-outline-danger" onclick="removeTierRow('tier_row_<?= $tierIdx ?>')" title="Kademeyi Sil">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -625,6 +659,43 @@ if ($action === 'add' || $action === 'edit') {
     }
 
     function removePackageRow(rowId) {
+        const row = document.getElementById(rowId);
+        if (row) {
+            row.remove();
+        }
+    }
+
+    let tierCounter = <?= (int)$tierIdx ?>;
+
+    function addTierRow() {
+        tierCounter++;
+        const tbody = document.getElementById('tiersTbody');
+        const row = document.createElement('tr');
+        row.className = 'tier-row';
+        row.id = 'tier_row_' + tierCounter;
+        row.innerHTML = `
+            <td>
+                <div class="input-group input-group-sm">
+                    <input type="number" name="dynamic_tiers[${tierCounter}][quantity]" class="form-control font-monospace fw-bold text-center" value="" required placeholder="Örn: 25">
+                    <span class="input-group-text">Adet</span>
+                </div>
+            </td>
+            <td>
+                <div class="input-group input-group-sm">
+                    <input type="number" step="0.5" name="dynamic_tiers[${tierCounter}][discount_percent]" class="form-control font-monospace fw-bold text-center" value="0" required placeholder="0">
+                    <span class="input-group-text">% İndirim</span>
+                </div>
+            </td>
+            <td class="text-center">
+                <button type="button" class="btn btn-xs btn-outline-danger" onclick="removeTierRow('tier_row_${tierCounter}')" title="Kademeyi Sil">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    }
+
+    function removeTierRow(rowId) {
         const row = document.getElementById(rowId);
         if (row) {
             row.remove();

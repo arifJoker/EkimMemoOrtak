@@ -93,6 +93,39 @@ class Helper {
     }
 
     /**
+     * Canlı veya Önbellekli Dolar Kuru (USD/TRY) Getirir
+     */
+    public static function getUsdRate() {
+        $settingRate = (float)self::getSetting('usd_rate', 0);
+        $cachedTime = (int)self::getSetting('usd_rate_last_update', 0);
+
+        // 1 saatte bir TCMB'den otomatik güncelle
+        if ($settingRate <= 0 || (time() - $cachedTime) > 3600) {
+            try {
+                $ctx = stream_context_create(['http' => ['timeout' => 2]]);
+                $xml = @file_get_contents('https://www.tcmb.gov.tr/kurlar/today.xml', false, $ctx);
+                if ($xml) {
+                    $parsed = @simplexml_load_string($xml);
+                    if ($parsed) {
+                        foreach ($parsed->Currency as $c) {
+                            if ((string)$c['CurrencyCode'] === 'USD') {
+                                $rate = (float)str_replace(',', '.', (string)$c->BanknoteSelling ?: (string)$c->ForexSelling);
+                                if ($rate > 0) {
+                                    self::saveSetting('usd_rate', $rate);
+                                    self::saveSetting('usd_rate_last_update', time());
+                                    return $rate;
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (Exception $e) {}
+        }
+
+        return $settingRate > 0 ? $settingRate : 38.50;
+    }
+
+    /**
      * Dosya Yükleme Yöneticisi (Büyük Matbaa Dosyaları, Resimler, ZIP)
      */
     public static function uploadFile($file, $targetSubDir = 'designs', $allowedExtensions = ['pdf', 'ai', 'psd', 'cdr', 'eps', 'tiff', 'zip', 'rar', 'jpg', 'jpeg', 'png', 'svg'], $maxSizeMb = 150) {
@@ -334,42 +367,6 @@ class Helper {
 
         $badge = $map[$status] ?? ['label' => $status, 'class' => 'bg-secondary text-white'];
         return '<span class="badge ' . $badge['class'] . '">' . $badge['label'] . '</span>';
-    }
-
-    /**
-     * TCMB Canlı Dolar ($ USD) Kuru Getirir
-     */
-    public static function getUsdRate($forceRefresh = false) {
-        $currentRate = (float)self::getSetting('usd_try_rate', 38.50);
-        $lastUpdate = self::getSetting('usd_rate_updated_at', '');
-
-        // Günde bir kez veya zorunluysa TCMB XML'den çek
-        if ($forceRefresh || empty($lastUpdate) || date('Y-m-d', strtotime($lastUpdate)) !== date('Y-m-d')) {
-            try {
-                $ctx = stream_context_create(['http' => ['timeout' => 3]]);
-                $xmlContent = @file_get_contents('https://www.tcmb.gov.tr/kurlar/today.xml', false, $ctx);
-                if ($xmlContent) {
-                    $xml = @simplexml_load_string($xmlContent);
-                    if ($xml) {
-                        foreach ($xml->Currency as $c) {
-                            if ((string)$c['CurrencyCode'] === 'USD') {
-                                $rate = (float)str_replace(',', '.', (string)$c->BanknoteSelling ?: (string)$c->ForexSelling);
-                                if ($rate > 10) {
-                                    $currentRate = $rate;
-                                    self::saveSetting('usd_try_rate', number_format($rate, 4, '.', ''));
-                                    self::saveSetting('usd_rate_updated_at', date('Y-m-d H:i:s'));
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (Exception $e) {
-                // Fallback to saved rate
-            }
-        }
-
-        return $currentRate ?: 38.50;
     }
 
     /**

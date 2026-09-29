@@ -452,9 +452,16 @@ class Product {
             $unitBasePrice = 95.00;
 
             if ($isCustomSize && $customWidth > 0 && $customHeight > 0) {
-                // Dinamik m2 hesabı (m2 birim fiyatı 550 TL)
+                // Dinamik m2 hesabı (USD / TRY Kuru ile ve yukarı yuvarlamalı)
                 $areaM2 = ($customWidth * $customHeight) / 10000;
-                $unitBasePrice = max(65.00, round($areaM2 * 550.00, 2));
+                $m2Usd = (float)($product['m2_usd_price'] ?? 0);
+                if ($m2Usd > 0) {
+                    $usdRate = Helper::getUsdRate();
+                    $rawPriceTry = $areaM2 * $m2Usd * $usdRate;
+                    $unitBasePrice = max(45.00, ceil($rawPriceTry)); // Örn: 47,52 TL -> 48 TL
+                } else {
+                    $unitBasePrice = max(45.00, ceil($areaM2 * 550.00));
+                }
             } else {
                 if (!empty($presets[$selectedPackage]['price'])) {
                     $unitBasePrice = (float)$presets[$selectedPackage]['price'];
@@ -464,7 +471,7 @@ class Product {
             // Kalınlık Seçimi (5mm ise +%25)
             $thickness = $selectedOptions['thickness'] ?? '3mm';
             if ($thickness === '5mm') {
-                $unitBasePrice = round($unitBasePrice * 1.25, 2);
+                $unitBasePrice = ceil($unitBasePrice * 1.25);
             }
 
             // Montaj Seçeneği
@@ -475,15 +482,24 @@ class Product {
                 $unitBasePrice += 10.00; // 4 Köşeden delikli
             }
 
-            // Kademeli Toplu Adet İndirimi
+            // Kademeli Toplu Adet İndirimi (Veritabanındaki tanımlı kademelerden çekilir)
+            $tiers = $this->getQuantityTiers($productId);
             $discountPercent = 0.0;
-            if ($quantity >= 100) $discountPercent = 40.0;
-            elseif ($quantity >= 50) $discountPercent = 30.0;
-            elseif ($quantity >= 25) $discountPercent = 20.0;
-            elseif ($quantity >= 10) $discountPercent = 10.0;
+            if (!empty($tiers)) {
+                foreach ($tiers as $t) {
+                    if ($quantity >= (int)$t['quantity']) {
+                        $discountPercent = (float)$t['discount_percent'];
+                    }
+                }
+            } else {
+                if ($quantity >= 100) $discountPercent = 40.0;
+                elseif ($quantity >= 50) $discountPercent = 30.0;
+                elseif ($quantity >= 25) $discountPercent = 20.0;
+                elseif ($quantity >= 10) $discountPercent = 10.0;
+            }
 
-            $unitPrice = round($unitBasePrice * (1 - ($discountPercent / 100)), 2);
-            $calculatedSubtotal = round($unitPrice * $quantity, 2);
+            $unitPrice = ceil($unitBasePrice * (1 - ($discountPercent / 100)));
+            $calculatedSubtotal = $unitPrice * $quantity;
 
             if ($includeDesignService && !empty($product['allow_design_service'])) {
                 $calculatedSubtotal += (float)($product['design_service_price'] ?? 150.0);
@@ -885,10 +901,14 @@ class Product {
                 'uploads/mockups/tambaski_dekota_collection.jpg'
             ], JSON_UNESCAPED_SLASHES);
 
+            try {
+                $this->db->exec("ALTER TABLE products ADD COLUMN m2_usd_price DECIMAL(10,2) DEFAULT 0.00");
+            } catch (Exception $e) {}
+
             if (!$prodId) {
                 $insProd = $this->db->prepare("INSERT INTO products 
-                    (category_id, name, slug, sku, short_description, full_description, base_price, package_presets, featured_image, gallery, allow_online_editor, allow_design_upload, is_featured, is_urgent, status) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    (category_id, name, slug, sku, short_description, full_description, base_price, m2_usd_price, package_presets, featured_image, gallery, allow_online_editor, allow_design_upload, is_featured, is_urgent, status) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 $insProd->execute([
                     $catId,
                     'Dekota İSG & Güvenlik Uyarı Levhası',
@@ -897,6 +917,7 @@ class Product {
                     '3mm / 5mm Sert Dekota (Forex) zemin üzerine yüksek çözünürlüklü UV baskılı İSG, fabrika ve tesis güvenlik uyarı levhaları.',
                     '3mm veya 5mm Sert Dekota (Forex) zemin üzerine direkt UV baskı teknolojisiyle üretilen yüksek dayanımlı uyarı levhaları. Solmaz, neme, suya ve güneşe tam dayanıklıdır.',
                     95.00,
+                    14.50,
                     $pkgJson,
                     'uploads/mockups/tambaski_dekota_mockup.jpg',
                     $galleryJson,
@@ -918,7 +939,7 @@ class Product {
                     $insTier->execute([$prodId, $t['quantity'], $t['multiplier'], $t['discount_percent']]);
                 }
             } else {
-                $this->db->prepare("UPDATE products SET category_id = ?, package_presets = ?, featured_image = ?, gallery = ?, allow_online_editor = 1, status = 1 WHERE id = ?")
+                $this->db->prepare("UPDATE products SET category_id = ?, package_presets = ?, m2_usd_price = 14.50, featured_image = ?, gallery = ?, allow_online_editor = 1, status = 1 WHERE id = ?")
                          ->execute([$catId, $pkgJson, 'uploads/mockups/tambaski_dekota_mockup.jpg', $galleryJson, $prodId]);
             }
         } catch (Exception $e) {}

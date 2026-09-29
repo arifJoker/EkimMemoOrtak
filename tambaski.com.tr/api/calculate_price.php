@@ -4,24 +4,28 @@
  */
 require_once __DIR__ . '/../config/config.php';
 
-$productId = (int)($_REQUEST['product_id'] ?? 0);
-$quantity = (int)($_REQUEST['quantity'] ?? 100);
-$options = $_REQUEST['options'] ?? [];
+$rawInput = file_get_contents('php://input');
+$jsonBody = !empty($rawInput) ? json_decode($rawInput, true) : null;
+$inputData = is_array($jsonBody) ? array_merge($_REQUEST, $jsonBody) : $_REQUEST;
+
+$productId = (int)($inputData['product_id'] ?? 0);
+$quantity = (int)($inputData['quantity'] ?? 100);
+$options = $inputData['options'] ?? [];
 if (!is_array($options)) {
     $options = [];
 }
-if (!empty($_REQUEST['thickness'])) {
-    $options['thickness'] = $_REQUEST['thickness'];
+if (!empty($inputData['thickness'])) {
+    $options['thickness'] = $inputData['thickness'];
 }
-if (!empty($_REQUEST['mounting'])) {
-    $options['mounting'] = $_REQUEST['mounting'];
+if (!empty($inputData['mounting'])) {
+    $options['mounting'] = $inputData['mounting'];
 }
 
-$customWidth = (float)($_REQUEST['custom_width'] ?? $_REQUEST['dekota_width_cm'] ?? 0);
-$customHeight = (float)($_REQUEST['custom_height'] ?? $_REQUEST['dekota_height_cm'] ?? 0);
-$includeDesignService = !empty($_REQUEST['design_service']);
-$selectedPackage = trim($_REQUEST['selected_package'] ?? $_REQUEST['package_id'] ?? $_REQUEST['package'] ?? 'standart');
-$customPaperId = (int)($_REQUEST['custom_paper_id'] ?? 0);
+$customWidth = (float)($inputData['custom_width'] ?? $inputData['dekota_width_cm'] ?? $inputData['width_cm'] ?? 0);
+$customHeight = (float)($inputData['custom_height'] ?? $inputData['dekota_height_cm'] ?? $inputData['height_cm'] ?? 0);
+$includeDesignService = !empty($inputData['design_service']);
+$selectedPackage = trim($inputData['selected_package'] ?? $inputData['package_id'] ?? $inputData['package'] ?? 'standart');
+$customPaperId = (int)($inputData['custom_paper_id'] ?? 0);
 
 if (!$productId) {
     Helper::jsonResponse(['success' => false, 'error' => 'Ürün ID belirtilmedi.'], 400);

@@ -304,45 +304,144 @@ window.SignStudio = (function() {
         { title: 'ÖNEMLİ DUYURU', bg: '#111827', text: '#ffffff', icon: 'info_camera' }
     ];
 
-    return {
         getLibrary: function() { return vectorLibrary; },
         getHeaderPresets: function() { return headerPresets; },
 
-        initStudio: function(canvasElementId) {
-            if (!document.getElementById(canvasElementId)) return;
+        init: function(canvasElementId, widthCm, heightCm) {
+            currentWidthCm = widthCm || 35;
+            currentHeightCm = heightCm || 50;
+            const canvasEl = document.getElementById(canvasElementId);
+            if (!canvasEl) return;
 
-            // Fabric canvas oluştur
+            const holder = document.getElementById('signStudioCanvasHolder') || canvasEl.parentElement;
+            const maxW = 500;
+            const maxH = 650;
+            const ratio = currentWidthCm / currentHeightCm;
+
+            let displayW = maxW;
+            let displayH = Math.round(maxW / ratio);
+
+            if (displayH > maxH) {
+                displayH = maxH;
+                displayW = Math.round(maxH * ratio);
+            }
+
+            canvasEl.width = displayW;
+            canvasEl.height = displayH;
+
+            if (canvas) {
+                try { canvas.dispose(); } catch(e) {}
+            }
+
             if (typeof fabric !== 'undefined') {
                 canvas = new fabric.Canvas(canvasElementId, {
+                    width: displayW,
+                    height: displayH,
                     backgroundColor: '#ffffff',
                     preserveObjectStacking: true,
                     selection: true
                 });
-                this.updateCanvasDimensions(35, 50);
+                canvas.renderAll();
             }
         },
 
-        updateCanvasDimensions: function(widthCm, heightCm) {
-            currentWidthCm = widthCm;
-            currentHeightCm = heightCm;
-            const container = document.getElementById('signCanvasContainer');
-            if (!container || !canvas) return;
+        initStudio: function(canvasElementId) {
+            this.init(canvasElementId, 35, 50);
+        },
 
-            const maxW = container.clientWidth - 40 || 450;
-            const maxH = 500;
+        renderCategoryButtons: function(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
 
-            const ratio = widthCm / heightCm;
-            let displayW = maxW;
-            let displayH = maxW / ratio;
+            const categories = [
+                { id: 'all', name: 'Tümü', icon: 'bi-grid-fill' },
+                { id: 'ppe', name: 'KKD / İSG', icon: 'bi-shield-check' },
+                { id: 'prohibition', name: 'Yasaklar', icon: 'bi-slash-circle-fill' },
+                { id: 'warning', name: 'Tehlike / Uyarı', icon: 'bi-exclamation-triangle-fill' },
+                { id: 'emergency', name: 'Acil Çıkış', icon: 'bi-box-arrow-right' },
+                { id: 'fire', name: 'Yangın', icon: 'bi-fire' },
+                { id: 'info', name: 'Bilgi & Tesis', icon: 'bi-info-circle-fill' }
+            ];
 
-            if (displayH > maxH) {
-                displayH = maxH;
-                displayW = maxH * ratio;
+            let html = '';
+            categories.forEach((cat, idx) => {
+                const activeCls = (idx === 0) ? 'btn-primary active' : 'btn-outline-secondary';
+                html += `<button type="button" class="btn btn-xs rounded-pill px-2 py-1 sign-cat-btn ${activeCls}" style="font-size: 10.5px;" onclick="SignStudio.onCategoryClick('${cat.id}', this)">
+                    <i class="bi ${cat.icon} me-1"></i>${cat.name}
+                </button>`;
+            });
+            container.innerHTML = html;
+        },
+
+        onCategoryClick: function(categoryId, btnEl) {
+            document.querySelectorAll('.sign-cat-btn').forEach(b => {
+                b.classList.remove('btn-primary', 'active');
+                b.classList.add('btn-outline-secondary');
+            });
+            if (btnEl) {
+                btnEl.classList.remove('btn-outline-secondary');
+                btnEl.classList.add('btn-primary', 'active');
+            }
+            this.renderVectorPicker('signStudioVectorList', categoryId);
+        },
+
+        renderVectorPicker: function(containerId, categoryFilter = 'all', searchTerm = '') {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            let filtered = vectorLibrary;
+            if (categoryFilter && categoryFilter !== 'all') {
+                filtered = filtered.filter(item => item.category === categoryFilter);
+            }
+            if (searchTerm && searchTerm.trim() !== '') {
+                const term = searchTerm.toLowerCase().trim();
+                filtered = filtered.filter(item => item.name.toLowerCase().includes(term) || item.tags.toLowerCase().includes(term));
             }
 
-            canvas.setWidth(displayW);
-            canvas.setHeight(displayH);
-            canvas.renderAll();
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="col-12 text-center text-muted py-4 small"><i class="bi bi-search me-1"></i> Aradığınız kriterde piktogram bulunamadı.</div>`;
+                return;
+            }
+
+            let html = '';
+            filtered.forEach(item => {
+                html += `
+                <div class="col-4 col-sm-3 col-md-4">
+                    <div class="card h-100 p-2 text-center border rounded-3 shadow-2xs hover-lift cursor-pointer bg-white" 
+                         onclick="SignStudio.addVectorIcon('${item.id}')" 
+                         title="${item.name} - Levhaya Ekle"
+                         style="transition: all 0.2s ease;">
+                        <div class="d-flex align-items-center justify-content-center p-1 mb-1" style="height: 52px;">
+                            <div style="width: 44px; height: 44px; color: ${item.color || '#333'};">
+                                ${item.svg}
+                            </div>
+                        </div>
+                        <div class="text-truncate fw-bold text-dark" style="font-size: 9.5px;" title="${item.name}">${item.name}</div>
+                    </div>
+                </div>`;
+            });
+
+            container.innerHTML = html;
+        },
+
+        renderHeaderPicker: function(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            let html = '';
+            headerPresets.forEach((hdr, idx) => {
+                html += `
+                <div class="card border p-2 rounded-3 shadow-2xs hover-lift cursor-pointer" 
+                     onclick="SignStudio.addHeaderBand(${idx})"
+                     style="background: #ffffff; transition: all 0.2s ease;">
+                    <div class="d-flex align-items-center justify-content-between p-2 rounded-2" style="background: ${hdr.bg}; color: ${hdr.text};">
+                        <span class="fw-bolder fs-6 tracking-wide" style="font-family: Impact, Arial Black, sans-serif;">${hdr.title}</span>
+                        <span class="badge bg-dark bg-opacity-50 text-white" style="font-size: 10px;"><i class="bi bi-plus-lg me-1"></i>Üste Ekle</span>
+                    </div>
+                </div>`;
+            });
+
+            container.innerHTML = html;
         },
 
         addVectorIcon: function(iconId) {
@@ -354,7 +453,7 @@ window.SignStudio = (function() {
                 svgObj.scaleToWidth(canvas.getWidth() * 0.35);
                 svgObj.set({
                     left: canvas.getWidth() / 2,
-                    top: canvas.getHeight() * 0.4,
+                    top: canvas.getHeight() * 0.45,
                     originX: 'center',
                     originY: 'center',
                     cornerColor: '#2563eb',
@@ -389,7 +488,7 @@ window.SignStudio = (function() {
                 originX: 'center',
                 originY: 'center',
                 fontFamily: 'Impact, Arial Black, sans-serif',
-                fontSize: Math.round(bandHeight * 0.6),
+                fontSize: Math.round(bandHeight * 0.55),
                 fontWeight: 'bold',
                 fill: preset.text,
                 selectable: true
@@ -427,7 +526,6 @@ window.SignStudio = (function() {
 
         addHazardBorder: function(type = 'yellow_black') {
             if (!canvas) return;
-            // Çift hatlı kalın güvenlik çerçevesi
             const border = new fabric.Rect({
                 left: 6,
                 top: 6,
