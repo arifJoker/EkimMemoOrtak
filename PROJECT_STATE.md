@@ -6,5 +6,5 @@
 | **Memo** | - | - | - | 🟢 [BOŞTA] |
 
 ---
-- **Son Eşitleme:** 2026-09-29 12:20
-- **Durum:** ✅ Elde tutulan mockup kaldırıldı, tam ekran lightbox %98 genişlikte devasa & net olarak optimize edildi, orijinal TAMBASKI! logosu sabitlendi.
+- **Son Eşitleme:** 2026-09-29 21:10
+- **Durum:** ✅ Kartvizit kategorisi (4 Paket, Tiraj, Canva Studio, 3D Mockup) izole edildi, Kategori bazlı hesaplama modelleri (m², sert zemin, adet) ve RBAC editör yetki sınırlandırması tamamlandı.

@@ -5,6 +5,13 @@ Auth::requireAdmin();
 $db = Database::getInstance()->getConnection();
 $action = $_GET['action'] ?? 'list';
 
+// Otomatik Temizlik: Kartvizit ürünlerini Kartvizit kategorisine bağla
+$kartvizitCat = $db->query("SELECT id FROM categories WHERE slug = 'kartvizit' LIMIT 1")->fetch();
+if ($kartvizitCat) {
+    $db->prepare("UPDATE products SET category_id = ? WHERE (name LIKE '%Kartvizit%' OR slug LIKE '%kartvizit%') AND category_id != ?")
+       ->execute([$kartvizitCat['id'], $kartvizitCat['id']]);
+}
+
 // -----------------------------------------------------------------------------
 // 1. Silme İşlemi
 // -----------------------------------------------------------------------------

@@ -5,6 +5,22 @@ Auth::requireAdmin();
 $db = Database::getInstance()->getConnection();
 $action = $_GET['action'] ?? 'list';
 
+// pricing_model kolon kontrolü ve ekleme
+try {
+    $colCheck = $db->query("SHOW COLUMNS FROM categories LIKE 'pricing_model'")->fetch();
+    if (!$colCheck) {
+        $db->exec("ALTER TABLE categories ADD COLUMN pricing_model VARCHAR(50) DEFAULT 'package_tier'");
+    }
+} catch (Exception $ex) {}
+
+// Otomatik Temizlik: Kartvizit ürünlerini Kartvizit kategorisine bağla
+$kartvizitCat = $db->query("SELECT id FROM categories WHERE slug = 'kartvizit' LIMIT 1")->fetch();
+if ($kartvizitCat) {
+    $db->prepare("UPDATE products SET category_id = ? WHERE (name LIKE '%Kartvizit%' OR slug LIKE '%kartvizit%') AND category_id != ?")
+       ->execute([$kartvizitCat['id'], $kartvizitCat['id']]);
+    $db->prepare("UPDATE categories SET pricing_model = 'package_tier' WHERE id = ?")->execute([$kartvizitCat['id']]);
+}
+
 // 1. Silme İşlemi
 if ($action === 'delete') {
     $id = (int)($_GET['id'] ?? 0);
@@ -29,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name'] ?? '');
     $slug = !empty($_POST['slug']) ? Helper::slugify($_POST['slug']) : Helper::slugify($name);
     $icon = trim($_POST['icon'] ?? 'bi bi-grid');
+    $pricingModel = trim($_POST['pricing_model'] ?? 'package_tier');
     $sortOrder = (int)($_POST['sort_order'] ?? 0);
     $status = !empty($_POST['status']) ? 1 : 0;
     $catId = (int)($_POST['category_id'] ?? 0);
@@ -40,12 +57,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($catId > 0) {
-        $stmt = $db->prepare("UPDATE categories SET name = ?, slug = ?, icon = ?, sort_order = ?, status = ? WHERE id = ?");
-        $stmt->execute([$name, $slug, $icon, $sortOrder, $status, $catId]);
+        $stmt = $db->prepare("UPDATE categories SET name = ?, slug = ?, icon = ?, pricing_model = ?, sort_order = ?, status = ? WHERE id = ?");
+        $stmt->execute([$name, $slug, $icon, $pricingModel, $sortOrder, $status, $catId]);
         Helper::setFlash('success', "<strong>{$name}</strong> kategorisi güncellendi.");
     } else {
-        $stmt = $db->prepare("INSERT INTO categories (name, slug, icon, sort_order, status) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([$name, $slug, $icon, $sortOrder, $status]);
+        $stmt = $db->prepare("INSERT INTO categories (name, slug, icon, pricing_model, sort_order, status) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$name, $slug, $icon, $pricingModel, $sortOrder, $status]);
         Helper::setFlash('success', "Yeni kategori <strong>{$name}</strong> başarıyla eklendi.");
     }
     header("Location: " . SITE_URL . "/admin/categories.php");
@@ -151,6 +168,25 @@ require_once __DIR__ . '/header.php';
                     </div>
                 </div>
 
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-dark">Hesaplama &amp; Fiyatlandırma Modeli *</label>
+                    <select name="pricing_model" class="form-select" required>
+                        <option value="package_tier" <?= (($editCategory['pricing_model'] ?? 'package_tier') === 'package_tier') ? 'selected' : '' ?>>
+                            🎨 Paket &amp; Tiraj Modeli (Kartvizit, Broşür - 4 Paket + Canva)
+                        </option>
+                        <option value="m2_calculator" <?= (($editCategory['pricing_model'] ?? '') === 'm2_calculator') ? 'selected' : '' ?>>
+                            📐 Dinamik Metrekare (m²) Modeli (Araç Sticker, Branda, Folyo)
+                        </option>
+                        <option value="rigid_board" <?= (($editCategory['pricing_model'] ?? '') === 'rigid_board') ? 'selected' : '' ?>>
+                            🛡️ Sert Zemin &amp; Levha Modeli (Dekota, Pleksi, Fotoblok)
+                        </option>
+                        <option value="tiered_qty" <?= (($editCategory['pricing_model'] ?? '') === 'tiered_qty') ? 'selected' : '' ?>>
+                            🎁 Kademeli Parça/Adet Modeli (Promosyon, Tişört, Magnet)
+                        </option>
+                    </select>
+                    <small class="text-muted" style="font-size: 11px;">Bu kategorideki ürünlerin hesaplama ve varyant motorunu belirler.</small>
+                </div>
+
                 <div class="row g-2 mb-3">
                     <div class="col-6">
                         <label class="form-label small fw-bold text-dark">Sıralama</label>
@@ -186,6 +222,7 @@ require_once __DIR__ . '/header.php';
                         <tr>
                             <th style="width: 50px;">İkon</th>
                             <th>Kategori Adı</th>
+                            <th>Hesaplama &amp; Varyant Modeli</th>
                             <th>Slug (URL)</th>
                             <th class="text-center">Ürün Sayısı</th>
                             <th class="text-center">Sıra</th>
@@ -196,10 +233,12 @@ require_once __DIR__ . '/header.php';
                     <tbody>
                         <?php if (empty($categories)): ?>
                             <tr>
-                                <td colspan="7" class="text-center py-4 text-muted">Henüz kayıtlı kategori bulunmuyor.</td>
+                                <td colspan="8" class="text-center py-4 text-muted">Henüz kayıtlı kategori bulunmuyor.</td>
                             </tr>
                         <?php else: ?>
-                            <?php foreach ($categories as $cat): ?>
+                            <?php foreach ($categories as $cat): 
+                                $pModel = $cat['pricing_model'] ?? 'package_tier';
+                            ?>
                                 <tr class="<?= (isset($editCategory) && $editCategory['id'] == $cat['id']) ? 'table-warning' : '' ?>">
                                     <td class="text-center">
                                         <div class="rounded-3 bg-light p-2 d-inline-flex align-items-center justify-content-center text-primary shadow-xs" style="width: 36px; height: 36px;">
@@ -211,6 +250,27 @@ require_once __DIR__ . '/header.php';
                                         <a href="<?= SITE_URL ?>/category.php?slug=<?= $cat['slug'] ?>" target="_blank" class="text-muted" style="font-size: 11px;">
                                             <i class="bi bi-box-arrow-up-right me-1"></i>Sitede Gör
                                         </a>
+                                    </td>
+                                    <td>
+                                        <?php if ($pModel === 'package_tier'): ?>
+                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
+                                                <i class="bi bi-box-seam me-1"></i>4 Paket &amp; Tiraj Modeli
+                                            </span>
+                                        <?php elseif ($pModel === 'm2_calculator'): ?>
+                                            <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">
+                                                <i class="bi bi-aspect-ratio me-1"></i>Dinamik Metrekare (m²)
+                                            </span>
+                                        <?php elseif ($pModel === 'rigid_board'): ?>
+                                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1">
+                                                <i class="bi bi-layers me-1"></i>Sert Zemin &amp; Levha
+                                            </span>
+                                        <?php elseif ($pModel === 'tiered_qty'): ?>
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                                                <i class="bi bi-tags me-1"></i>Kademeli Parça/Adet
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="badge bg-secondary-subtle text-secondary px-2 py-1">Standart</span>
+                                        <?php endif; ?>
                                     </td>
                                     <td>
                                         <code class="text-secondary"><?= htmlspecialchars($cat['slug']) ?></code>
