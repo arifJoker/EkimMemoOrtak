@@ -27,10 +27,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $customPaperId = (int)($_POST['custom_paper_id'] ?? 0);
 
         $sizeType = $_POST['size_type'] ?? 'standard';
+        $selectedPackage = $_POST['selected_package'] ?? 'standart';
         $isCustomSize = ($sizeType === 'custom' || $selectedPackage === 'ozel' || !empty($_POST['is_custom_size']));
 
-        $customWidth = (float)($_POST['custom_width'] ?? $_POST['dekota_width_cm'] ?? 0);
-        $customHeight = (float)($_POST['custom_height'] ?? $_POST['dekota_height_cm'] ?? 0);
+        if ($isCustomSize) {
+            $customWidth = (float)(!empty($_POST['dekota_width_cm']) ? $_POST['dekota_width_cm'] : ($_POST['custom_width'] ?? 0));
+            $customHeight = (float)(!empty($_POST['dekota_height_cm']) ? $_POST['dekota_height_cm'] : ($_POST['custom_height'] ?? 0));
+        } else {
+            $customWidth = 0;
+            $customHeight = 0;
+        }
 
         $customSize = ($isCustomSize && $customWidth > 0 && $customHeight > 0) ? [
             'width'     => $customWidth,

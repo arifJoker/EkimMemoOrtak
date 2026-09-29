@@ -7,18 +7,55 @@ $db = Database::getInstance()->getConnection();
 
 $action = $_GET['action'] ?? 'list';
 
-// 1. Vektörel SVG İndirme
+// 1. Vektörel SVG İndirme (Tüm Çizim Programlarıyla %100 Uyumlu)
 if ($action === 'download_svg') {
+    while (ob_get_level()) {
+        ob_end_clean();
+    }
+    
     $itemId = (int)($_GET['item_id'] ?? 0);
     $stmt = $db->prepare("SELECT * FROM order_items WHERE id = ?");
     $stmt->execute([$itemId]);
     $item = $stmt->fetch();
 
     if ($item && !empty($item['design_svg'])) {
+        $svg = $item['design_svg'];
+
+        // 1. JSON kontrolü (Ön / Arka yüz kaydı)
+        $decoded = json_decode($svg, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            $side = $_GET['side'] ?? 'front';
+            $svg = $decoded[$side] ?? $decoded['front'] ?? reset($decoded);
+        }
+
+        // 2. HTML entity decode (eğer &lt;svg geldiyse aç)
+        if (strpos($svg, '<svg') === false && strpos($svg, '&lt;svg') !== false) {
+            $svg = html_entity_decode($svg, ENT_QUOTES | ENT_XML1, 'UTF-8');
+        }
+
+        // 3. Data URI kontrolü (data:image/svg+xml;...)
+        if (strpos($svg, 'data:image/svg+xml;base64,') === 0) {
+            $svg = base64_decode(substr($svg, strlen('data:image/svg+xml;base64,')));
+        } elseif (strpos($svg, 'data:image/svg+xml') === 0) {
+            $commaPos = strpos($svg, ',');
+            if ($commaPos !== false) {
+                $svg = urldecode(substr($svg, $commaPos + 1));
+            }
+        }
+
+        $svg = trim($svg);
+
+        // 4. Standart XML başlığı (Illustrator, Corel ve tarayıcıların sorunsuz açması için)
+        if (strpos($svg, '<?xml') === false && strpos($svg, '<svg') !== false) {
+            $svg = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>' . "\n" . $svg;
+        }
+
         $filename = 'baski_siparis_' . $item['order_id'] . '_kalem_' . $item['id'] . '.svg';
-        header('Content-Type: image/svg+xml');
+        header('Content-Type: image/svg+xml; charset=utf-8');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
-        echo $item['design_svg'];
+        header('Content-Length: ' . strlen($svg));
+        header('Cache-Control: private, no-transform, no-store, must-revalidate');
+        echo $svg;
         exit;
     } else {
         Helper::setFlash('danger', 'Vektörel SVG dosyası bulunamadı.');
@@ -38,7 +75,7 @@ if ($action === 'delete' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// 3. Adım Adım İlerleme (Tek Tıkla Bir Sonraki Aşamaya Geçiş)
+// 3. Adım Adım İlerleme (Tek Tıkla Doğrusal Durum Geçişi)
 if ($action === 'step_status' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $orderId = (int)($_POST['order_id'] ?? 0);
     $nextStep = trim($_POST['next_step'] ?? '');
@@ -68,7 +105,7 @@ if ($action === 'step_status' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// 4. Kargo Bilgisi Girerek Kargoya Verme (ZORUNLU Kargo Firması ve Takip Kodu)
+// 4. Kargo Bilgisi Girerek Kargoya Verme (ZORUNLU Takip Kodu)
 if ($action === 'ship_order' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $orderId = (int)($_POST['order_id'] ?? 0);
     $cargoCompany = trim($_POST['cargo_company'] ?? 'Yurtiçi Kargo');
@@ -151,7 +188,7 @@ if ($action === 'view'):
         </div>
     </div>
 
-    <!-- 🟢 ADIM ADIM İLERLEME ÇUBUĞU & TEK TIKLA SONRAKİ AŞAMA -->
+    <!-- 🟢 ADIM ADIM İLERLEME ÇUBUĞU -->
     <div class="bg-white border rounded-3 p-3 mb-3 d-flex flex-wrap align-items-center justify-content-between gap-3 shadow-2xs">
         <div>
             <span class="text-muted small d-block mb-1">Mevcut Durum:</span>
@@ -162,7 +199,7 @@ if ($action === 'view'):
         </div>
 
         <div class="d-flex align-items-center gap-2">
-            <!-- 1. Adım: Ödeme Bekliyor ise -> Ödeme Alındı Yap -->
+            <!-- 1. Adım: Ödeme Bekliyor -> Onayla -->
             <?php if (!$isPaid || $status === 'pending_payment'): ?>
                 <form action="<?= SITE_URL ?>/admin/orders.php?action=step_status" method="POST">
                     <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
@@ -173,7 +210,7 @@ if ($action === 'view'):
                     </button>
                 </form>
 
-            <!-- 2. Adım: Ödeme Alındı ise -> Hazırlanıyor / Baskıya Al -->
+            <!-- 2. Adım: Ödeme Alındı -> Hazırlanıyor -->
             <?php elseif ($status === 'payment_received'): ?>
                 <form action="<?= SITE_URL ?>/admin/orders.php?action=step_status" method="POST">
                     <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
@@ -184,13 +221,13 @@ if ($action === 'view'):
                     </button>
                 </form>
 
-            <!-- 3. Adım: Hazırlanıyor ise -> Kargoya Ver (Takip No Zorunlu Modal) -->
+            <!-- 3. Adım: Hazırlanıyor -> Kargoya Ver (Modal Takip No Zorunlu) -->
             <?php elseif ($status === 'in_production' || $status === 'preparing' || $status === 'design_approval' || $status === 'packaged'): ?>
                 <button type="button" class="btn btn-dark py-2 px-3 fw-bold rounded-pill shadow-2xs" data-bs-toggle="modal" data-bs-target="#shipModalDetail">
                     <i class="bi bi-truck me-1"></i> 3. Adım: Kargoya Ver & Takip No Gir &rarr;
                 </button>
 
-            <!-- 4. Adım: Kargoda ise -> Teslim Edildi Yap -->
+            <!-- 4. Adım: Kargoda -> Teslim Edildi -->
             <?php elseif ($status === 'shipped'): ?>
                 <form action="<?= SITE_URL ?>/admin/orders.php?action=step_status" method="POST">
                     <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
@@ -201,13 +238,13 @@ if ($action === 'view'):
                     </button>
                 </form>
 
-            <!-- 5. Adım: Tamamlandı -->
+            <!-- 5. Adım: Teslim Edildi -->
             <?php elseif ($status === 'delivered'): ?>
                 <div class="badge bg-success-subtle text-success border border-success p-2 px-3 rounded-pill fs-6">
                     <i class="bi bi-check-circle-fill me-1"></i> Sipariş Başarıyla Tamamlandı
                 </div>
 
-            <!-- İptal ise: Yeniden Aç -->
+            <!-- İptal ise -->
             <?php elseif ($status === 'cancelled'): ?>
                 <form action="<?= SITE_URL ?>/admin/orders.php?action=step_status" method="POST">
                     <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
@@ -243,15 +280,22 @@ if ($action === 'view'):
                 </div>
 
                 <?php foreach ($order['items'] as $item): 
+                    // Ebat tespiti (Özel ölçü veya paket ebadı)
+                    $dimText = '';
+                    $customSizeData = !empty($item['custom_size']) ? json_decode($item['custom_size'], true) : null;
+                    if (!empty($customSizeData) && !empty($customSizeData['width']) && !empty($customSizeData['height'])) {
+                        $dimText = 'Özel Ölçü: ' . $customSizeData['width'] . ' x ' . $customSizeData['height'] . ' cm';
+                    }
+
                     $cleanOptions = [];
-                    $hasPackage = false;
                     if (!empty($item['options_array'])) {
                         foreach ($item['options_array'] as $optStr) {
-                            if (stripos($optStr, 'Paket:') !== false) $hasPackage = true;
-                        }
-                        foreach ($item['options_array'] as $optStr) {
-                            if ($hasPackage && stripos($optStr, 'Özel Boyut:') !== false && (stripos($optStr, '8.4') !== false || stripos($optStr, '5.2') !== false)) {
+                            if (stripos($optStr, 'Özel Boyut:') !== false) {
+                                if (empty($dimText)) $dimText = $optStr;
                                 continue;
+                            }
+                            if (stripos($optStr, 'Paket:') !== false && empty($dimText)) {
+                                $dimText = str_replace('Paket: ', '', $optStr);
                             }
                             $cleanOptions[] = $optStr;
                         }
@@ -260,24 +304,34 @@ if ($action === 'view'):
                     <div class="d-flex flex-wrap align-items-center justify-content-between p-2.5 bg-light rounded-2 border mb-2 gap-2">
                         <div class="d-flex align-items-center gap-3" style="min-width: 250px;">
                             <?php if (!empty($item['design_svg'])): ?>
-                                <div class="bg-white border rounded p-1 text-center" style="width: 55px; height: 55px; overflow: hidden;">
-                                    <?= $item['design_svg'] ?>
+                                <div class="bg-white border rounded p-1 text-center d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; overflow: hidden;">
+                                    <div style="transform: scale(0.35); transform-origin: center; width: 170px; height: 170px; display: flex; align-items: center; justify-content: center;">
+                                        <?= $item['design_svg'] ?>
+                                    </div>
                                 </div>
                             <?php elseif (!empty($item['design_file'])): ?>
-                                <div class="bg-white border rounded p-1 text-center d-flex align-items-center justify-content-center" style="width: 55px; height: 55px;">
-                                    <i class="bi bi-file-earmark-arrow-up text-primary fs-4"></i>
+                                <div class="bg-white border rounded p-1 text-center d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                    <i class="bi bi-file-earmark-arrow-up text-primary fs-3"></i>
                                 </div>
                             <?php else: ?>
-                                <div class="bg-white border rounded p-1 text-center d-flex align-items-center justify-content-center text-muted" style="width: 55px; height: 55px;">
-                                    <i class="bi bi-card-image fs-4"></i>
+                                <div class="bg-white border rounded p-1 text-center d-flex align-items-center justify-content-center text-muted" style="width: 60px; height: 60px;">
+                                    <i class="bi bi-card-image fs-3"></i>
                                 </div>
                             <?php endif; ?>
 
                             <div>
-                                <div class="fw-bold text-dark"><?= htmlspecialchars($item['product_name']) ?></div>
-                                <div class="text-muted small">Miktar: <strong><?= $item['quantity'] ?> Adet</strong></div>
+                                <div class="fw-bold text-dark fs-6"><?= htmlspecialchars($item['product_name']) ?></div>
+                                <div class="d-flex align-items-center gap-2 mt-0.5">
+                                    <span class="badge bg-primary text-white">Adet: <?= number_format($item['quantity'], 0, '', '.') ?></span>
+                                    <?php if (!empty($dimText)): ?>
+                                        <span class="badge bg-white text-dark border font-monospace fw-bold">
+                                            <i class="bi bi-aspect-ratio text-primary me-1"></i><?= htmlspecialchars($dimText) ?>
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+
                                 <?php if (!empty($cleanOptions)): ?>
-                                    <div class="text-secondary small mt-0.5" style="font-size: 11.5px;">
+                                    <div class="text-secondary small mt-1" style="font-size: 11.5px;">
                                         <?= implode(' • ', array_map('htmlspecialchars', $cleanOptions)) ?>
                                     </div>
                                 <?php endif; ?>
@@ -286,15 +340,15 @@ if ($action === 'view'):
 
                         <div class="d-flex align-items-center gap-3 ms-auto text-end">
                             <div>
-                                <div class="fw-bold text-primary fs-6"><?= Helper::formatPrice($item['total_price']) ?></div>
+                                <div class="fw-bold text-primary fs-5"><?= Helper::formatPrice($item['total_price']) ?></div>
                                 <div class="text-muted" style="font-size: 11px;">Birim: <?= Helper::formatPrice($item['unit_price']) ?></div>
                             </div>
                             <?php if (!empty($item['design_svg'])): ?>
-                                <a href="<?= SITE_URL ?>/admin/orders.php?action=download_svg&item_id=<?= $item['id'] ?>" class="btn btn-sm btn-primary py-1 px-2.5 text-nowrap">
-                                    <i class="bi bi-download me-1"></i> SVG İndir
+                                <a href="<?= SITE_URL ?>/admin/orders.php?action=download_svg&item_id=<?= $item['id'] ?>" class="btn btn-sm btn-primary py-1.5 px-3 rounded-pill fw-bold text-nowrap shadow-2xs">
+                                    <i class="bi bi-download me-1"></i> Vektörel SVG İndir
                                 </a>
                             <?php elseif (!empty($item['design_file'])): ?>
-                                <a href="<?= SITE_URL . '/' . htmlspecialchars($item['design_file']) ?>" target="_blank" class="btn btn-sm btn-dark py-1 px-2.5 text-nowrap">
+                                <a href="<?= SITE_URL . '/' . htmlspecialchars($item['design_file']) ?>" target="_blank" class="btn btn-sm btn-dark py-1.5 px-3 rounded-pill fw-bold text-nowrap shadow-2xs">
                                     <i class="bi bi-download me-1"></i> Dosyayı İndir
                                 </a>
                             <?php endif; ?>
@@ -304,7 +358,7 @@ if ($action === 'view'):
 
                 <!-- Tutar Özeti -->
                 <div class="d-flex justify-content-end pt-2 border-top">
-                    <div style="min-width: 200px;" class="small text-end">
+                    <div style="min-width: 220px;" class="small text-end">
                         <div class="text-muted mb-1">Ara Toplam: <strong><?= Helper::formatPrice($order['subtotal']) ?></strong></div>
                         <div class="text-muted mb-1">KDV: <strong><?= Helper::formatPrice($order['tax_amount']) ?></strong></div>
                         <div class="text-muted mb-1">Kargo: <strong><?= Helper::formatPrice($order['shipping_fee']) ?></strong></div>
@@ -558,7 +612,7 @@ else:
         </form>
     </div>
 
-    <!-- Sipariş Tablosu -->
+    <!-- 📦 Sipariş Tablosu -->
     <div class="bg-white rounded-3 border">
         <?php if (empty($orders)): ?>
             <div class="text-center py-5 text-muted small">
@@ -566,18 +620,17 @@ else:
             </div>
         <?php else: ?>
             <div class="table-responsive">
-                <table class="table table-hover align-middle small mb-0">
-                    <thead class="table-light text-secondary" style="font-size: 12px;">
+                <table class="table table-hover align-middle mb-0" style="font-size: 12.5px;">
+                    <thead class="table-light text-secondary" style="font-size: 11.5px;">
                         <tr>
-                            <th>Sipariş No</th>
-                            <th>Tarih</th>
-                            <th>Müşteri</th>
-                            <th>Kalemler</th>
-                            <th>Tutar</th>
-                            <th>Mevcut Durum</th>
-                            <th style="min-width: 170px;">Sonraki Adım (Tek Tık)</th>
-                            <th>Kargo Takip</th>
-                            <th class="text-end">İşlem</th>
+                            <th style="width: 140px;">Sipariş No & Tarih</th>
+                            <th style="width: 160px;">Müşteri</th>
+                            <th>Kalemler & Tasarım</th>
+                            <th style="width: 120px;">Tutar</th>
+                            <th style="width: 120px;">Ödeme</th>
+                            <th style="width: 180px;">Aşama & Sonraki Adım</th>
+                            <th style="width: 140px;">Kargo Takip</th>
+                            <th style="width: 80px;" class="text-end">İşlem</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -587,108 +640,133 @@ else:
                             $isOrdPaid = $ord['payment_status'] === 'paid';
                         ?>
                             <tr>
-                                <!-- No -->
-                                <td class="fw-bold font-monospace">
-                                    <a href="<?= SITE_URL ?>/admin/orders.php?action=view&id=<?= $ord['id'] ?>" class="text-decoration-none">
+                                <!-- No & Tarih -->
+                                <td>
+                                    <a href="<?= SITE_URL ?>/admin/orders.php?action=view&id=<?= $ord['id'] ?>" class="text-decoration-none fw-bold font-monospace text-primary fs-6 d-block">
                                         #<?= htmlspecialchars($ord['order_number']) ?>
                                     </a>
-                                </td>
-
-                                <!-- Tarih -->
-                                <td class="text-muted" style="font-size: 11.5px;">
-                                    <?= date('d.m.Y H:i', strtotime($ord['created_at'])) ?>
+                                    <span class="text-muted" style="font-size: 11px;">
+                                        <?= date('d.m.Y H:i', strtotime($ord['created_at'])) ?>
+                                    </span>
                                 </td>
 
                                 <!-- Müşteri -->
                                 <td>
                                     <div class="fw-semibold text-dark"><?= htmlspecialchars($ord['customer_name']) ?></div>
-                                    <div class="text-muted" style="font-size: 11px;"><?= htmlspecialchars($ord['customer_phone']) ?></div>
+                                    <div class="text-muted" style="font-size: 11px;">
+                                        <a href="tel:<?= htmlspecialchars($ord['customer_phone']) ?>" class="text-decoration-none text-muted">
+                                            <?= htmlspecialchars($ord['customer_phone']) ?>
+                                        </a>
+                                    </div>
                                 </td>
 
-                                <!-- Kalemler -->
+                                <!-- Kalemler & Ebat & SVG -->
                                 <td>
-                                    <?php foreach ($items as $it): ?>
-                                        <div class="text-truncate" style="max-width: 160px;" title="<?= htmlspecialchars($it['product_name']) ?>">
-                                            <?= htmlspecialchars($it['product_name']) ?> <span class="text-muted">(<?= $it['quantity'] ?>)</span>
+                                    <?php foreach ($items as $it): 
+                                        $dimText = '';
+                                        $customSizeData = !empty($it['custom_size']) ? json_decode($it['custom_size'], true) : null;
+                                        if (!empty($customSizeData) && !empty($customSizeData['width']) && !empty($customSizeData['height'])) {
+                                            $dimText = $customSizeData['width'] . ' x ' . $customSizeData['height'] . ' cm';
+                                        }
+
+                                        if (empty($dimText) && !empty($it['options_array'])) {
+                                            foreach ($it['options_array'] as $optStr) {
+                                                if (stripos($optStr, 'Özel Boyut:') !== false) {
+                                                    $dimText = str_replace('Özel Boyut: ', '', $optStr);
+                                                    break;
+                                                }
+                                                if (empty($dimText) && stripos($optStr, 'Paket:') !== false) {
+                                                    $dimText = str_replace('Paket: ', '', $optStr);
+                                                }
+                                            }
+                                        }
+                                    ?>
+                                        <div class="mb-1">
+                                            <span class="fw-bold text-dark"><?= htmlspecialchars($it['product_name']) ?></span>
+                                            <span class="text-muted small ms-1">(<?= $it['quantity'] ?> Adet)</span>
+                                            <?php if (!empty($dimText)): ?>
+                                                <span class="badge bg-light text-primary border border-primary-subtle ms-1 font-monospace" style="font-size: 10px;">
+                                                    📐 <?= htmlspecialchars($dimText) ?>
+                                                </span>
+                                            <?php endif; ?>
                                         </div>
+
                                         <?php if (!empty($it['design_svg'])): ?>
-                                            <a href="<?= SITE_URL ?>/admin/orders.php?action=download_svg&item_id=<?= $it['id'] ?>" class="badge bg-primary-subtle text-primary text-decoration-none me-1" style="font-size: 10px;">
-                                                <i class="bi bi-download"></i> SVG
+                                            <a href="<?= SITE_URL ?>/admin/orders.php?action=download_svg&item_id=<?= $it['id'] ?>" class="btn btn-xs btn-outline-primary py-0.5 px-2 rounded me-1" style="font-size: 10.5px;">
+                                                <i class="bi bi-download me-0.5"></i> Vektörel SVG
                                             </a>
                                         <?php elseif (!empty($it['design_file'])): ?>
-                                            <a href="<?= SITE_URL . '/' . htmlspecialchars($it['design_file']) ?>" target="_blank" class="badge bg-secondary text-decoration-none me-1" style="font-size: 10px;">
-                                                <i class="bi bi-download"></i> Dosya
+                                            <a href="<?= SITE_URL . '/' . htmlspecialchars($it['design_file']) ?>" target="_blank" class="btn btn-xs btn-outline-dark py-0.5 px-2 rounded me-1" style="font-size: 10.5px;">
+                                                <i class="bi bi-download me-0.5"></i> Dosya
                                             </a>
                                         <?php endif; ?>
                                     <?php endforeach; ?>
                                 </td>
 
                                 <!-- Tutar -->
-                                <td>
-                                    <div class="fw-bold text-dark"><?= Helper::formatPrice($ord['total_amount']) ?></div>
-                                    <span class="text-muted" style="font-size: 10.5px;"><?= strtoupper($ord['payment_method']) ?></span>
+                                <td style="white-space: nowrap;">
+                                    <div class="fw-bold text-dark fs-6"><?= Helper::formatPrice($ord['total_amount']) ?></div>
+                                    <span class="text-muted" style="font-size: 10px;"><?= strtoupper($ord['payment_method']) ?></span>
                                 </td>
 
-                                <!-- Mevcut Durum Rozetleri -->
-                                <td>
-                                    <div><?= Helper::getPaymentStatusBadge($ord['payment_status']) ?></div>
-                                    <div class="mt-1"><?= Helper::getOrderStatusBadge($ord['order_status']) ?></div>
+                                <!-- Ödeme Durumu -->
+                                <td style="white-space: nowrap;">
+                                    <?= Helper::getPaymentStatusBadge($ord['payment_status']) ?>
                                 </td>
 
-                                <!-- 🟢 SONRAKİ ADIM (TEK TIKLA İLERLEME BUTONU) -->
-                                <td>
-                                    <!-- Durum 1: Ödeme Bekliyor -> Ödeme Onayla -->
+                                <!-- Aşama & Sonraki Adım Butonu -->
+                                <td style="white-space: nowrap;">
+                                    <div class="mb-1">
+                                        <?= Helper::getOrderStatusBadge($ord['order_status']) ?>
+                                    </div>
+
+                                    <!-- 🟢 TEK TIKLA SONRAKİ ADIM -->
                                     <?php if (!$isOrdPaid || $ordStatus === 'pending_payment'): ?>
-                                        <form action="<?= SITE_URL ?>/admin/orders.php?action=step_status" method="POST">
+                                        <form action="<?= SITE_URL ?>/admin/orders.php?action=step_status" method="POST" class="d-inline">
                                             <input type="hidden" name="order_id" value="<?= $ord['id'] ?>">
                                             <input type="hidden" name="next_step" value="payment_received">
                                             <input type="hidden" name="redirect_to" value="<?= SITE_URL ?>/admin/orders.php?tab=<?= urlencode($activeTab) ?>">
-                                            <button type="submit" class="btn btn-xs btn-success py-1 px-2.5 rounded-pill fw-bold text-nowrap shadow-2xs">
+                                            <button type="submit" class="btn btn-xs btn-success py-1 px-2 rounded-pill fw-bold text-nowrap shadow-2xs">
                                                 <i class="bi bi-check2-circle me-1"></i> Ödemeyi Onayla &rarr;
                                             </button>
                                         </form>
 
-                                    <!-- Durum 2: Ödeme Alındı -> Hazırlanıyor'a Al -->
                                     <?php elseif ($ordStatus === 'payment_received'): ?>
-                                        <form action="<?= SITE_URL ?>/admin/orders.php?action=step_status" method="POST">
+                                        <form action="<?= SITE_URL ?>/admin/orders.php?action=step_status" method="POST" class="d-inline">
                                             <input type="hidden" name="order_id" value="<?= $ord['id'] ?>">
                                             <input type="hidden" name="next_step" value="in_production">
                                             <input type="hidden" name="redirect_to" value="<?= SITE_URL ?>/admin/orders.php?tab=<?= urlencode($activeTab) ?>">
-                                            <button type="submit" class="btn btn-xs btn-primary py-1 px-2.5 rounded-pill fw-bold text-nowrap shadow-2xs">
+                                            <button type="submit" class="btn btn-xs btn-primary py-1 px-2 rounded-pill fw-bold text-nowrap shadow-2xs">
                                                 <i class="bi bi-gear-fill me-1"></i> Hazırlanıyor'a Al &rarr;
                                             </button>
                                         </form>
 
-                                    <!-- Durum 3: Hazırlanıyor / Baskıda -> Kargoya Ver (Modal Takip No Zorunlu) -->
                                     <?php elseif ($ordStatus === 'in_production' || $ordStatus === 'preparing' || $ordStatus === 'design_approval' || $ordStatus === 'packaged'): ?>
-                                        <button type="button" class="btn btn-xs btn-dark py-1 px-2.5 rounded-pill fw-bold text-nowrap shadow-2xs" data-bs-toggle="modal" data-bs-target="#shipModal<?= $ord['id'] ?>">
+                                        <button type="button" class="btn btn-xs btn-dark py-1 px-2 rounded-pill fw-bold text-nowrap shadow-2xs" data-bs-toggle="modal" data-bs-target="#shipModal<?= $ord['id'] ?>">
                                             <i class="bi bi-truck me-1"></i> Kargoya Ver...
                                         </button>
 
-                                    <!-- Durum 4: Kargoda -> Teslim Edildi Yap -->
                                     <?php elseif ($ordStatus === 'shipped'): ?>
-                                        <form action="<?= SITE_URL ?>/admin/orders.php?action=step_status" method="POST">
+                                        <form action="<?= SITE_URL ?>/admin/orders.php?action=step_status" method="POST" class="d-inline">
                                             <input type="hidden" name="order_id" value="<?= $ord['id'] ?>">
                                             <input type="hidden" name="next_step" value="delivered">
                                             <input type="hidden" name="redirect_to" value="<?= SITE_URL ?>/admin/orders.php?tab=<?= urlencode($activeTab) ?>">
-                                            <button type="submit" class="btn btn-xs btn-outline-success py-1 px-2.5 rounded-pill fw-bold text-nowrap">
+                                            <button type="submit" class="btn btn-xs btn-outline-success py-1 px-2 rounded-pill fw-bold text-nowrap">
                                                 <i class="bi bi-box2-heart me-1"></i> Teslim Edildi Yap ✓
                                             </button>
                                         </form>
 
-                                    <!-- Durum 5: Teslim Edildi (Tamamlandı) -->
                                     <?php elseif ($ordStatus === 'delivered'): ?>
-                                        <span class="badge bg-success-subtle text-success py-1 px-2 rounded-pill fw-bold">
-                                            <i class="bi bi-check-all me-1"></i> Teslim Edildi
+                                        <span class="badge bg-success-subtle text-success py-0.5 px-2 rounded-pill fw-bold">
+                                            <i class="bi bi-check-all me-1"></i> Tamamlandı
                                         </span>
 
-                                    <!-- Durum 6: İptal / İade -->
                                     <?php elseif ($ordStatus === 'cancelled' || $ordStatus === 'refunded'): ?>
-                                        <form action="<?= SITE_URL ?>/admin/orders.php?action=step_status" method="POST">
+                                        <form action="<?= SITE_URL ?>/admin/orders.php?action=step_status" method="POST" class="d-inline">
                                             <input type="hidden" name="order_id" value="<?= $ord['id'] ?>">
                                             <input type="hidden" name="next_step" value="reopen">
                                             <input type="hidden" name="redirect_to" value="<?= SITE_URL ?>/admin/orders.php?tab=<?= urlencode($activeTab) ?>">
-                                            <button type="submit" class="btn btn-xs btn-outline-secondary py-0.5 px-2 rounded-pill" title="Yeniden Aktif Et">
+                                            <button type="submit" class="btn btn-xs btn-outline-secondary py-0.5 px-2 rounded-pill">
                                                 <i class="bi bi-arrow-counterclockwise"></i> Yeniden Aç
                                             </button>
                                         </form>
@@ -708,12 +786,12 @@ else:
                                 </td>
 
                                 <!-- İşlemler -->
-                                <td class="text-end">
+                                <td class="text-end" style="white-space: nowrap;">
                                     <div class="d-inline-flex gap-1">
-                                        <a href="<?= SITE_URL ?>/admin/orders.php?action=view&id=<?= $ord['id'] ?>" class="btn btn-sm btn-light py-0.5 px-2 border" title="Detaylı İncele">
+                                        <a href="<?= SITE_URL ?>/admin/orders.php?action=view&id=<?= $ord['id'] ?>" class="btn btn-xs btn-light py-1 px-2 border" title="Detay">
                                             İncele
                                         </a>
-                                        <button type="button" class="btn btn-sm btn-light text-danger py-0.5 px-1.5 border" data-bs-toggle="modal" data-bs-target="#delModal<?= $ord['id'] ?>" title="Sil">
+                                        <button type="button" class="btn btn-xs btn-light text-danger py-1 px-1.5 border" data-bs-toggle="modal" data-bs-target="#delModal<?= $ord['id'] ?>" title="Sil">
                                             <i class="bi bi-trash3"></i>
                                         </button>
                                     </div>
@@ -727,7 +805,7 @@ else:
                                                     <input type="hidden" name="redirect_to" value="<?= SITE_URL ?>/admin/orders.php?tab=<?= urlencode($activeTab) ?>">
 
                                                     <div class="modal-header border-bottom py-2">
-                                                        <h6 class="modal-title fw-bold text-dark"><i class="bi bi-truck me-1"></i>Kargo Bilgilerini Gir</h6>
+                                                        <h6 class="modal-title fw-bold text-dark"><i class="bi bi-truck me-1"></i>Kargo Takip Bilgisi Gir</h6>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                     </div>
                                                     <div class="modal-body py-3">

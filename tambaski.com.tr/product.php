@@ -2501,10 +2501,16 @@ function selectPackage(pkg, element) {
 
     // Dekota Özel Ölçü Kutusu Kontrolü
     const dekotaCustomBox = document.getElementById('dekotaCustomSizeBox');
+    const sizeTypeInput = document.querySelector('input[name="size_type"]');
     if (dekotaCustomBox) {
         dekotaCustomBox.style.display = (pkg === 'ozel') ? 'block' : 'none';
-        if (pkg === 'ozel' && typeof onDekotaCustomSizeChange === 'function') {
-            onDekotaCustomSizeChange();
+        if (pkg === 'ozel') {
+            if (sizeTypeInput) sizeTypeInput.value = 'custom';
+            if (typeof onDekotaCustomSizeChange === 'function') {
+                onDekotaCustomSizeChange();
+            }
+        } else {
+            if (sizeTypeInput) sizeTypeInput.value = 'standard';
         }
     }
 
@@ -2960,6 +2966,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const hInput = document.getElementById('dekotaHeightCm');
             if (wInput) wInput.value = curW;
             if (hInput) hInput.value = curH;
+
+            const cw = document.getElementById('customWidth');
+            const ch = document.getElementById('customHeight');
+            const st = document.querySelector('input[name="size_type"]');
+            if (cw) cw.value = curW;
+            if (ch) ch.value = curH;
+            if (st) st.value = 'custom';
+
             if (typeof calculateCustomPrice === 'function') calculateCustomPrice();
         } else {
             const pkgRadio = document.getElementById('pkg_' + matchedPkg) || document.querySelector('input[name="selected_package"][value="' + matchedPkg + '"]');
@@ -3020,6 +3034,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const m2 = ((w * h) / 10000).toFixed(2);
         const badge = document.getElementById('dekotaCustomM2Badge');
         if (badge) badge.textContent = m2 + ' m²';
+
+        const cw = document.getElementById('customWidth');
+        const ch = document.getElementById('customHeight');
+        const st = document.querySelector('input[name="size_type"]');
+        if (cw) cw.value = w;
+        if (ch) ch.value = h;
+        if (st) st.value = 'custom';
+
         if (typeof calculateLivePrice === 'function') calculateLivePrice();
     };
 
