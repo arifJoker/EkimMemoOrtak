@@ -38,20 +38,47 @@ if ($action === 'delete' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// 3. Kargo Bilgisi Girerek Kargoya Verme (ZORUNLU Kargo Firması ve Takip Kodu)
+// 3. Adım Adım İlerleme (Tek Tıkla Bir Sonraki Aşamaya Geçiş)
+if ($action === 'step_status' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $orderId = (int)($_POST['order_id'] ?? 0);
+    $nextStep = trim($_POST['next_step'] ?? '');
+
+    if ($orderId > 0 && !empty($nextStep)) {
+        if ($nextStep === 'payment_received') {
+            $orderModel->updatePaymentStatus($orderId, 'paid');
+            $orderModel->updateStatus($orderId, 'payment_received');
+            Helper::setFlash('success', 'Ödeme onaylandı: Sipariş "Ödeme Alındı" durumuna geçti.');
+        } elseif ($nextStep === 'in_production') {
+            $orderModel->updateStatus($orderId, 'in_production');
+            Helper::setFlash('success', 'Sipariş "Hazırlanıyor / Baskıda" aşamasına alındı.');
+        } elseif ($nextStep === 'delivered') {
+            $orderModel->updateStatus($orderId, 'delivered');
+            Helper::setFlash('success', 'Sipariş başarıyla "Teslim Edildi" olarak tamamlandı.');
+        } elseif ($nextStep === 'reopen') {
+            $orderModel->updateStatus($orderId, 'payment_received');
+            Helper::setFlash('success', 'Sipariş tekrar aktif sürece alındı.');
+        } elseif ($nextStep === 'cancelled') {
+            $orderModel->updateStatus($orderId, 'cancelled');
+            Helper::setFlash('warning', 'Sipariş iptal edildi.');
+        }
+    }
+
+    $redirect = !empty($_POST['redirect_to']) ? $_POST['redirect_to'] : (SITE_URL . "/admin/orders.php");
+    header("Location: " . $redirect);
+    exit;
+}
+
+// 4. Kargo Bilgisi Girerek Kargoya Verme (ZORUNLU Kargo Firması ve Takip Kodu)
 if ($action === 'ship_order' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $orderId = (int)($_POST['order_id'] ?? 0);
-    $cargoCompany = trim($_POST['cargo_company'] ?? '');
+    $cargoCompany = trim($_POST['cargo_company'] ?? 'Yurtiçi Kargo');
     $cargoTracking = trim($_POST['cargo_tracking_code'] ?? '');
 
     if ($orderId <= 0) {
         Helper::setFlash('danger', 'Geçersiz sipariş.');
     } elseif (empty($cargoTracking)) {
-        Helper::setFlash('danger', 'Kargoya verildi diyebilmek için Kargo Takip Numarası girmek zorunludur.');
+        Helper::setFlash('danger', 'Kargoya verildi durumuna geçmek için Kargo Takip Numarası girmek zorunludur.');
     } else {
-        if (empty($cargoCompany)) {
-            $cargoCompany = 'Yurtiçi Kargo';
-        }
         $orderModel->updateCargo($orderId, $cargoCompany, $cargoTracking);
         Helper::setFlash('success', 'Kargo bilgisi kaydedildi ve sipariş "Kargoya Verildi" olarak güncellendi.');
     }
@@ -61,42 +88,16 @@ if ($action === 'ship_order' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// 4. Hızlı Durum Güncelleme
-if ($action === 'quick_status' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $orderId = (int)($_POST['order_id'] ?? 0);
-    $type = $_POST['type'] ?? 'order_status';
-    $status = trim($_POST['status'] ?? '');
-
-    if ($orderId > 0 && !empty($status)) {
-        if ($status === 'shipped') {
-            Helper::setFlash('danger', 'Kargoya verildi durumuna geçmek için kargo takip numarası girmelisiniz.');
-        } else {
-            if ($type === 'payment_status') {
-                $orderModel->updatePaymentStatus($orderId, $status);
-                Helper::setFlash('success', 'Ödeme durumu güncellendi.');
-            } else {
-                $orderModel->updateStatus($orderId, $status);
-                Helper::setFlash('success', 'Sipariş aşaması güncellendi.');
-            }
-        }
-    }
-
-    $redirect = !empty($_POST['redirect_to']) ? $_POST['redirect_to'] : (SITE_URL . "/admin/orders.php");
-    header("Location: " . $redirect);
-    exit;
-}
-
-// 5. Detaylı Sipariş ve Kargo Güncelleme Formu
+// 5. Detaylı Form Güncelleme
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'update') {
     $orderId = (int)($_POST['order_id'] ?? 0);
     $orderStatus = $_POST['order_status'] ?? 'pending_payment';
     $paymentStatus = $_POST['payment_status'] ?? 'pending';
-    $cargoCompany = trim($_POST['cargo_company'] ?? '');
+    $cargoCompany = trim($_POST['cargo_company'] ?? 'Yurtiçi Kargo');
     $cargoTracking = trim($_POST['cargo_tracking_code'] ?? '');
 
-    // Kargo Kontrolü: Eğer "Kargoya Verildi" seçildiyse Takip No Zorunludur!
     if ($orderStatus === 'shipped' && empty($cargoTracking)) {
-        Helper::setFlash('danger', '⚠️ Kargoya verildi durumuna geçmek için Kargo Takip No girilmesi zorunludur.');
+        Helper::setFlash('danger', '⚠️ Siparişi "Kargoya Verildi" yapmak için Kargo Takip No girmelisiniz.');
         header("Location: " . SITE_URL . "/admin/orders.php?action=view&id=" . $orderId);
         exit;
     }
@@ -105,11 +106,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'update') {
     $orderModel->updatePaymentStatus($orderId, $paymentStatus);
     
     if (!empty($cargoTracking)) {
-        if (empty($cargoCompany)) $cargoCompany = 'Yurtiçi Kargo';
         $orderModel->updateCargo($orderId, $cargoCompany, $cargoTracking);
     }
 
-    Helper::setFlash('success', 'Sipariş bilgileri güncellendi.');
+    Helper::setFlash('success', 'Sipariş bilgileri başarıyla güncellendi.');
     header("Location: " . SITE_URL . "/admin/orders.php?action=view&id=" . $orderId);
     exit;
 }
@@ -128,6 +128,9 @@ if ($action === 'view'):
         require_once __DIR__ . '/footer.php';
         exit;
     }
+
+    $status = $order['order_status'];
+    $isPaid = $order['payment_status'] === 'paid';
 ?>
     <!-- Sade Başlık -->
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 pb-2 border-bottom gap-2">
@@ -145,6 +148,87 @@ if ($action === 'view'):
             <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteOrderModal">
                 <i class="bi bi-trash3 me-1"></i> Sil
             </button>
+        </div>
+    </div>
+
+    <!-- 🟢 ADIM ADIM İLERLEME ÇUBUĞU & TEK TIKLA SONRAKİ AŞAMA -->
+    <div class="bg-white border rounded-3 p-3 mb-3 d-flex flex-wrap align-items-center justify-content-between gap-3 shadow-2xs">
+        <div>
+            <span class="text-muted small d-block mb-1">Mevcut Durum:</span>
+            <div class="d-flex align-items-center gap-2">
+                <span class="fs-6"><?= Helper::getPaymentStatusBadge($order['payment_status']) ?></span>
+                <span class="fs-6"><?= Helper::getOrderStatusBadge($order['order_status']) ?></span>
+            </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <!-- 1. Adım: Ödeme Bekliyor ise -> Ödeme Alındı Yap -->
+            <?php if (!$isPaid || $status === 'pending_payment'): ?>
+                <form action="<?= SITE_URL ?>/admin/orders.php?action=step_status" method="POST">
+                    <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
+                    <input type="hidden" name="next_step" value="payment_received">
+                    <input type="hidden" name="redirect_to" value="<?= SITE_URL ?>/admin/orders.php?action=view&id=<?= $order['id'] ?>">
+                    <button type="submit" class="btn btn-success py-2 px-3 fw-bold rounded-pill shadow-2xs">
+                        <i class="bi bi-check-circle me-1"></i> 1. Adım: Ödemeyi Onayla &rarr;
+                    </button>
+                </form>
+
+            <!-- 2. Adım: Ödeme Alındı ise -> Hazırlanıyor / Baskıya Al -->
+            <?php elseif ($status === 'payment_received'): ?>
+                <form action="<?= SITE_URL ?>/admin/orders.php?action=step_status" method="POST">
+                    <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
+                    <input type="hidden" name="next_step" value="in_production">
+                    <input type="hidden" name="redirect_to" value="<?= SITE_URL ?>/admin/orders.php?action=view&id=<?= $order['id'] ?>">
+                    <button type="submit" class="btn btn-primary py-2 px-3 fw-bold rounded-pill shadow-2xs">
+                        <i class="bi bi-gear-fill me-1"></i> 2. Adım: Hazırlanıyor'a Al (Baskıya Başla) &rarr;
+                    </button>
+                </form>
+
+            <!-- 3. Adım: Hazırlanıyor ise -> Kargoya Ver (Takip No Zorunlu Modal) -->
+            <?php elseif ($status === 'in_production' || $status === 'preparing' || $status === 'design_approval' || $status === 'packaged'): ?>
+                <button type="button" class="btn btn-dark py-2 px-3 fw-bold rounded-pill shadow-2xs" data-bs-toggle="modal" data-bs-target="#shipModalDetail">
+                    <i class="bi bi-truck me-1"></i> 3. Adım: Kargoya Ver & Takip No Gir &rarr;
+                </button>
+
+            <!-- 4. Adım: Kargoda ise -> Teslim Edildi Yap -->
+            <?php elseif ($status === 'shipped'): ?>
+                <form action="<?= SITE_URL ?>/admin/orders.php?action=step_status" method="POST">
+                    <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
+                    <input type="hidden" name="next_step" value="delivered">
+                    <input type="hidden" name="redirect_to" value="<?= SITE_URL ?>/admin/orders.php?action=view&id=<?= $order['id'] ?>">
+                    <button type="submit" class="btn btn-outline-success py-2 px-3 fw-bold rounded-pill shadow-2xs">
+                        <i class="bi bi-box2-heart me-1"></i> 4. Adım: Siparişi "Teslim Edildi" Yap ✓
+                    </button>
+                </form>
+
+            <!-- 5. Adım: Tamamlandı -->
+            <?php elseif ($status === 'delivered'): ?>
+                <div class="badge bg-success-subtle text-success border border-success p-2 px-3 rounded-pill fs-6">
+                    <i class="bi bi-check-circle-fill me-1"></i> Sipariş Başarıyla Tamamlandı
+                </div>
+
+            <!-- İptal ise: Yeniden Aç -->
+            <?php elseif ($status === 'cancelled'): ?>
+                <form action="<?= SITE_URL ?>/admin/orders.php?action=step_status" method="POST">
+                    <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
+                    <input type="hidden" name="next_step" value="reopen">
+                    <input type="hidden" name="redirect_to" value="<?= SITE_URL ?>/admin/orders.php?action=view&id=<?= $order['id'] ?>">
+                    <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> İptali Geri Al (Yeniden Aç)
+                    </button>
+                </form>
+            <?php endif; ?>
+
+            <?php if ($status !== 'cancelled' && $status !== 'delivered'): ?>
+                <form action="<?= SITE_URL ?>/admin/orders.php?action=step_status" method="POST" class="d-inline" onsubmit="return confirm('Bu siparişi iptal etmek istediğinize emin misiniz?');">
+                    <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
+                    <input type="hidden" name="next_step" value="cancelled">
+                    <input type="hidden" name="redirect_to" value="<?= SITE_URL ?>/admin/orders.php?action=view&id=<?= $order['id'] ?>">
+                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-2.5">
+                        İptal Et
+                    </button>
+                </form>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -250,10 +334,10 @@ if ($action === 'view'):
             </div>
         </div>
 
-        <!-- Sağ Kolon: Durum ve Kargo İşlemleri -->
+        <!-- Sağ Kolon: Manuel Durum ve Kargo İşlemleri -->
         <div class="col-lg-4">
             <div class="bg-white rounded-3 border p-3">
-                <h6 class="fw-bold text-dark mb-3 pb-2 border-bottom">Sipariş & Kargo Yönetimi</h6>
+                <h6 class="fw-bold text-dark mb-3 pb-2 border-bottom">Manuel Ayar & Kargo Bilgisi</h6>
 
                 <form action="<?= SITE_URL ?>/admin/orders.php?action=update" method="POST" id="orderUpdateForm">
                     <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
@@ -273,16 +357,11 @@ if ($action === 'view'):
                         <select name="order_status" id="orderStatusSelect" class="form-select form-select-sm">
                             <option value="pending_payment" <?= $order['order_status'] === 'pending_payment' ? 'selected' : '' ?>>⏳ Ödeme Bekleniyor</option>
                             <option value="payment_received" <?= $order['order_status'] === 'payment_received' ? 'selected' : '' ?>>✅ Ödeme Alındı</option>
-                            <option value="preparing" <?= $order['order_status'] === 'preparing' ? 'selected' : '' ?>>⚙️ Hazırlanıyor</option>
-                            <option value="in_production" <?= $order['order_status'] === 'in_production' ? 'selected' : '' ?>>🏭 Baskıda / Üretimde</option>
-                            <option value="packaged" <?= $order['order_status'] === 'packaged' ? 'selected' : '' ?>>📦 Paketlendi</option>
+                            <option value="in_production" <?= $order['order_status'] === 'in_production' || $order['order_status'] === 'preparing' ? 'selected' : '' ?>>⚙️ Hazırlanıyor / Baskıda</option>
                             <option value="shipped" <?= $order['order_status'] === 'shipped' ? 'selected' : '' ?>>🚚 Kargoya Verildi</option>
                             <option value="delivered" <?= $order['order_status'] === 'delivered' ? 'selected' : '' ?>>🎉 Teslim Edildi</option>
                             <option value="cancelled" <?= $order['order_status'] === 'cancelled' ? 'selected' : '' ?>>❌ İptal Edildi</option>
                         </select>
-                        <div id="cargoRequiredAlert" class="small text-danger mt-1" style="display: none;">
-                            * "Kargoya Verildi" için aşağıdaki Takip Numarası zorunludur!
-                        </div>
                     </div>
 
                     <div class="p-2.5 bg-light rounded-2 border mb-3">
@@ -298,7 +377,7 @@ if ($action === 'view'):
                         </div>
 
                         <div class="mb-1">
-                            <label class="form-label text-muted" style="font-size: 11px;">Takip Numarası <span class="text-danger" id="starReq" style="display: <?= $order['order_status'] === 'shipped' ? 'inline' : 'none' ?>;">*</span></label>
+                            <label class="form-label text-muted" style="font-size: 11px;">Takip Numarası</label>
                             <input type="text" name="cargo_tracking_code" id="cargoTrackingInput" class="form-control form-control-sm font-monospace" placeholder="Örn: 1234567890" value="<?= htmlspecialchars($order['cargo_tracking_code'] ?? '') ?>">
                         </div>
 
@@ -311,24 +390,50 @@ if ($action === 'view'):
                         <?php endif; ?>
                     </div>
 
-                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">
+                    <button type="submit" class="btn btn-sm btn-primary w-100 py-2 fw-bold">
                         <i class="bi bi-check2 me-1"></i> Değişiklikleri Kaydet
                     </button>
                 </form>
+            </div>
+        </div>
+    </div>
 
-                <script>
-                document.getElementById('orderStatusSelect').addEventListener('change', function() {
-                    const isShipped = this.value === 'shipped';
-                    document.getElementById('cargoRequiredAlert').style.display = isShipped ? 'block' : 'none';
-                    document.getElementById('starReq').style.display = isShipped ? 'inline' : 'none';
-                    if (isShipped) {
-                        document.getElementById('cargoTrackingInput').setAttribute('required', 'required');
-                        document.getElementById('cargoTrackingInput').focus();
-                    } else {
-                        document.getElementById('cargoTrackingInput').removeAttribute('required');
-                    }
-                });
-                </script>
+    <!-- Kargoya Ver Modal (Detail İçin) -->
+    <div class="modal fade" id="shipModalDetail" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm text-start">
+            <div class="modal-content rounded-3 border-0 shadow">
+                <form action="<?= SITE_URL ?>/admin/orders.php?action=ship_order" method="POST">
+                    <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
+                    <input type="hidden" name="redirect_to" value="<?= SITE_URL ?>/admin/orders.php?action=view&id=<?= $order['id'] ?>">
+
+                    <div class="modal-header border-bottom py-2">
+                        <h6 class="modal-title fw-bold text-dark"><i class="bi bi-truck me-1"></i>Kargo Takip Bilgisi Gir</h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body py-3">
+                        <div class="small text-muted mb-2">
+                            Siparişi kargoya vermek için takip numarasını giriniz:
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold mb-1">Kargo Firması</label>
+                            <select name="cargo_company" class="form-select form-select-sm">
+                                <?php foreach (Cargo::getCompanies() as $key => $c): ?>
+                                    <option value="<?= $key ?>" <?= ($order['cargo_company'] === $key) ? 'selected' : '' ?>><?= $c['name'] ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label small fw-bold mb-1">Kargo Takip Numarası *</label>
+                            <input type="text" name="cargo_tracking_code" class="form-control form-control-sm font-monospace" placeholder="Örn: 1234567890" value="<?= htmlspecialchars($order['cargo_tracking_code'] ?? '') ?>" required autofocus>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top py-2">
+                        <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">İptal</button>
+                        <button type="submit" class="btn btn-sm btn-primary fw-bold">
+                            <i class="bi bi-check2 me-1"></i> Kargoya Verildi Olarak İşaretle
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -469,8 +574,8 @@ else:
                             <th>Müşteri</th>
                             <th>Kalemler</th>
                             <th>Tutar</th>
-                            <th>Ödeme</th>
-                            <th>Aşama</th>
+                            <th>Mevcut Durum</th>
+                            <th style="min-width: 170px;">Sonraki Adım (Tek Tık)</th>
                             <th>Kargo Takip</th>
                             <th class="text-end">İşlem</th>
                         </tr>
@@ -478,6 +583,8 @@ else:
                     <tbody>
                         <?php foreach ($orders as $ord): 
                             $items = $orderModel->getOrderItems($ord['id']);
+                            $ordStatus = $ord['order_status'];
+                            $isOrdPaid = $ord['payment_status'] === 'paid';
                         ?>
                             <tr>
                                 <!-- No -->
@@ -501,7 +608,7 @@ else:
                                 <!-- Kalemler -->
                                 <td>
                                     <?php foreach ($items as $it): ?>
-                                        <div class="text-truncate" style="max-width: 170px;" title="<?= htmlspecialchars($it['product_name']) ?>">
+                                        <div class="text-truncate" style="max-width: 160px;" title="<?= htmlspecialchars($it['product_name']) ?>">
                                             <?= htmlspecialchars($it['product_name']) ?> <span class="text-muted">(<?= $it['quantity'] ?>)</span>
                                         </div>
                                         <?php if (!empty($it['design_svg'])): ?>
@@ -522,81 +629,70 @@ else:
                                     <span class="text-muted" style="font-size: 10.5px;"><?= strtoupper($ord['payment_method']) ?></span>
                                 </td>
 
-                                <!-- Ödeme Durumu Dropdown -->
+                                <!-- Mevcut Durum Rozetleri -->
                                 <td>
-                                    <div class="dropdown">
-                                        <a href="#" class="text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
-                                            <?= Helper::getPaymentStatusBadge($ord['payment_status']) ?>
-                                        </a>
-                                        <ul class="dropdown-menu shadow-sm small border-0">
-                                            <li>
-                                                <form action="<?= SITE_URL ?>/admin/orders.php?action=quick_status" method="POST">
-                                                    <input type="hidden" name="order_id" value="<?= $ord['id'] ?>">
-                                                    <input type="hidden" name="type" value="payment_status">
-                                                    <input type="hidden" name="status" value="paid">
-                                                    <button type="submit" class="dropdown-item text-success">✅ Ödendi Yap</button>
-                                                </form>
-                                            </li>
-                                            <li>
-                                                <form action="<?= SITE_URL ?>/admin/orders.php?action=quick_status" method="POST">
-                                                    <input type="hidden" name="order_id" value="<?= $ord['id'] ?>">
-                                                    <input type="hidden" name="type" value="payment_status">
-                                                    <input type="hidden" name="status" value="pending">
-                                                    <button type="submit" class="dropdown-item text-warning">⏳ Bekliyor Yap</button>
-                                                </form>
-                                            </li>
-                                        </ul>
-                                    </div>
+                                    <div><?= Helper::getPaymentStatusBadge($ord['payment_status']) ?></div>
+                                    <div class="mt-1"><?= Helper::getOrderStatusBadge($ord['order_status']) ?></div>
                                 </td>
 
-                                <!-- Sipariş Aşaması Dropdown -->
+                                <!-- 🟢 SONRAKİ ADIM (TEK TIKLA İLERLEME BUTONU) -->
                                 <td>
-                                    <div class="dropdown">
-                                        <a href="#" class="text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
-                                            <?= Helper::getOrderStatusBadge($ord['order_status']) ?>
-                                        </a>
-                                        <ul class="dropdown-menu shadow-sm small border-0">
-                                            <li>
-                                                <form action="<?= SITE_URL ?>/admin/orders.php?action=quick_status" method="POST">
-                                                    <input type="hidden" name="order_id" value="<?= $ord['id'] ?>">
-                                                    <input type="hidden" name="type" value="order_status">
-                                                    <input type="hidden" name="status" value="payment_received">
-                                                    <button type="submit" class="dropdown-item">✅ Ödeme Alındı</button>
-                                                </form>
-                                            </li>
-                                            <li>
-                                                <form action="<?= SITE_URL ?>/admin/orders.php?action=quick_status" method="POST">
-                                                    <input type="hidden" name="order_id" value="<?= $ord['id'] ?>">
-                                                    <input type="hidden" name="type" value="order_status">
-                                                    <input type="hidden" name="status" value="in_production">
-                                                    <button type="submit" class="dropdown-item text-primary">🏭 Baskıda / Üretimde</button>
-                                                </form>
-                                            </li>
-                                            <li>
-                                                <!-- Kargoya Ver Modal Tetikleyici (Takip Kodu Zorunlu) -->
-                                                <button type="button" class="dropdown-item text-dark fw-bold" data-bs-toggle="modal" data-bs-target="#shipModal<?= $ord['id'] ?>">
-                                                    🚚 Kargoya Ver...
-                                                </button>
-                                            </li>
-                                            <li>
-                                                <form action="<?= SITE_URL ?>/admin/orders.php?action=quick_status" method="POST">
-                                                    <input type="hidden" name="order_id" value="<?= $ord['id'] ?>">
-                                                    <input type="hidden" name="type" value="order_status">
-                                                    <input type="hidden" name="status" value="delivered">
-                                                    <button type="submit" class="dropdown-item text-success">🎉 Teslim Edildi</button>
-                                                </form>
-                                            </li>
-                                            <li><hr class="dropdown-divider my-1"></li>
-                                            <li>
-                                                <form action="<?= SITE_URL ?>/admin/orders.php?action=quick_status" method="POST">
-                                                    <input type="hidden" name="order_id" value="<?= $ord['id'] ?>">
-                                                    <input type="hidden" name="type" value="order_status">
-                                                    <input type="hidden" name="status" value="cancelled">
-                                                    <button type="submit" class="dropdown-item text-danger">❌ İptal Et</button>
-                                                </form>
-                                            </li>
-                                        </ul>
-                                    </div>
+                                    <!-- Durum 1: Ödeme Bekliyor -> Ödeme Onayla -->
+                                    <?php if (!$isOrdPaid || $ordStatus === 'pending_payment'): ?>
+                                        <form action="<?= SITE_URL ?>/admin/orders.php?action=step_status" method="POST">
+                                            <input type="hidden" name="order_id" value="<?= $ord['id'] ?>">
+                                            <input type="hidden" name="next_step" value="payment_received">
+                                            <input type="hidden" name="redirect_to" value="<?= SITE_URL ?>/admin/orders.php?tab=<?= urlencode($activeTab) ?>">
+                                            <button type="submit" class="btn btn-xs btn-success py-1 px-2.5 rounded-pill fw-bold text-nowrap shadow-2xs">
+                                                <i class="bi bi-check2-circle me-1"></i> Ödemeyi Onayla &rarr;
+                                            </button>
+                                        </form>
+
+                                    <!-- Durum 2: Ödeme Alındı -> Hazırlanıyor'a Al -->
+                                    <?php elseif ($ordStatus === 'payment_received'): ?>
+                                        <form action="<?= SITE_URL ?>/admin/orders.php?action=step_status" method="POST">
+                                            <input type="hidden" name="order_id" value="<?= $ord['id'] ?>">
+                                            <input type="hidden" name="next_step" value="in_production">
+                                            <input type="hidden" name="redirect_to" value="<?= SITE_URL ?>/admin/orders.php?tab=<?= urlencode($activeTab) ?>">
+                                            <button type="submit" class="btn btn-xs btn-primary py-1 px-2.5 rounded-pill fw-bold text-nowrap shadow-2xs">
+                                                <i class="bi bi-gear-fill me-1"></i> Hazırlanıyor'a Al &rarr;
+                                            </button>
+                                        </form>
+
+                                    <!-- Durum 3: Hazırlanıyor / Baskıda -> Kargoya Ver (Modal Takip No Zorunlu) -->
+                                    <?php elseif ($ordStatus === 'in_production' || $ordStatus === 'preparing' || $ordStatus === 'design_approval' || $ordStatus === 'packaged'): ?>
+                                        <button type="button" class="btn btn-xs btn-dark py-1 px-2.5 rounded-pill fw-bold text-nowrap shadow-2xs" data-bs-toggle="modal" data-bs-target="#shipModal<?= $ord['id'] ?>">
+                                            <i class="bi bi-truck me-1"></i> Kargoya Ver...
+                                        </button>
+
+                                    <!-- Durum 4: Kargoda -> Teslim Edildi Yap -->
+                                    <?php elseif ($ordStatus === 'shipped'): ?>
+                                        <form action="<?= SITE_URL ?>/admin/orders.php?action=step_status" method="POST">
+                                            <input type="hidden" name="order_id" value="<?= $ord['id'] ?>">
+                                            <input type="hidden" name="next_step" value="delivered">
+                                            <input type="hidden" name="redirect_to" value="<?= SITE_URL ?>/admin/orders.php?tab=<?= urlencode($activeTab) ?>">
+                                            <button type="submit" class="btn btn-xs btn-outline-success py-1 px-2.5 rounded-pill fw-bold text-nowrap">
+                                                <i class="bi bi-box2-heart me-1"></i> Teslim Edildi Yap ✓
+                                            </button>
+                                        </form>
+
+                                    <!-- Durum 5: Teslim Edildi (Tamamlandı) -->
+                                    <?php elseif ($ordStatus === 'delivered'): ?>
+                                        <span class="badge bg-success-subtle text-success py-1 px-2 rounded-pill fw-bold">
+                                            <i class="bi bi-check-all me-1"></i> Teslim Edildi
+                                        </span>
+
+                                    <!-- Durum 6: İptal / İade -->
+                                    <?php elseif ($ordStatus === 'cancelled' || $ordStatus === 'refunded'): ?>
+                                        <form action="<?= SITE_URL ?>/admin/orders.php?action=step_status" method="POST">
+                                            <input type="hidden" name="order_id" value="<?= $ord['id'] ?>">
+                                            <input type="hidden" name="next_step" value="reopen">
+                                            <input type="hidden" name="redirect_to" value="<?= SITE_URL ?>/admin/orders.php?tab=<?= urlencode($activeTab) ?>">
+                                            <button type="submit" class="btn btn-xs btn-outline-secondary py-0.5 px-2 rounded-pill" title="Yeniden Aktif Et">
+                                                <i class="bi bi-arrow-counterclockwise"></i> Yeniden Aç
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
                                 </td>
 
                                 <!-- Kargo Takip Kolonu -->
@@ -607,16 +703,14 @@ else:
                                             <?= htmlspecialchars($ord['cargo_tracking_code']) ?> <i class="bi bi-box-arrow-up-right" style="font-size: 9px;"></i>
                                         </a>
                                     <?php else: ?>
-                                        <button type="button" class="btn btn-xs btn-outline-primary py-0.5 px-2 rounded" style="font-size: 11px;" data-bs-toggle="modal" data-bs-target="#shipModal<?= $ord['id'] ?>">
-                                            <i class="bi bi-truck me-0.5"></i> Kargoya Ver
-                                        </button>
+                                        <span class="text-muted" style="font-size: 11px;">—</span>
                                     <?php endif; ?>
                                 </td>
 
                                 <!-- İşlemler -->
                                 <td class="text-end">
                                     <div class="d-inline-flex gap-1">
-                                        <a href="<?= SITE_URL ?>/admin/orders.php?action=view&id=<?= $ord['id'] ?>" class="btn btn-sm btn-light py-0.5 px-2 border" title="Detay">
+                                        <a href="<?= SITE_URL ?>/admin/orders.php?action=view&id=<?= $ord['id'] ?>" class="btn btn-sm btn-light py-0.5 px-2 border" title="Detaylı İncele">
                                             İncele
                                         </a>
                                         <button type="button" class="btn btn-sm btn-light text-danger py-0.5 px-1.5 border" data-bs-toggle="modal" data-bs-target="#delModal<?= $ord['id'] ?>" title="Sil">
@@ -624,7 +718,7 @@ else:
                                         </button>
                                     </div>
 
-                                    <!-- Kargo Bilgisi Girme Modalı (ZORUNLU) -->
+                                    <!-- Kargo Bilgisi Girme Modalı (ZORUNLU Takip No) -->
                                     <div class="modal fade" id="shipModal<?= $ord['id'] ?>" tabindex="-1" aria-hidden="true">
                                         <div class="modal-dialog modal-dialog-centered modal-sm text-start">
                                             <div class="modal-content rounded-3 border-0 shadow">
@@ -637,7 +731,7 @@ else:
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                     </div>
                                                     <div class="modal-body py-3">
-                                                        <div class="small text-muted mb-3">
+                                                        <div class="small text-muted mb-2">
                                                             Sipariş <strong>#<?= htmlspecialchars($ord['order_number']) ?></strong> için takip numarası girmeden kargoda durumuna geçilemez.
                                                         </div>
 
