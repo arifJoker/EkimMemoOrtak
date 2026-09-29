@@ -17,3 +17,6 @@ Thumbs.db
 dist/
 build/
 *.log
+mockup/
+*.zip
+*.psd

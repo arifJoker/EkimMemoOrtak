@@ -53,107 +53,41 @@ require_once __DIR__ . '/includes/header.php';
                 </div>
 
                 <!-- ========================================================================= -->
-                <!-- 🎨 CANLI DİNAMİK MOCKUP SAHNESİ & 3D DOKU SİMÜLATÖRÜ -->
+                <!-- 📸 ÜRÜN GÖRSELİ & GALERİ -->
                 <!-- ========================================================================= -->
                 <?php
-                $realisticMockup = !empty($product['mockup_image']) 
-                    ? (str_starts_with($product['mockup_image'], 'http') ? $product['mockup_image'] : SITE_URL . '/' . $product['mockup_image']) 
-                    : SITE_URL . '/uploads/mockups/tambaski_kartvizit_vip_mockup.jpg';
+                $mainProductImage = !empty($product['image']) 
+                    ? (str_starts_with($product['image'], 'http') ? $product['image'] : SITE_URL . '/' . $product['image']) 
+                    : (!empty($product['mockup_image']) 
+                        ? (str_starts_with($product['mockup_image'], 'http') ? $product['mockup_image'] : SITE_URL . '/' . $product['mockup_image']) 
+                        : SITE_URL . '/uploads/mockups/tambaski_kartvizit_vip_mockup.jpg');
+                
+                $galleryImages = [];
+                if (!empty($mainProductImage)) $galleryImages[] = $mainProductImage;
+                if (!empty($product['gallery_array'])) {
+                    foreach ($product['gallery_array'] as $gImg) {
+                        $full = str_starts_with($gImg, 'http') ? $gImg : SITE_URL . '/' . $gImg;
+                        if (!in_array($full, $galleryImages)) $galleryImages[] = $full;
+                    }
+                }
                 ?>
-                <div class="mockup-stage-box text-center py-3 bg-light rounded-4 mb-2 position-relative overflow-hidden shadow-sm" style="min-height: 280px; background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); border: 1px solid #334155;">
-                    
-                    <!-- Üst Bar: Kalınlık & Doku Göstergesi + 360° Video Butonu -->
-                    <div class="position-absolute top-0 start-0 w-100 p-2 d-flex justify-content-between align-items-start" style="z-index: 25; pointer-events: none;">
-                        <div class="d-flex flex-column gap-1 text-start" style="pointer-events: auto;">
-                            <span class="badge bg-primary-subtle text-primary rounded-pill px-2 py-1 shadow-sm" id="showcaseThicknessBadge" style="font-size: 10px;">
-                                <i class="bi bi-layers-half text-warning me-1"></i> Kalınlık: <strong>0.38 mm (350 GSM)</strong>
-                            </span>
-                            <span class="badge bg-white bg-opacity-10 text-light rounded-pill px-2 py-1 shadow-sm" id="showcaseFinishBadge" style="font-size: 10px;">
-                                <i class="bi bi-stars text-info me-1"></i> Doku: <strong>24K Altın Varak &amp; İtalyan Tuale</strong>
-                            </span>
-                        </div>
-                        <button type="button" class="btn btn-sm btn-danger rounded-pill px-3 py-1 shadow d-flex align-items-center gap-1" onclick="PackageShowcase.playCinematicVideo()" style="font-size: 11px; pointer-events: auto; background: linear-gradient(135deg, #e11d48, #f43f5e); border: none;">
-                            <i class="bi bi-play-circle-fill fs-6"></i> <span>360° Video</span>
-                        </button>
-                    </div>
-
-                    <!-- 1. Canlı Yüksek Çözünürlüklü Gerçekçi Stüdyo Mockup Görünümü (VARSAYILAN) -->
-                    <div id="mockup_photo_view" class="mockup-view-pane" style="display: flex; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; background: #0b1120; align-items: center; justify-content: center; padding: 6px;">
-                        <img id="stagePhotoImg" src="<?= htmlspecialchars($realisticMockup) ?>" alt="TamBaskı Kurumsal Mockup" class="rounded-3 shadow-lg" style="max-width: 100%; max-height: 270px; width: 100%; height: 100%; object-fit: cover; cursor: zoom-in;" onclick="openFullscreenImage(this.src)" title="Tam ekran büyütmek için tıklayın">
-                        <button type="button" class="btn btn-sm btn-dark position-absolute bottom-0 end-0 m-2 rounded-pill px-2.5 py-1 text-white opacity-90 shadow d-flex align-items-center gap-1" style="font-size: 10px; background: rgba(15,23,42,0.85); border: 1px solid rgba(255,255,255,0.2); z-index: 20;" onclick="openFullscreenImage(document.getElementById('stagePhotoImg').src)">
-                            <i class="bi bi-arrows-fullscreen"></i> İncele
-                        </button>
-                    </div>
-
-                    <!-- 2. İnteraktif 3D Kart Sahnesi (Mouse ile Eğim & Işık Parıltısı) -->
-                    <div id="mockup_interactive_view" class="mockup-view-pane" style="display: none; align-items: center; justify-content: center; width: 100%; height: 100%; min-height: 270px; perspective: 1000px; padding: 20px 8px;">
-                        <div id="interactivePackageCard" class="interactive-showcase-card shadow-2xl position-relative overflow-hidden cursor-pointer" style="width: 290px; height: 170px; background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%); border-radius: 12px; transition: transform 0.15s ease-out; display: flex; flex-direction: column; justify-content: space-between; padding: 18px; box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
-                            
-                            <!-- Dinamik Işık Parıldama Katmanı -->
-                            <div id="cardLightGleam" class="position-absolute top-0 start-0 w-100 h-100 pointer-events-none" style="z-index: 5; mix-blend-mode: screen; transition: background 0.08s ease;"></div>
-
-                            <!-- Kart İçeriği (TamBaskı Kurumsal Kimlik) -->
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <div id="showcaseBrandTitle" class="d-flex align-items-center">
-                                    <img src="<?= SITE_URL ?>/assets/img/logo.svg" alt="TamBaskı" style="height: 24px; max-width: 140px; object-fit: contain; transition: filter 0.3s ease;" id="showcaseLogoImg">
-                                </div>
-                                <span class="badge bg-dark bg-opacity-75 text-white font-monospace" style="font-size: 8.5px;">HEIDELBERG HD</span>
-                            </div>
-                            <div class="text-start">
-                                <div class="fw-bold text-dark fs-6" style="line-height: 1.2;">Arif Uz</div>
-                                <div class="text-primary fw-semibold" style="font-size: 11px;">Yönetici</div>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center text-muted border-top pt-2" style="font-size: 9.5px;">
-                                <span><i class="bi bi-envelope text-primary"></i> info@tambaski.com.tr</span>
-                                <span class="fw-bold text-dark"><i class="bi bi-telephone text-primary"></i> 0850 308 00 00</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 3. Video Oynatıcı Görünümü (Varsa) -->
-                    <div id="mockup_video_view" class="mockup-view-pane" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; background: #0f172a; align-items: center; justify-content: center; padding: 8px;">
-                        <video id="stageVideoPlayer" controls autoplay loop playsinline class="rounded-3 shadow-lg" style="max-width: 100%; max-height: 260px; width: auto; height: auto; object-fit: contain;"></video>
-                    </div>
-
-                    <!-- Alt Bilgi: 3D Döndürme İpucu -->
-                    <div class="position-absolute bottom-0 start-50 translate-middle-x mb-1 text-secondary small text-nowrap" style="font-size: 9.5px; opacity: 0.85; z-index: 20;">
-                        <i class="bi bi-patch-check-fill text-warning me-1"></i> TamBaskı Gerçekçi Matbaa Baskı ve Doku Simülasyonu
-                    </div>
-                </div>
-
-                <!-- 📸 Çoklu Fotoğraf & Video Küçük Resim Şeridi (Varsa) -->
-                <div class="d-flex gap-1 overflow-x-auto pb-2 mb-2 align-items-center" id="prodMediaStrip" style="white-space: nowrap;">
-                    <!-- Gerçekçi Mockup Butonu -->
-                    <button type="button" class="btn btn-sm btn-primary active rounded-3 p-1 px-2.5 text-nowrap media-thumb-btn shadow-xs" onclick="showMediaPhoto('<?= htmlspecialchars($realisticMockup) ?>', this)" title="Gerçekçi Stüdyo Mockup" style="font-size: 11px; height: 42px;">
-                        <i class="bi bi-image-fill me-1"></i> Mockup
-                    </button>
-
-                    <!-- İnteraktif 3D Butonu -->
-                    <button type="button" class="btn btn-sm btn-light border rounded-3 p-1 px-2 text-nowrap media-thumb-btn" onclick="showMediaMockup(this)" title="İnteraktif 3D Kart" style="font-size: 11px; height: 42px;">
-                        <i class="bi bi-layers-half me-1"></i> 3D Kart
-                    </button>
-
-                    <!-- Fotoğraflar (WebP / Ultra HD) -->
-                    <?php 
-                    $hasGallery = !empty($product['gallery_array']);
-                    if ($hasGallery): 
-                        foreach ($product['gallery_array'] as $gIdx => $gImg): 
-                            $fullImgUrl = str_starts_with($gImg, 'http') ? $gImg : SITE_URL . '/' . $gImg;
-                        ?>
-                            <button type="button" class="btn btn-sm btn-light border rounded-3 p-0 overflow-hidden media-thumb-btn" onclick="showMediaPhoto('<?= $fullImgUrl ?>', this)" style="width: 42px; height: 42px; flex-shrink: 0;">
-                                <img src="<?= $fullImgUrl ?>" alt="Fotoğraf <?= $gIdx + 1 ?>" style="width: 100%; height: 100%; object-fit: cover;">
-                            </button>
-                        <?php endforeach; 
-                    endif; ?>
-
-                    <!-- 🎥 Gerçek 3D Tanıtım Videosu Butonu -->
-                    <?php 
-                    $fullVideoUrl = !empty($product['video_path']) ? (str_starts_with($product['video_path'], 'http') ? $product['video_path'] : SITE_URL . '/' . $product['video_path']) : SITE_URL . '/uploads/videos/tambaski_vip_showcase.mp4';
-                    ?>
-                    <button type="button" class="btn btn-sm btn-outline-danger rounded-3 p-1 px-2 text-nowrap media-thumb-btn d-flex align-items-center gap-1 shadow-xs" onclick="showMediaVideo('<?= $fullVideoUrl ?>', this)" title="Gerçekçi 3D Altın Varak & Kalınlık Videosu" style="font-size: 11px; height: 42px; background: #fff;">
-                        <i class="bi bi-play-circle-fill text-danger fs-6"></i> <span class="fw-bold">Video</span>
+                <div class="product-gallery-stage bg-white rounded-4 border p-2 mb-2 shadow-2xs position-relative overflow-hidden text-center" style="min-height: 280px; display: flex; align-items: center; justify-content: center; background: #ffffff;">
+                    <img id="mainProductPhoto" src="<?= htmlspecialchars($mainProductImage) ?>" alt="<?= htmlspecialchars($product['name']) ?>" class="img-fluid rounded-3" style="max-height: 380px; width: 100%; object-fit: contain; cursor: zoom-in; transition: opacity 0.2s ease;" onclick="openFullscreenImage(this.src)" title="Büyütmek için tıklayın">
+                    <button type="button" class="btn btn-sm btn-dark bg-opacity-75 rounded-pill px-2.5 py-1 text-white shadow-sm position-absolute bottom-0 end-0 m-2 d-flex align-items-center gap-1" style="font-size: 11px; z-index: 10;" onclick="openFullscreenImage(document.getElementById('mainProductPhoto').src)">
+                        <i class="bi bi-arrows-fullscreen"></i> İncele
                     </button>
                 </div>
+
+                <!-- 📸 Küçük Resim Şeridi (Varsa) -->
+                <?php if (count($galleryImages) > 1): ?>
+                <div class="d-flex gap-2 overflow-x-auto pb-2 mb-2 align-items-center" id="prodMediaStrip" style="white-space: nowrap;">
+                    <?php foreach ($galleryImages as $idx => $imgUrl): ?>
+                        <button type="button" class="btn btn-sm btn-light border rounded-3 p-1 overflow-hidden media-thumb-btn <?= $idx === 0 ? 'active border-primary shadow-xs' : '' ?>" onclick="switchProductPhoto('<?= htmlspecialchars($imgUrl) ?>', this)" style="width: 48px; height: 48px; flex-shrink: 0; padding: 2px;">
+                            <img src="<?= htmlspecialchars($imgUrl) ?>" alt="Görsel <?= $idx + 1 ?>" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;">
+                        </button>
+                    <?php endforeach; ?>
+                </div>
+                <?php endif; ?>
                 
                 <h5 class="fw-bold mb-1" id="dynamicProdTitle"><?= htmlspecialchars($product['name']) ?></h5>
                 <p class="text-muted small mb-2 d-none d-lg-block" id="dynamicProdDesc"><?= htmlspecialchars($product['short_description'] ?? '') ?></p>
@@ -972,60 +906,47 @@ require_once __DIR__ . '/includes/header.php';
                         
                         <!-- 1. HENÜZ TASARIM OLUŞTURULMAMIŞKEN GÖRÜNEN SEÇİCİ PANEL -->
                         <div id="designInitialSelector">
-                            <!-- 4'lü Tasarım Sekmeleri -->
-                            <div class="design-nav-pills">
-                                <button type="button" class="design-nav-btn active btn-canva-tab" data-tab="tabCanva">
-                                    <i class="bi bi-palette-fill text-danger" style="color: #e11d48;"></i>
-                                    <span class="fw-bold">1. Kendin Tasarla</span>
-                                </button>
-
-                                <button type="button" class="design-nav-btn" data-tab="tabTemplate">
-                                    <i class="bi bi-grid-3x3-gap-fill text-warning"></i>
-                                    <span>2. Hazır Şablon</span>
-                                </button>
-
-                                <button type="button" class="design-nav-btn" data-tab="tabUpload">
-                                    <i class="bi bi-cloud-arrow-up-fill text-info"></i>
-                                    <span>3. Dosya Yükle</span>
-                                </button>
-
-                                <button type="button" class="design-nav-btn" data-tab="tabSupport">
-                                    <i class="bi bi-whatsapp text-success"></i>
-                                    <span>4. Grafik Desteği</span>
+                            
+                            <!-- 🚀 TEK ANA BUTON: TASARLAMAYA BAŞLA -->
+                            <div class="mb-3">
+                                <button type="button" class="btn btn-danger w-100 py-3 fw-bold rounded-pill shadow-sm d-flex align-items-center justify-content-center gap-2" id="btnMainStartDesign" onclick="openCanvaStudio()" style="background: linear-gradient(135deg, #f15a24, #e11d48); border: none; font-size: 15.5px;">
+                                    <i class="bi bi-palette-fill fs-5"></i>
+                                    <span>🎨 Tasarlamaya Başla</span>
                                 </button>
                             </div>
 
-                            <!-- 🎨 TAB 1: KENDİN TASARLA (TEK TIKLA BAŞLA) -->
-                            <div id="tabCanva" class="design-tab-pane">
-                                <div class="p-3 rounded-4 border bg-white mb-2 shadow-2xs" style="border-color: #fecdd3 !important; background: linear-gradient(180deg, #fff1f2 0%, #ffffff 100%) !important;">
-                                    <div class="d-flex align-items-center gap-2 mb-2 pb-2 border-bottom">
-                                        <div class="rounded-3 p-2 text-white shadow-xs" style="background: linear-gradient(135deg, #f15a24, #ea580c); width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
-                                            <i class="bi bi-brush-fill fs-5"></i>
-                                        </div>
-                                        <div>
-                                            <div class="fw-bold text-dark small lh-1">TamBaskı Online Vektör Stüdyosu</div>
-                                            <span class="text-muted" style="font-size: 10.5px;">Tarayıcınızda sıfırdan logonuzu ekleyin, metinleri düzenleyin, QR kod oluşturun (300 DPI)</span>
+                            <!-- 2 SEÇENEK: HAZIR ŞABLON KULLAN / KENDİ GÖRSELİM VAR -->
+                            <div class="row g-2 mb-3">
+                                <div class="col-12 col-sm-6">
+                                    <div class="card h-100 border-2 rounded-3 p-3 cursor-pointer design-option-card" id="optReadyTemplate" onclick="selectDesignOption('template')" style="transition: all 0.2s ease; border-color: #f59e0b; background: #fffdf5;">
+                                        <div class="d-flex align-items-center gap-2.5">
+                                            <div class="rounded-3 p-2 text-white shadow-2xs" style="background: linear-gradient(135deg, #f59e0b, #d97706); width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                                <i class="bi bi-grid-3x3-gap-fill fs-5"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold text-dark small">🎨 Hazır Şablon Kullanarak Tasarla</div>
+                                                <div class="text-muted" style="font-size: 10.5px;">Mesleğinize özel şablonu seçip düzenleyin</div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <p class="small text-muted mb-3" style="font-size: 11.5px; line-height: 1.4;">
-                                        Hiçbir grafik programına gerek olmadan, doğrudan tarayıcınızda 1 tıkla tasarlamaya başlayın. CMYK renk modunda, milimetrik baskı ve taşma payı garantilidir.
-                                    </p>
-                                    
-                                    <button type="button" class="btn btn-danger w-100 py-3 fw-bold rounded-pill shadow-xs d-flex align-items-center justify-content-center gap-2" onclick="openCanvaStudio()" style="background: linear-gradient(135deg, #f15a24, #e11d48); border: none;">
-                                        <i class="bi bi-palette-fill fs-5"></i>
-                                        <span class="fs-6">🎨 Tasarım Editörünü Aç (Tek Tıkla Başla)</span>
-                                    </button>
-
-                                    <div class="mt-3 d-flex flex-wrap items-center justify-content-around gap-2 text-muted" style="font-size: 11px;">
-                                        <span><i class="bi bi-check2-circle text-success me-1"></i>300 DPI Vektör Çıktı</span>
-                                        <span><i class="bi bi-check2-circle text-success me-1"></i>Ücretsiz QR Kod Motoru</span>
-                                        <span><i class="bi bi-check2-circle text-success me-1"></i>Tek/Çift Yön Tasarım</span>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <div class="card h-100 border rounded-3 p-3 cursor-pointer design-option-card" id="optCustomUpload" onclick="selectDesignOption('upload')" style="transition: all 0.2s ease; border-color: #cbd5e1; background: #ffffff;">
+                                        <div class="d-flex align-items-center gap-2.5">
+                                            <div class="rounded-3 p-2 text-white shadow-2xs" style="background: linear-gradient(135deg, #0284c7, #0369a1); width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                                <i class="bi bi-cloud-arrow-up-fill fs-5"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold text-dark small">📤 Kendi Görselim Var (Baskı Dosyam Hazır)</div>
+                                                <div class="text-muted" style="font-size: 10.5px;">PDF, AI, PSD veya baskı görselinizi yükleyin</div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- 📑 TAB 2: HAZIR ŞABLON KULLAN (HIZLI BİLGİ GİRİŞİ & MESLEK SEÇİMİ) -->
-                            <div id="tabTemplate" class="design-tab-pane" style="display: none;">
+                            <!-- 📑 SEÇENEK 1: HAZIR ŞABLON KULLAN (HIZLI BİLGİ GİRİŞİ & MESLEK SEÇİMİ) -->
+                            <div id="tabTemplate" class="design-tab-pane" style="display: block;">
                                 <div class="p-3 rounded-4 border bg-white mb-2 shadow-2xs" style="border-color: #fef08a !important; background: linear-gradient(180deg, #fefce8 0%, #ffffff 100%) !important;">
                                     <div class="d-flex align-items-center gap-2 mb-2 pb-2 border-bottom">
                                         <div class="rounded-3 p-2 text-white shadow-xs" style="background: linear-gradient(135deg, #eab308, #ca8a04); width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
@@ -1377,11 +1298,16 @@ require_once __DIR__ . '/includes/header.php';
                     </button>
                 </div>
 
-                <!-- Canlı 3D Mockup, Araçlar & Kaydet -->
+                <!-- Canlı 3D Mockup, Araçlar, Grafiker Desteği & Kaydet -->
                 <div class="canva-header-actions d-flex align-items-center gap-1 gap-md-2">
-                    <button type="button" class="btn btn-sm text-white shadow-sm" id="canvaBtn3d" style="background: linear-gradient(135deg, #8b5cf6, #ec4899); border:none;" onclick="CanvaStudio.open3dMockup()" title="Canlı 3D Mockup Önizleme">
+                    <button type="button" class="btn btn-sm text-white shadow-sm" id="canvaBtn3d" style="background: linear-gradient(135deg, #8b5cf6, #ec4899); border:none;" onclick="CanvaStudio.open3dMockup()" title="Canlı Mockup ve 3D Önizleme">
                         <i class="bi bi-box-seam"></i> <span class="d-none d-md-inline ms-1 fw-bold">3D Önizle</span>
                     </button>
+
+                    <!-- 💬 Canlı Grafiker Desteği Butonu -->
+                    <a href="https://wa.me/<?= Helper::getSetting('site_whatsapp', '905550000000') ?>?text=<?= urlencode('Merhaba, ' . $product['name'] . ' tasarımı yaparken grafiker desteği almak istiyorum.') ?>" target="_blank" class="btn btn-sm btn-success fw-bold text-white shadow-sm d-flex align-items-center gap-1 rounded-pill px-2.5 py-1" style="background: #25D366; border:none;" title="Tasarım yaparken takıldığınız her konuda grafikerimizden anında canlı destek alın">
+                        <i class="bi bi-whatsapp"></i> <span class="d-none d-sm-inline">Grafiker Desteği</span>
+                    </a>
 
                     <button type="button" class="btn btn-sm btn-outline-secondary text-white rounded-pill px-2 py-1 active d-none d-lg-inline-flex" id="btnToggleCanvaGuides" onclick="CanvaStudio.toggleGuides()" title="Güvenli Metin Alanı Kılavuzunu Göster/Gizle">
                         <i class="bi bi-shield-check me-1"></i> <span>Güvenli Alan</span>
@@ -1732,6 +1658,14 @@ require_once __DIR__ . '/includes/header.php';
                         
                         <!-- Metin Seçiliyse Gösterilen Araçlar -->
                         <div id="canvaTextControls" class="d-flex align-items-center gap-2 flex-wrap">
+                            <!-- ✏️ Metin İçeriğini Düzenleme Girişi (Kullanıcı Dostu Hızlı Metin Değiştirici) -->
+                            <div class="input-group input-group-sm" style="min-width: 220px; max-width: 320px;">
+                                <span class="input-group-text bg-light text-primary fw-bold" style="font-size: 11px;">
+                                    <i class="bi bi-pencil-square me-1"></i> Metin:
+                                </span>
+                                <input type="text" id="canvaActiveTextInput" class="form-control fw-semibold" placeholder="Metni buraya yazın..." oninput="CanvaStudio.updateActiveText(this.value)">
+                            </div>
+
                             <!-- Font Ailesi -->
                             <select id="canvaFontFamily" class="form-select form-select-sm" style="width: 145px; font-size: 12px;">
                                 <option value="Inter">Inter (Modern)</option>
@@ -1840,57 +1774,97 @@ require_once __DIR__ . '/includes/header.php';
 <!-- 🌟 3D CANLI BASKI & MOCKUP ÖNİZLEME MODAL -->
 <!-- ========================================================================= -->
 <div class="modal fade" id="canva3dMockupModal" tabindex="-1" aria-hidden="true" style="backdrop-filter: blur(8px); background: rgba(15, 23, 42, 0.75);">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow-2xl rounded-4 overflow-hidden" style="background: #0f172a; color: #fff;">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content border-0 shadow-2xl rounded-4 overflow-hidden" style="background: #0b1120; color: #fff;">
             <!-- Başlık -->
-            <div class="modal-header border-secondary border-opacity-25 px-4 py-3 bg-slate-900 d-flex justify-content-between align-items-center">
+            <div class="modal-header border-secondary border-opacity-25 px-4 py-3 bg-slate-900 d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div class="d-flex align-items-center gap-2">
                     <span class="badge bg-primary-subtle text-primary p-2 rounded-circle"><i class="bi bi-box-seam fs-6"></i></span>
                     <div>
-                        <h6 class="modal-title fw-bold text-white mb-0">Canlı 3D Baskı Mockup Önizleme</h6>
-                        <small class="text-secondary" style="font-size: 11px;">Tasarımınızı gerçekçi 3D alanda inceleyin ve arkalı önlü kontrol edin</small>
+                        <h6 class="modal-title fw-bold text-white mb-0">Canlı Baskı &amp; Stüdyo Mockup Önizleme</h6>
+                        <small class="text-secondary" style="font-size: 11px;">Tasarımınızı gerçekçi masaüstü stüdyo fotoğrafı ve 3D alanda inceleyin</small>
                     </div>
                 </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                
+                <!-- Görünüm Seçici Sekmeler -->
+                <div class="btn-group btn-group-sm ms-auto" id="mockupViewModeGroup">
+                    <button type="button" class="btn btn-primary active fw-bold px-3 py-1" id="btnModeDeskMockup" onclick="CanvaStudio.switchMockupMode('desk')">
+                        <i class="bi bi-display me-1"></i> Masaüstü Mockup
+                    </button>
+                    <button type="button" class="btn btn-outline-light fw-bold px-3 py-1" id="btnMode3dCard" onclick="CanvaStudio.switchMockupMode('3d')">
+                        <i class="bi bi-arrow-repeat me-1"></i> 3D Kart Döndür
+                    </button>
+                </div>
+
+                <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="modal" aria-label="Kapat"></button>
             </div>
 
-            <!-- 3D Gövde -->
-            <div class="modal-body p-4 d-flex flex-column align-items-center justify-content-center" style="min-height: 480px; background: radial-gradient(circle at center, #1e293b 0%, #0b0f19 100%);">
+            <!-- Modal Gövdesi -->
+            <div class="modal-body p-3 p-md-4 d-flex flex-column align-items-center justify-content-center position-relative" style="min-height: 520px; background: radial-gradient(circle at center, #1e293b 0%, #060910 100%);">
                 
-                <!-- 3D Kart Sahnesi -->
-                <div class="mockup-3d-scene" style="perspective: 1200px; width: 100%; display: flex; justify-content: center; align-items: center; padding: 25px 0;">
-                    <div id="mockup3dCardInner" class="mockup-3d-card" style="width: 480px; height: 280px; position: relative; transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);" onclick="CanvaStudio.toggle3dFlip()" title="Çevirmek için tıklayın">
+                <!-- 1. MASAÜSTÜ GERÇEKÇİ ÇİFT KART MOCKUP SAHNESİ -->
+                <div id="mockupDeskPane" class="w-100 d-flex flex-column align-items-center justify-content-center">
+                    <div class="position-relative shadow-2xl rounded-4 overflow-hidden border border-secondary border-opacity-25" style="width: 100%; max-width: 580px; aspect-ratio: 1/1; background: url('<?= SITE_URL ?>/uploads/mockups/mockup_desk_dual_base.jpg') center/cover no-repeat; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7);">
                         
-                        <!-- Ön Yüz (Front Face) -->
-                        <div id="mockup3dFrontFace" class="mockup-face position-absolute top-0 start-0 w-100 h-100 rounded-3 overflow-hidden shadow-lg bg-white" style="backface-visibility: hidden; transform: rotateY(0deg);">
-                            <!-- Front SVG will be inserted here -->
+                        <!-- Üst Kart (Ön Yüz) -->
+                        <div id="deskMockupFront" class="position-absolute shadow-sm overflow-hidden d-flex align-items-center justify-content-center" style="left: 22.95%; top: 12.825%; width: 54.25%; height: 31.125%; background: #ffffff; border-radius: 2px;">
+                            <!-- Live Front SVG -->
                         </div>
+                        <span class="badge bg-dark bg-opacity-75 text-white position-absolute shadow-xs" style="left: 24.5%; top: 14.5%; font-size: 10px; pointer-events: none; z-index: 5;">
+                            Ön Yüz
+                        </span>
 
-                        <!-- Arka Yüz (Back Face) -->
-                        <div id="mockup3dBackFace" class="mockup-face position-absolute top-0 start-0 w-100 h-100 rounded-3 overflow-hidden shadow-lg bg-white" style="backface-visibility: hidden; transform: rotateY(180deg);">
-                            <!-- Back SVG will be inserted here -->
+                        <!-- Alt Kart (Arka Yüz) -->
+                        <div id="deskMockupBack" class="position-absolute shadow-sm overflow-hidden d-flex align-items-center justify-content-center" style="left: 22.95%; top: 55.2%; width: 54.25%; height: 31.1%; background: #ffffff; border-radius: 2px;">
+                            <!-- Live Back SVG -->
                         </div>
+                        <span class="badge bg-dark bg-opacity-75 text-white position-absolute shadow-xs" style="left: 24.5%; top: 57%; font-size: 10px; pointer-events: none; z-index: 5;">
+                            Arka Yüz
+                        </span>
+                    </div>
 
+                    <div class="mt-3 text-secondary small d-flex align-items-center gap-3 flex-wrap justify-content-center">
+                        <span><i class="bi bi-patch-check-fill text-warning me-1"></i> Gerçek çekim stüdyo fotoğrafı üzerinde ön ve arka tasarımınız</span>
+                        <span class="d-none d-md-inline">•</span>
+                        <span class="text-white-50"><i class="bi bi-printer text-info me-1"></i> 300 DPI Heidelberg ofset simülasyonu</span>
                     </div>
                 </div>
 
-                <!-- Çevirme & Bilgi İpucu -->
-                <div class="d-flex align-items-center gap-3 mt-3">
-                    <button type="button" class="btn btn-outline-light rounded-pill px-4 btn-sm fw-bold shadow-sm" id="btnFlip3dMockup" onclick="CanvaStudio.toggle3dFlip()">
-                        <i class="bi bi-arrow-repeat me-1"></i> <span id="btn3dFlipLabel">Arka Yüzü Göster</span>
-                    </button>
-                    <span class="text-secondary small" style="font-size: 12px;"><i class="bi bi-hand-index-thumb me-1"></i> Çevirmek için kartın üzerine de tıklayabilirsiniz.</span>
+                <!-- 2. 3D KART SAHNESİ (DÖNDÜRÜLEBİLİR) -->
+                <div id="mockup3dPane" class="w-100 d-none flex-column align-items-center justify-content-center">
+                    <div class="mockup-3d-scene" style="perspective: 1200px; width: 100%; display: flex; justify-content: center; align-items: center; padding: 25px 0;">
+                        <div id="mockup3dCardInner" class="mockup-3d-card" style="width: 480px; height: 280px; position: relative; transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);" onclick="CanvaStudio.toggle3dFlip()" title="Çevirmek için tıklayın">
+                            <!-- Ön Yüz -->
+                            <div id="mockup3dFrontFace" class="mockup-face position-absolute top-0 start-0 w-100 h-100 rounded-3 overflow-hidden shadow-lg bg-white" style="backface-visibility: hidden; transform: rotateY(0deg);"></div>
+                            <!-- Arka Yüz -->
+                            <div id="mockup3dBackFace" class="mockup-face position-absolute top-0 start-0 w-100 h-100 rounded-3 overflow-hidden shadow-lg bg-white" style="backface-visibility: hidden; transform: rotateY(180deg);"></div>
+                        </div>
+                    </div>
+
+                    <!-- Çevirme & Bilgi İpucu -->
+                    <div class="d-flex align-items-center gap-3 mt-2">
+                        <button type="button" class="btn btn-outline-light rounded-pill px-4 btn-sm fw-bold shadow-sm" id="btnFlip3dMockup" onclick="CanvaStudio.toggle3dFlip()">
+                            <i class="bi bi-arrow-repeat me-1"></i> <span id="btn3dFlipLabel">Arka Yüzü Göster</span>
+                        </button>
+                        <span class="text-secondary small" style="font-size: 12px;"><i class="bi bi-hand-index-thumb me-1"></i> Kartı çevirmek için üzerine tıklayın.</span>
+                    </div>
                 </div>
+
             </div>
 
             <!-- Alt Butonlar -->
-            <div class="modal-footer border-secondary border-opacity-25 px-4 py-3 bg-slate-900 d-flex justify-content-between">
+            <div class="modal-footer border-secondary border-opacity-25 px-4 py-3 bg-slate-900 d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <button type="button" class="btn btn-outline-secondary text-white rounded-pill px-4 btn-sm" data-bs-dismiss="modal">
                     <i class="bi bi-pencil me-1"></i> Düzenlemeye Dön
                 </button>
-                <button type="button" class="btn btn-success rounded-pill px-4 btn-sm fw-bold" onclick="CanvaStudio.saveFromMockup()">
-                    <i class="bi bi-check-circle me-1"></i> Tasarımı Onayla & Siparişe Ekle
-                </button>
+                <div class="d-flex align-items-center gap-2">
+                    <a href="https://wa.me/<?= Helper::getSetting('site_whatsapp', '905550000000') ?>?text=<?= urlencode('Merhaba, ' . $product['name'] . ' tasarımı için grafiker desteği almak istiyorum.') ?>" target="_blank" class="btn btn-sm btn-outline-success text-success border-success rounded-pill px-3">
+                        <i class="bi bi-whatsapp me-1"></i> Grafiker Desteği
+                    </a>
+                    <button type="button" class="btn btn-success rounded-pill px-4 btn-sm fw-bold shadow-sm" onclick="CanvaStudio.saveFromMockup()">
+                        <i class="bi bi-check-circle me-1"></i> Tasarımı Onayla &amp; Siparişe Ekle
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -2140,77 +2114,57 @@ function updateStickyBar() {
     stickyPkgQty.textContent = pkgName + ' • ' + qtyText;
 }
 
-window.showMediaMockup = function(btn) {
+window.switchProductPhoto = function(imgUrl, btn) {
     document.querySelectorAll('.media-thumb-btn').forEach(b => {
-        b.classList.remove('active', 'btn-primary');
-        b.classList.add('btn-light');
+        b.classList.remove('active', 'border-primary', 'shadow-xs');
     });
     if (btn) {
-        btn.classList.add('active', 'btn-primary');
-        btn.classList.remove('btn-light');
+        btn.classList.add('active', 'border-primary', 'shadow-xs');
     }
-    
-    const interView = document.getElementById('mockup_interactive_view');
-    const photoView = document.getElementById('mockup_photo_view');
-    const videoView = document.getElementById('mockup_video_view');
-    
-    if (photoView) photoView.style.display = 'none';
-    if (videoView) {
-        videoView.style.display = 'none';
-        const vp = document.getElementById('stageVideoPlayer');
-        if (vp) vp.pause();
-    }
-    if (interView) interView.style.display = 'flex';
-};
-
-window.showMediaPhoto = function(imgUrl, btn) {
-    document.querySelectorAll('.media-thumb-btn').forEach(b => {
-        b.classList.remove('active', 'btn-primary');
-        b.classList.add('btn-light');
-    });
-    if (btn) {
-        btn.classList.add('active', 'btn-primary');
-        btn.classList.remove('btn-light');
-    }
-
-    const interView = document.getElementById('mockup_interactive_view');
-    const photoView = document.getElementById('mockup_photo_view');
-    const videoView = document.getElementById('mockup_video_view');
-    const photoImg = document.getElementById('stagePhotoImg');
-
-    if (interView) interView.style.display = 'none';
-    if (videoView) {
-        videoView.style.display = 'none';
-        const vp = document.getElementById('stageVideoPlayer');
-        if (vp) vp.pause();
-    }
-    if (photoView && photoImg) {
-        photoImg.src = imgUrl;
-        photoView.style.display = 'flex';
+    const photo = document.getElementById('mainProductPhoto');
+    if (photo) {
+        photo.style.opacity = '0.4';
+        photo.src = imgUrl;
+        setTimeout(() => { photo.style.opacity = '1'; }, 150);
     }
 };
+window.showMediaPhoto = window.switchProductPhoto;
 
-window.showMediaVideo = function(videoUrl, btn) {
-    document.querySelectorAll('.media-thumb-btn').forEach(b => {
-        b.classList.remove('active', 'btn-primary');
-        b.classList.add('btn-light');
-    });
-    if (btn) {
-        btn.classList.add('active', 'btn-primary');
-        btn.classList.remove('btn-light');
-    }
+window.selectDesignOption = function(type) {
+    const optTemplate = document.getElementById('optReadyTemplate');
+    const optUpload = document.getElementById('optCustomUpload');
+    const paneTemplate = document.getElementById('tabTemplate');
+    const paneUpload = document.getElementById('tabUpload');
+    const designTypeInput = document.getElementById('designTypeInput');
 
-    const interView = document.getElementById('mockup_interactive_view');
-    const photoView = document.getElementById('mockup_photo_view');
-    const videoView = document.getElementById('mockup_video_view');
-    const videoPlayer = document.getElementById('stageVideoPlayer');
-
-    if (interView) interView.style.display = 'none';
-    if (photoView) photoView.style.display = 'none';
-    if (videoView && videoPlayer) {
-        videoPlayer.src = videoUrl;
-        videoView.style.display = 'flex';
-        videoPlayer.play().catch(() => {});
+    if (type === 'template') {
+        if (optTemplate) {
+            optTemplate.style.borderColor = '#f59e0b';
+            optTemplate.style.background = '#fffdf5';
+            optTemplate.classList.add('border-2');
+        }
+        if (optUpload) {
+            optUpload.style.borderColor = '#cbd5e1';
+            optUpload.style.background = '#ffffff';
+            optUpload.classList.remove('border-2');
+        }
+        if (paneTemplate) paneTemplate.style.display = 'block';
+        if (paneUpload) paneUpload.style.display = 'none';
+        if (designTypeInput) designTypeInput.value = 'online_editor';
+    } else if (type === 'upload') {
+        if (optUpload) {
+            optUpload.style.borderColor = '#0284c7';
+            optUpload.style.background = '#f0f9ff';
+            optUpload.classList.add('border-2');
+        }
+        if (optTemplate) {
+            optTemplate.style.borderColor = '#cbd5e1';
+            optTemplate.style.background = '#ffffff';
+            optTemplate.classList.remove('border-2');
+        }
+        if (paneTemplate) paneTemplate.style.display = 'none';
+        if (paneUpload) paneUpload.style.display = 'block';
+        if (designTypeInput) designTypeInput.value = 'uploaded';
     }
 };
 

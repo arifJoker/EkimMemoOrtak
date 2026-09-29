@@ -120,6 +120,14 @@ const CanvaStudio = {
         this.canvas.on('selection:created', (e) => this.handleSelection(e));
         this.canvas.on('selection:updated', (e) => this.handleSelection(e));
         this.canvas.on('selection:cleared', () => this.handleSelectionClear());
+        this.canvas.on('text:changed', (e) => {
+            if (e.target) {
+                const activeTextInput = document.getElementById('canvaActiveTextInput');
+                if (activeTextInput) activeTextInput.value = e.target.text || '';
+                this.checkObjectBoundaries();
+                this.saveState();
+            }
+        });
         this.canvas.on('object:moving', (e) => {
             if (e.target) this.clampObjectInsideBounds(e.target);
         });
@@ -580,63 +588,62 @@ const CanvaStudio = {
         }
 
         const modalEl = document.getElementById('canva3dMockupModal');
-        const cardInner = document.getElementById('mockup3dCardInner');
+        const deskFront = document.getElementById('deskMockupFront');
+        const deskBack = document.getElementById('deskMockupBack');
         const frontContainer = document.getElementById('mockup3dFrontFace');
         const backContainer = document.getElementById('mockup3dBackFace');
         const flipBtn = document.getElementById('btnFlip3dMockup');
 
-        let frontSvg = (this.sidesData && this.sidesData.front.svg) || currentSvg || window.savedFrontSvg || document.getElementById('selectedDesignSvg')?.value || '';
-        let backSvg = (this.sidesData && this.sidesData.back.svg) || window.savedBackSvg || document.getElementById('selectedDesignBackSvg')?.value || '';
+        let frontSvg = (this.sidesData && this.sidesData.front && this.sidesData.front.svg) || currentSvg || window.savedFrontSvg || document.getElementById('selectedDesignSvg')?.value || '';
+        let backSvg = (this.sidesData && this.sidesData.back && this.sidesData.back.svg) || window.savedBackSvg || document.getElementById('selectedDesignBackSvg')?.value || '';
 
-        // Ensure SVG has responsive width/height
-        if (frontSvg) {
-            frontSvg = frontSvg.replace(/<svg\b([^>]*)>/i, '<svg$1 style="width:100%;height:100%;object-fit:contain;display:block;" preserveAspectRatio="xMidYMid meet">');
-            frontSvg = frontSvg.replace(/(\s+width="[^"]*")|(\s+height="[^"]*")/i, '');
-        }
-        if (backSvg) {
-            backSvg = backSvg.replace(/<svg\b([^>]*)>/i, '<svg$1 style="width:100%;height:100%;object-fit:contain;display:block;" preserveAspectRatio="xMidYMid meet">');
-            backSvg = backSvg.replace(/(\s+width="[^"]*")|(\s+height="[^"]*")/i, '');
-        }
+        // SVG responsive fit formatter
+        const prepareSvg = (svg) => {
+            if (!svg) return '';
+            let s = svg.replace(/<svg\b([^>]*)>/i, '<svg$1 style="width:100%;height:100%;object-fit:fill;display:block;" preserveAspectRatio="none">');
+            s = s.replace(/(\s+width="[^"]*")|(\s+height="[^"]*")/i, '');
+            return s;
+        };
 
-        // Orantılı kart ebatı hesaplama (kenarlarda boşluk / beyaz letterbox kalmasın)
-        if (cardInner) {
-            const aspect = (this.width || 850) / (this.height || 500);
-            let targetW = 460;
-            let targetH = Math.round(460 / aspect);
-            
-            if (aspect < 1) {
-                // Dikey (ör. Broşür, Yelken Bayrak)
-                targetH = 400;
-                targetW = Math.round(400 * aspect);
-                if (targetW < 180) targetW = 180;
-            } else if (targetH > 320) {
-                targetH = 320;
-                targetW = Math.round(320 * aspect);
-            }
-            cardInner.style.width = targetW + 'px';
-            cardInner.style.height = targetH + 'px';
-            cardInner.classList.remove('flipped');
-        }
+        const renderedFront = prepareSvg(frontSvg) || '<div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted" style="background:#fff; font-size:12px; font-weight:600;">Ön Yüz Tasarımı</div>';
+        const renderedBack = prepareSvg(backSvg) || (this.isDoubleSided && backSvg ? '' : '<div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-muted" style="background:#f8fafc; font-size:11px;"><i class="bi bi-shield-check text-primary mb-1 fs-5"></i><span class="fw-bold">TamBaskı Kurumsal</span><small class="text-muted" style="font-size:9.5px;">Tek Yön Baskı (Arka Yüz Boş)</small></div>');
 
-        if (frontContainer) {
-            frontContainer.className = 'mockup-face position-absolute w-100 h-100 rounded-3 shadow-lg overflow-hidden border';
-            frontContainer.innerHTML = frontSvg || '<div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">Tasarım Yok</div>';
-        }
+        // 1. Masaüstü Gerçekçi Fotoğraf Mockup'ını Doldur
+        if (deskFront) deskFront.innerHTML = renderedFront;
+        if (deskBack) deskBack.innerHTML = renderedBack;
 
+        // 2. 3D Dönen Kart Sahnesini Doldur
+        if (frontContainer) frontContainer.innerHTML = renderedFront;
         if (backContainer) {
-            backContainer.className = 'mockup-face position-absolute w-100 h-100 rounded-3 shadow-lg overflow-hidden border';
-            if (backSvg) {
-                backContainer.innerHTML = backSvg;
-                if (flipBtn) flipBtn.style.display = 'inline-flex';
-            } else {
-                backContainer.innerHTML = `<div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted" style="background:#f1f5f9; font-size:13px; font-weight:500;"><span>Tek Yön Baskı (Arka Yüz Boş)</span></div>`;
-                if (flipBtn) flipBtn.style.display = (this.isDoubleSided && backSvg) ? 'inline-flex' : 'none';
-            }
+            backContainer.innerHTML = renderedBack;
+            if (flipBtn) flipBtn.style.display = (this.isDoubleSided && backSvg) ? 'inline-flex' : 'none';
         }
+
+        // Varsayılan olarak Masaüstü Mockup görünümünü aç
+        this.switchMockupMode('desk');
 
         if (modalEl) {
-            const modal = new bootstrap.Modal(modalEl);
+            const modal = bootstrap.Modal.getOrCreateInstance ? bootstrap.Modal.getOrCreateInstance(modalEl) : new bootstrap.Modal(modalEl);
             modal.show();
+        }
+    },
+
+    switchMockupMode: function(mode) {
+        const deskPane = document.getElementById('mockupDeskPane');
+        const card3dPane = document.getElementById('mockup3dPane');
+        const btnDesk = document.getElementById('btnModeDeskMockup');
+        const btn3d = document.getElementById('btnMode3dCard');
+
+        if (mode === 'desk') {
+            if (deskPane) { deskPane.classList.remove('d-none'); deskPane.classList.add('d-flex'); }
+            if (card3dPane) { card3dPane.classList.remove('d-flex'); card3dPane.classList.add('d-none'); }
+            if (btnDesk) { btnDesk.classList.add('active', 'btn-primary'); btnDesk.classList.remove('btn-outline-light'); }
+            if (btn3d) { btn3d.classList.remove('active', 'btn-primary'); btn3d.classList.add('btn-outline-light'); }
+        } else {
+            if (deskPane) { deskPane.classList.remove('d-flex'); deskPane.classList.add('d-none'); }
+            if (card3dPane) { card3dPane.classList.remove('d-none'); card3dPane.classList.add('d-flex'); }
+            if (btnDesk) { btnDesk.classList.remove('active', 'btn-primary'); btnDesk.classList.add('btn-outline-light'); }
+            if (btn3d) { btn3d.classList.add('active', 'btn-primary'); btn3d.classList.remove('btn-outline-light'); }
         }
     },
 
@@ -1687,6 +1694,11 @@ const CanvaStudio = {
         if (active.type === 'i-text' || active.type === 'text') {
             if (textControls) textControls.style.display = 'flex';
 
+            const activeTextInput = document.getElementById('canvaActiveTextInput');
+            if (activeTextInput) {
+                activeTextInput.value = active.text || '';
+            }
+
             const fontSelect = document.getElementById('canvaFontFamily');
             if (fontSelect && active.fontFamily) fontSelect.value = active.fontFamily;
 
@@ -1703,6 +1715,21 @@ const CanvaStudio = {
             const colorPicker = document.getElementById('canvaTextColorPicker');
             if (colorPicker && active.fill && typeof active.fill === 'string') colorPicker.value = active.fill;
         }
+    },
+
+    updateActiveText: function(val) {
+        if (!this.canvas) return;
+        const active = this.canvas.getActiveObject();
+        if (!active || (active.type !== 'i-text' && active.type !== 'text')) return;
+
+        active.set('text', val);
+        if (typeof active.initDimensions === 'function') {
+            active.initDimensions();
+        }
+        active.setCoords();
+        this.canvas.requestRenderAll();
+        this.checkObjectBoundaries();
+        this.saveState();
     },
 
     handleSelectionClear: function() {
