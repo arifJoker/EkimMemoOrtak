@@ -80,13 +80,19 @@ body {
   overflow: hidden;
   border-radius: 8px;
   padding: 2px 4px;
+  min-width: 140px;
+  flex-shrink: 0;
 }
 
 .navbar-brand .brand-logo-img {
   height: 48px;
   width: auto;
+  min-width: 140px;
+  aspect-ratio: 3270 / 720;
   max-width: 290px;
   object-fit: contain;
+  display: block;
+  flex-shrink: 0;
   transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), filter 0.28s ease;
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.04));
 }
@@ -94,13 +100,18 @@ body {
 @media (min-width: 1200px) {
   .navbar-brand .brand-logo-img {
     height: 52px;
+    min-width: 160px;
     max-width: 320px;
   }
 }
 
 @media (max-width: 576px) {
+  .navbar-brand {
+    min-width: 120px;
+  }
   .navbar-brand .brand-logo-img {
     height: 34px;
+    min-width: 120px;
     max-width: 175px;
   }
 }

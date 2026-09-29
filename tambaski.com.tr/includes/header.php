@@ -68,7 +68,7 @@ $topCats = $dbConn ? $dbConn->query("SELECT * FROM categories WHERE status = 1 O
             
             <!-- Logo (Geniş Yatay Format - Karar Verilen Nihai Logo) -->
             <a class="navbar-brand me-2 me-xl-3" href="<?= SITE_URL ?>/" title="TamBaskı Online Matbaa">
-                <img src="<?= SITE_URL ?>/assets/img/logo.svg?v=2" alt="TamBaskı" class="brand-logo-img" id="mainHeaderLogo">
+                <img src="<?= SITE_URL ?>/assets/img/logo.svg?v=3" alt="TamBaskı" class="brand-logo-img" id="mainHeaderLogo" width="218" height="48" style="aspect-ratio: 3270 / 720; min-width: 140px; height: 48px; object-fit: contain;">
             </a>
 
             <!-- Ana Menü (Logo ile aynı hizada, sağa kaymış) -->

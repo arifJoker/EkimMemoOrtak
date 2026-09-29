@@ -11,12 +11,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $productId = (int)($_POST['product_id'] ?? 0);
         $quantity = (int)($_POST['quantity'] ?? 100);
         $options = $_POST['options'] ?? [];
+        if (!is_array($options)) {
+            $options = [];
+        }
         $selectedPackage = $_POST['selected_package'] ?? 'standart';
+        $options['selected_package'] = $selectedPackage;
+
+        if (!empty($_POST['thickness'])) {
+            $options['thickness'] = $_POST['thickness'];
+        }
+        if (!empty($_POST['mounting'])) {
+            $options['mounting'] = $_POST['mounting'];
+        }
+
         $customPaperId = (int)($_POST['custom_paper_id'] ?? 0);
 
-        $customSize = !empty($_POST['custom_width']) && !empty($_POST['custom_height']) ? [
-            'width'  => (float)$_POST['custom_width'],
-            'height' => (float)$_POST['custom_height']
+        $customWidth = (float)($_POST['custom_width'] ?? $_POST['dekota_width_cm'] ?? 0);
+        $customHeight = (float)($_POST['custom_height'] ?? $_POST['dekota_height_cm'] ?? 0);
+
+        $customSize = ($customWidth > 0 && $customHeight > 0) ? [
+            'width'  => $customWidth,
+            'height' => $customHeight
         ] : null;
 
         $svgData = $_POST['design_svg'] ?? null;
@@ -226,6 +241,8 @@ require_once __DIR__ . '/includes/header.php';
                                 <div class="mt-1">
                                     <?php if ($item['design_type'] === 'uploaded'): ?>
                                         <span class="badge bg-info text-dark small"><i class="bi bi-file-earmark-arrow-up"></i> Yüklenen Dosya: <?= htmlspecialchars(basename($item['design_file'])) ?></span>
+                                    <?php elseif ($item['design_type'] === 'sign_studio'): ?>
+                                        <span class="badge text-white small" style="background: linear-gradient(135deg, #d97706, #f59e0b);"><i class="bi bi-shield-shaded me-1"></i> İSG Vektörel Levha Tasarımı (300 DPI)</span>
                                     <?php elseif ($item['design_type'] === 'canva_studio'): ?>
                                         <span class="badge text-white small" style="background: linear-gradient(135deg, #e11d48, #f43f5e);"><i class="bi bi-palette-fill me-1"></i> Canva Vektör Tasarımı (300 DPI)</span>
                                     <?php elseif ($item['design_type'] === 'ai_generated'): ?>

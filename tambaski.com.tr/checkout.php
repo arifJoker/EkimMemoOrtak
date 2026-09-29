@@ -225,7 +225,12 @@ require_once __DIR__ . '/includes/header.php';
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div>
                                             <div class="fw-bold"><?= htmlspecialchars($item['product_name']) ?></div>
-                                            <div class="text-muted"><?= number_format($item['quantity'], 0, '', '.') ?> Adet</div>
+                                            <div class="text-muted" style="font-size: 11px;"><?= number_format($item['quantity'], 0, '', '.') ?> Adet</div>
+                                            <?php if (!empty($item['options_labels'])): ?>
+                                                <div class="text-muted" style="font-size: 10.5px;">
+                                                    <?= implode(' • ', array_map('htmlspecialchars', $item['options_labels'])) ?>
+                                                </div>
+                                            <?php endif; ?>
                                         </div>
                                         <span class="fw-bold text-primary"><?= $item['formatted_price'] ?></span>
                                     </div>

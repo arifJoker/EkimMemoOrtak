@@ -37,7 +37,7 @@ class Cart {
         $designSvg = $designData['svg'] ?? null;
         $designPreview = $designData['preview'] ?? null;
         $designNotes = $designData['notes'] ?? null;
-        $totalPrice = $calc['grand_total'] ?? $calc['total_amount'] ?? 0;
+        $totalPrice = $calc['grand_total'] ?? $calc['total'] ?? $calc['total_amount'] ?? (($calc['unit_price'] ?? 0) * ($calc['quantity'] ?? 1));
 
         $stmt = $this->db->prepare("INSERT INTO cart_items (
             session_id, user_id, product_id, quantity, selected_options, custom_size,
@@ -79,6 +79,7 @@ class Cart {
 
         $options = !empty($item['selected_options']) ? json_decode($item['selected_options'], true) : [];
         $customSize = !empty($item['custom_size']) ? json_decode($item['custom_size'], true) : null;
+        $selectedPkg = $options['selected_package'] ?? 'standart';
 
         $productModel = new Product();
         $calc = $productModel->calculatePrice(
@@ -87,16 +88,19 @@ class Cart {
             $options,
             $customSize['width'] ?? 0,
             $customSize['height'] ?? 0,
-            $item['design_type'] === 'design_request'
+            $item['design_type'] === 'design_request',
+            $selectedPkg
         );
 
         if (!$calc['success']) return false;
+
+        $itemTotal = $calc['grand_total'] ?? $calc['total'] ?? $calc['total_amount'] ?? ($calc['unit_price'] * $calc['quantity']);
 
         $upStmt = $this->db->prepare("UPDATE cart_items SET quantity = ?, unit_price = ?, total_price = ? WHERE id = ?");
         return $upStmt->execute([
             $calc['quantity'],
             $calc['unit_price'],
-            $calc['grand_total'],
+            $itemTotal,
             $itemId
         ]);
     }
@@ -148,35 +152,75 @@ class Cart {
             $options = !empty($item['selected_options']) ? json_decode($item['selected_options'], true) : [];
             $customSize = !empty($item['custom_size']) ? json_decode($item['custom_size'], true) : null;
 
-            // Seçenek isimlerini çözümle
+            // Seçenek isimlerini çözümle (Hem ID bazlı matbaa özellikleri hem de paket / kalınlık / montaj)
             $optionLabels = [];
             if (!empty($options)) {
                 foreach ($options as $attrId => $valId) {
-                    $optStmt = $this->db->prepare("SELECT pav.title, pa.name AS attr_name FROM product_attribute_values pav JOIN product_attributes pa ON pav.attribute_id = pa.id WHERE pav.id = ?");
-                    $optStmt->execute([$valId]);
-                    $opt = $optStmt->fetch();
-                    if ($opt) {
-                        $optionLabels[] = $opt['attr_name'] . ': ' . $opt['title'];
+                    if (is_numeric($attrId)) {
+                        $optStmt = $this->db->prepare("SELECT pav.title, pa.name AS attr_name FROM product_attribute_values pav JOIN product_attributes pa ON pav.attribute_id = pa.id WHERE pav.id = ?");
+                        $optStmt->execute([$valId]);
+                        $opt = $optStmt->fetch();
+                        if ($opt) {
+                            $optionLabels[] = $opt['attr_name'] . ': ' . $opt['title'];
+                        }
+                    } else {
+                        if ($attrId === 'selected_package' || $attrId === 'package') {
+                            $pkgNames = [
+                                'kucuk' => 'Küçük Boy (25x35 cm)',
+                                'orta' => 'Orta Boy (35x50 cm)',
+                                'buyuk' => 'Büyük Boy (50x70 cm)',
+                                'mega' => 'Mega Boy (70x100 cm)',
+                                'ozel' => 'Özel Ölçü',
+                                'ekonomik' => 'Ekonomik Paket',
+                                'standart' => 'Standart Paket',
+                                'premium' => 'Premium Paket',
+                                'vip' => 'VIP Prestij Paket'
+                            ];
+                            $optionLabels[] = 'Paket: ' . ($pkgNames[$valId] ?? ucfirst($valId));
+                        } elseif ($attrId === 'thickness') {
+                            $thicknessNames = ['3mm' => '3 mm Sert Dekota', '5mm' => '5 mm Sert Dekota', '9mm' => '9 mm Sert Dekota'];
+                            $optionLabels[] = 'Kalınlık: ' . ($thicknessNames[$valId] ?? $valId);
+                        } elseif ($attrId === 'mounting') {
+                            $mountingNames = ['none' => 'Montajsız', 'tape' => 'Çift Taraflı Köpük Bantlı', 'holes' => '4 Köşeden Delikli'];
+                            $optionLabels[] = 'Montaj: ' . ($mountingNames[$valId] ?? $valId);
+                        } elseif (is_string($valId) && !empty($valId)) {
+                            $optionLabels[] = ucfirst($attrId) . ': ' . $valId;
+                        }
                     }
                 }
             }
 
+            if (!empty($customSize) && !empty($customSize['width']) && !empty($customSize['height'])) {
+                $optionLabels[] = 'Özel Boyut: ' . $customSize['width'] . ' x ' . $customSize['height'] . ' cm';
+            }
+
             // Sepet kalemi için bir üst kademe fırsat kontrolü
             $itemUpsell = null;
+            $itemPkg = $options['selected_package'] ?? 'standart';
             $calcUpsell = $productModel->calculatePrice(
                 $item['product_id'],
                 (int)$item['quantity'],
                 $options,
                 $customSize['width'] ?? 0,
                 $customSize['height'] ?? 0,
-                $item['design_type'] === 'design_request'
+                $item['design_type'] === 'design_request',
+                $itemPkg
             );
             if (!empty($calcUpsell['upsell']) && !empty($calcUpsell['upsell']['active'])) {
                 $itemUpsell = $calcUpsell['upsell'];
             }
 
-            $itemSubtotal = (float)$item['total_price'] / (1 + ((float)$item['tax_rate'] / 100));
-            $itemTax = (float)$item['total_price'] - $itemSubtotal;
+            // Eğer bir hata sonucu total_price 0 kaydedilmişse birim fiyat x adet ile anında otomatik düzelt
+            $itemTotalPrice = (float)$item['total_price'];
+            if ($itemTotalPrice <= 0 && (float)$item['unit_price'] > 0) {
+                $itemTotalPrice = (float)$item['unit_price'] * (int)$item['quantity'];
+                try {
+                    $this->db->prepare("UPDATE cart_items SET total_price = ? WHERE id = ?")->execute([$itemTotalPrice, $item['id']]);
+                } catch (Exception $e) {}
+            }
+
+            $itemSubtotal = $itemTotalPrice / (1 + ((float)$item['tax_rate'] / 100));
+            $itemTax = $itemTotalPrice - $itemSubtotal;
 
             $subtotal += $itemSubtotal;
             $totalTax += $itemTax;

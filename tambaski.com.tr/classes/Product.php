@@ -447,7 +447,11 @@ class Product {
         $presets = !empty($product['package_presets']) ? json_decode($product['package_presets'], true) : [];
 
         // 0. Sert Zemin & Levha Modeli (rigid_board - Dekota Uyarı Levhaları vb.) Fiyat Hesaplama
-        if (!empty($product['category_pricing_model']) && $product['category_pricing_model'] === 'rigid_board') {
+        $isRigidBoard = (!empty($product['category_pricing_model']) && $product['category_pricing_model'] === 'rigid_board')
+                     || str_contains($product['slug'] ?? '', 'dekota')
+                     || str_contains($product['category_slug'] ?? '', 'dekota');
+
+        if ($isRigidBoard) {
             $isCustomSize = ($selectedPackage === 'ozel' || $selectedPackage === 'custom');
             $unitBasePrice = 95.00;
 
@@ -491,6 +495,8 @@ class Product {
                     $rawPkgPrice = (float)$presets[$selectedPackage]['price'];
                 } elseif (!empty($presets['orta']['price'])) {
                     $rawPkgPrice = (float)$presets['orta']['price'];
+                } elseif (!empty($presets['standart']['price'])) {
+                    $rawPkgPrice = (float)$presets['standart']['price'];
                 } elseif ($basePrice > 0) {
                     $rawPkgPrice = $basePrice;
                 }
@@ -545,10 +551,12 @@ class Product {
                 'unit_price'            => $unitPrice,
                 'unit_base_price'       => $unitBasePrice,
                 'discount_percent'      => $discountPercent,
-                'subtotal'              => $calculatedSubtotal,
+                'subtotal'              => round($calculatedSubtotal, 2),
                 'tax_rate'              => $taxRate,
                 'tax_amount'            => round($taxAmount, 2),
+                'grand_total'           => round($totalWithTax, 2),
                 'total'                 => round($totalWithTax, 2),
+                'total_amount'          => round($totalWithTax, 2),
                 'formatted_total'       => Helper::formatPrice($totalWithTax),
                 'formatted_subtotal'    => Helper::formatPrice($calculatedSubtotal),
                 'formatted_unit_price'  => Helper::formatPrice($unitPrice),
@@ -973,10 +981,8 @@ class Product {
                 foreach ($tiers as $t) {
                     $insTier->execute([$prodId, $t['quantity'], $t['multiplier'], $t['discount_percent']]);
                 }
-            } else {
-                $this->db->prepare("UPDATE products SET category_id = ?, package_presets = ?, m2_usd_price = 14.50, m2_usd_price_3mm = 14.50, m2_usd_price_5mm = 18.50, m2_usd_price_9mm = 26.00, featured_image = ?, gallery = ?, allow_online_editor = 1, status = 1 WHERE id = ?")
-                         ->execute([$catId, $pkgJson, 'uploads/mockups/tambaski_dekota_mockup.jpg', $galleryJson, $prodId]);
             }
+            // Ürün zaten varsa admin panelinden yapılan fiyat ve ayarları ASLA ezme!
         } catch (Exception $e) {}
     }
 }
