@@ -40,23 +40,58 @@ $uploadUrl = "https://$cpanelHost/execute/Fileman/upload_files"
 $resUpload = & curl.exe -s -k -H "Authorization: $authHeader" -F "dir=$targetDir" -F "file-1=@$tempZip" -F "overwrite=1" "$uploadUrl"
 
 # 3. Zip dosyasini sunucuda ac (Extract - PHP ZipArchive ile %100 Overwrite garantili + OPCache temizligi)
-Write-Host ">>> Sunucuda arsiv aciliyor (ZipArchive extract)..." -ForegroundColor Gray
+Write-Host ">>> Sunucuda arsiv aciliyor (ZipArchive entry-by-entry force overwrite)..." -ForegroundColor Gray
 $unpackerCode = @"
 <?php
-set_time_limit(180);
+set_time_limit(300);
 `$zipPath = '$targetDir/deploy.zip';
 `$dest = '$targetDir';
 `$res = 'ZIP_NOT_FOUND';
 
+// Yetkisiz / eski mock dosyalari temizle
+`$rogueFiles = [
+    `$dest . '/admin/includes/admin_functions.php',
+    `$dest . '/admin/includes',
+    `$dest . '/admin/product_edit.php',
+    `$dest . '/admin/order_detail.php',
+    `$dest . '/vehicle_sticker_customizer.php',
+    `$dest . '/tambaski_deploy.zip',
+    `$dest . '/temp_up.zip'
+];
+foreach (`$rogueFiles as `$rf) {
+    if (is_file(`$rf)) @unlink(`$rf);
+    elseif (is_dir(`$rf)) @rmdir(`$rf);
+}
+
 if (file_exists(`$zipPath)) {
     `$zip = new ZipArchive();
     if (`$zip->open(`$zipPath) === TRUE) {
-        if (`$zip->extractTo(`$dest)) {
-            `$res = 'EXTRACT_OK';
-        } else {
-            `$res = 'EXTRACT_FAILED_OVERWRITE';
+        `$count = 0;
+        for (`$i = 0; `$i < `$zip->numFiles; `$i++) {
+            `$entryName = `$zip->getNameIndex(`$i);
+            `$targetFile = `$dest . '/' . `$entryName;
+
+            if (substr(`$entryName, -1) === '/') {
+                if (!is_dir(`$targetFile)) {
+                    @mkdir(`$targetFile, 0755, true);
+                }
+                continue;
+            }
+
+            `$dir = dirname(`$targetFile);
+            if (!is_dir(`$dir)) {
+                @mkdir(`$dir, 0755, true);
+            }
+
+            `$content = `$zip->getFromIndex(`$i);
+            if (`$content !== false) {
+                file_put_contents(`$targetFile, `$content);
+                @chmod(`$targetFile, 0644);
+                `$count++;
+            }
         }
         `$zip->close();
+        `$res = "EXTRACT_OK_ENTRIES_" . `$count;
     } else {
         `$res = 'EXTRACT_OPEN_FAILED';
     }
