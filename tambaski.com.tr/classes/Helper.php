@@ -297,10 +297,11 @@ class Helper {
     }
 
     /**
-     * Benzersiz Sipariş Numarası Üretici (Örn: BM-2609-8472)
+     * Benzersiz Alfanümerik Sipariş Numarası Üretici (Örn: TB260929A4B1)
+     * PayTR ve sanal posların özel karakter (tire vb.) kısıtlamalarına tam uyumludur.
      */
     public static function generateOrderNumber() {
-        return 'BM-' . date('ym') . '-' . strtoupper(bin2hex(random_bytes(2)));
+        return 'TB' . date('ymd') . strtoupper(bin2hex(random_bytes(2)));
     }
 
     /**

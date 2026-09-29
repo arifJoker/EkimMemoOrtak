@@ -134,8 +134,9 @@ class Order {
      * Sipariş Numarası ile Getirir
      */
     public function getByOrderNumber($orderNumber) {
-        $stmt = $this->db->prepare("SELECT * FROM orders WHERE order_number = ?");
-        $stmt->execute([$orderNumber]);
+        $clean = preg_replace('/[^a-zA-Z0-9]/', '', (string)$orderNumber);
+        $stmt = $this->db->prepare("SELECT * FROM orders WHERE order_number = ? OR REPLACE(order_number, '-', '') = ? LIMIT 1");
+        $stmt->execute([$orderNumber, $clean]);
         $order = $stmt->fetch();
         if ($order) {
             $order['items'] = $this->getOrderItems($order['id']);
