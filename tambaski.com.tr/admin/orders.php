@@ -7,7 +7,7 @@ $db = Database::getInstance()->getConnection();
 
 $action = $_GET['action'] ?? 'list';
 
-// 1. Vektörel SVG İndirme Aksiyonu (Operatör ve Matbaa için)
+// 1. Vektörel SVG İndirme
 if ($action === 'download_svg') {
     $itemId = (int)($_GET['item_id'] ?? 0);
     $stmt = $db->prepare("SELECT * FROM order_items WHERE id = ?");
@@ -15,46 +15,69 @@ if ($action === 'download_svg') {
     $item = $stmt->fetch();
 
     if ($item && !empty($item['design_svg'])) {
-        $filename = 'baski_vektorel_siparis_' . $item['order_id'] . '_item_' . $item['id'] . '.svg';
+        $filename = 'baski_siparis_' . $item['order_id'] . '_kalem_' . $item['id'] . '.svg';
         header('Content-Type: image/svg+xml');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
         echo $item['design_svg'];
         exit;
     } else {
-        Helper::setFlash('danger', 'Bu kaleme ait vektörel SVG tasarımı bulunamadı.');
+        Helper::setFlash('danger', 'Vektörel SVG dosyası bulunamadı.');
         header("Location: " . SITE_URL . "/admin/orders.php");
         exit;
     }
 }
 
-// 2. Sipariş Silme Aksiyonu
+// 2. Sipariş Silme
 if ($action === 'delete' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $orderId = (int)($_POST['order_id'] ?? 0);
     if ($orderId > 0) {
-        $del = $orderModel->delete($orderId);
-        if ($del) {
-            Helper::setFlash('success', 'Sipariş ve bağlı tüm baskı kalemleri başarıyla silindi.');
-        } else {
-            Helper::setFlash('danger', 'Sipariş silinirken teknik bir hata oluştu.');
-        }
+        $orderModel->delete($orderId);
+        Helper::setFlash('success', 'Sipariş başarıyla silindi.');
     }
     header("Location: " . SITE_URL . "/admin/orders.php");
     exit;
 }
 
-// 3. Hızlı Durum Güncelleme (Tablodan veya Detaydan Tek Tıkla)
+// 3. Kargo Bilgisi Girerek Kargoya Verme (ZORUNLU Kargo Firması ve Takip Kodu)
+if ($action === 'ship_order' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $orderId = (int)($_POST['order_id'] ?? 0);
+    $cargoCompany = trim($_POST['cargo_company'] ?? '');
+    $cargoTracking = trim($_POST['cargo_tracking_code'] ?? '');
+
+    if ($orderId <= 0) {
+        Helper::setFlash('danger', 'Geçersiz sipariş.');
+    } elseif (empty($cargoTracking)) {
+        Helper::setFlash('danger', 'Kargoya verildi diyebilmek için Kargo Takip Numarası girmek zorunludur.');
+    } else {
+        if (empty($cargoCompany)) {
+            $cargoCompany = 'Yurtiçi Kargo';
+        }
+        $orderModel->updateCargo($orderId, $cargoCompany, $cargoTracking);
+        Helper::setFlash('success', 'Kargo bilgisi kaydedildi ve sipariş "Kargoya Verildi" olarak güncellendi.');
+    }
+
+    $redirect = !empty($_POST['redirect_to']) ? $_POST['redirect_to'] : (SITE_URL . "/admin/orders.php");
+    header("Location: " . $redirect);
+    exit;
+}
+
+// 4. Hızlı Durum Güncelleme
 if ($action === 'quick_status' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $orderId = (int)($_POST['order_id'] ?? 0);
-    $type = $_POST['type'] ?? 'order_status'; // 'order_status' | 'payment_status'
+    $type = $_POST['type'] ?? 'order_status';
     $status = trim($_POST['status'] ?? '');
 
     if ($orderId > 0 && !empty($status)) {
-        if ($type === 'payment_status') {
-            $orderModel->updatePaymentStatus($orderId, $status);
-            Helper::setFlash('success', 'Ödeme durumu başarıyla güncellendi.');
+        if ($status === 'shipped') {
+            Helper::setFlash('danger', 'Kargoya verildi durumuna geçmek için kargo takip numarası girmelisiniz.');
         } else {
-            $orderModel->updateStatus($orderId, $status);
-            Helper::setFlash('success', 'Sipariş durumu başarıyla güncellendi.');
+            if ($type === 'payment_status') {
+                $orderModel->updatePaymentStatus($orderId, $status);
+                Helper::setFlash('success', 'Ödeme durumu güncellendi.');
+            } else {
+                $orderModel->updateStatus($orderId, $status);
+                Helper::setFlash('success', 'Sipariş aşaması güncellendi.');
+            }
         }
     }
 
@@ -63,7 +86,7 @@ if ($action === 'quick_status' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// 4. Detaylı Durum ve Kargo Güncelleme Formu
+// 5. Detaylı Sipariş ve Kargo Güncelleme Formu
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'update') {
     $orderId = (int)($_POST['order_id'] ?? 0);
     $orderStatus = $_POST['order_status'] ?? 'pending_payment';
@@ -71,142 +94,78 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'update') {
     $cargoCompany = trim($_POST['cargo_company'] ?? '');
     $cargoTracking = trim($_POST['cargo_tracking_code'] ?? '');
 
+    // Kargo Kontrolü: Eğer "Kargoya Verildi" seçildiyse Takip No Zorunludur!
+    if ($orderStatus === 'shipped' && empty($cargoTracking)) {
+        Helper::setFlash('danger', '⚠️ Kargoya verildi durumuna geçmek için Kargo Takip No girilmesi zorunludur.');
+        header("Location: " . SITE_URL . "/admin/orders.php?action=view&id=" . $orderId);
+        exit;
+    }
+
     $orderModel->updateStatus($orderId, $orderStatus);
     $orderModel->updatePaymentStatus($orderId, $paymentStatus);
+    
     if (!empty($cargoTracking)) {
+        if (empty($cargoCompany)) $cargoCompany = 'Yurtiçi Kargo';
         $orderModel->updateCargo($orderId, $cargoCompany, $cargoTracking);
     }
 
-    Helper::setFlash('success', 'Sipariş durumu ve kargo bilgileri başarıyla kaydedildi.');
+    Helper::setFlash('success', 'Sipariş bilgileri güncellendi.');
     header("Location: " . SITE_URL . "/admin/orders.php?action=view&id=" . $orderId);
     exit;
 }
 
-$pageTitle = 'Sipariş ve Üretim Yönetimi';
+$pageTitle = 'Siparişler';
 require_once __DIR__ . '/header.php';
 
 // =========================================================================
-// GÖRÜNÜM 1: SİPARİŞ DETAY EKRANI (action=view)
+// 1. SİPARİŞ DETAY EKRANI (action=view)
 // =========================================================================
 if ($action === 'view'):
     $orderId = (int)($_GET['id'] ?? 0);
     $order = $orderModel->getById($orderId);
     if (!$order) {
-        echo '<div class="alert alert-danger rounded-4 p-4 my-4"><i class="bi bi-exclamation-triangle-fill me-2"></i>Sipariş bulunamadı veya silinmiş.</div>';
+        echo '<div class="alert alert-danger rounded-3 p-4 my-4">Sipariş bulunamadı.</div>';
         require_once __DIR__ . '/footer.php';
         exit;
     }
 ?>
-    <!-- Üst Başlık & Hızlı Navigasyon -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-        <div>
-            <a href="<?= SITE_URL ?>/admin/orders.php" class="btn btn-sm btn-outline-secondary rounded-pill px-3 mb-2">
-                <i class="bi bi-arrow-left me-1"></i> Sipariş Listesine Dön
-            </a>
-            <div class="d-flex align-items-center gap-3">
-                <h3 class="fw-bold mb-0 font-monospace text-dark">#<?= htmlspecialchars($order['order_number']) ?></h3>
-                <span class="text-muted small"><i class="bi bi-calendar3 me-1"></i><?= date('d.m.Y - H:i', strtotime($order['created_at'])) ?></span>
-            </div>
-        </div>
-        <div class="d-flex align-items-center gap-2 flex-wrap">
-            <button type="button" class="btn btn-outline-dark rounded-pill px-3 btn-sm fw-bold shadow-2xs" onclick="window.print()">
-                <i class="bi bi-printer me-1"></i> Yazdır / Fiş
-            </button>
-            <span class="fs-6"><?= Helper::getPaymentStatusBadge($order['payment_status']) ?></span>
-            <span class="fs-6"><?= Helper::getOrderStatusBadge($order['order_status']) ?></span>
-            
-            <!-- Siparişi Sil Butonu -->
-            <button type="button" class="btn btn-outline-danger rounded-pill px-3 btn-sm fw-bold shadow-2xs" data-bs-toggle="modal" data-bs-target="#deleteOrderModal">
-                <i class="bi bi-trash3 me-1"></i> Siparişi Sil
-            </button>
-        </div>
-    </div>
-
-    <!-- Hızlı Eylem Çubuğu -->
-    <div class="p-3 bg-white rounded-4 border shadow-2xs mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+    <!-- Sade Başlık -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 pb-2 border-bottom gap-2">
         <div class="d-flex align-items-center gap-2">
-            <span class="small fw-bold text-muted"><i class="bi bi-lightning-charge-fill text-warning me-1"></i>Hızlı İşlemler:</span>
-            <?php if ($order['payment_status'] !== 'paid'): ?>
-                <form action="<?= SITE_URL ?>/admin/orders.php?action=quick_status" method="POST" class="d-inline">
-                    <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
-                    <input type="hidden" name="type" value="payment_status">
-                    <input type="hidden" name="status" value="paid">
-                    <input type="hidden" name="redirect_to" value="<?= SITE_URL ?>/admin/orders.php?action=view&id=<?= $order['id'] ?>">
-                    <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 fw-bold">
-                        <i class="bi bi-check2-circle me-1"></i> Ödemeyi "Ödendi" Yap
-                    </button>
-                </form>
-            <?php endif; ?>
-
-            <?php if ($order['order_status'] !== 'in_production'): ?>
-                <form action="<?= SITE_URL ?>/admin/orders.php?action=quick_status" method="POST" class="d-inline">
-                    <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
-                    <input type="hidden" name="type" value="order_status">
-                    <input type="hidden" name="status" value="in_production">
-                    <input type="hidden" name="redirect_to" value="<?= SITE_URL ?>/admin/orders.php?action=view&id=<?= $order['id'] ?>">
-                    <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold">
-                        <i class="bi bi-printer me-1"></i> "Baskıya Alındı" Yap
-                    </button>
-                </form>
-            <?php endif; ?>
-
-            <?php if ($order['order_status'] !== 'delivered'): ?>
-                <form action="<?= SITE_URL ?>/admin/orders.php?action=quick_status" method="POST" class="d-inline">
-                    <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
-                    <input type="hidden" name="type" value="order_status">
-                    <input type="hidden" name="status" value="delivered">
-                    <input type="hidden" name="redirect_to" value="<?= SITE_URL ?>/admin/orders.php?action=view&id=<?= $order['id'] ?>">
-                    <button type="submit" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-bold">
-                        <i class="bi bi-box2-heart me-1"></i> "Teslim Edildi" Yap
-                    </button>
-                </form>
-            <?php endif; ?>
-
-            <?php if ($order['order_status'] !== 'cancelled'): ?>
-                <form action="<?= SITE_URL ?>/admin/orders.php?action=quick_status" method="POST" class="d-inline" onsubmit="return confirm('Bu siparişi iptal etmek istediğinize emin misiniz?');">
-                    <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
-                    <input type="hidden" name="type" value="order_status">
-                    <input type="hidden" name="status" value="cancelled">
-                    <input type="hidden" name="redirect_to" value="<?= SITE_URL ?>/admin/orders.php?action=view&id=<?= $order['id'] ?>">
-                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold">
-                        <i class="bi bi-x-circle me-1"></i> İptal Et
-                    </button>
-                </form>
-            <?php endif; ?>
+            <a href="<?= SITE_URL ?>/admin/orders.php" class="btn btn-sm btn-outline-secondary py-1 px-2.5">
+                <i class="bi bi-arrow-left"></i> Geri
+            </a>
+            <h4 class="fw-bold mb-0 font-monospace text-dark">Sipariş #<?= htmlspecialchars($order['order_number']) ?></h4>
+            <span class="text-muted small ms-2"><?= date('d.m.Y H:i', strtotime($order['created_at'])) ?></span>
         </div>
-
-        <div>
-            <span class="badge bg-light text-dark border px-3 py-2 fs-6">
-                Ödeme Yöntemi: <strong class="text-uppercase"><?= htmlspecialchars($order['payment_method']) ?></strong>
-                <?php if (!empty($order['payment_transaction_id'])): ?>
-                    <span class="text-muted ms-1">(Pos Ref: <?= htmlspecialchars($order['payment_transaction_id']) ?>)</span>
-                <?php endif; ?>
-            </span>
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-sm btn-outline-dark" onclick="window.print()">
+                <i class="bi bi-printer me-1"></i> Yazdır
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteOrderModal">
+                <i class="bi bi-trash3 me-1"></i> Sil
+            </button>
         </div>
     </div>
 
-    <div class="row g-4">
-        
-        <!-- Sol Kolon: Baskı Kalemleri & Tasarım Dosyaları -->
+    <div class="row g-3">
+        <!-- Sol Kolon: Kalemler ve Müşteri -->
         <div class="col-lg-8">
-            <div class="apple-card p-4 mb-4">
-                <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-layers text-primary me-2"></i>Baskı Kalemleri & Tasarım Dosyaları</h5>
-                    <span class="badge bg-light text-secondary border"><?= count($order['items']) ?> Kalem</span>
+            <!-- Kalemler -->
+            <div class="bg-white rounded-3 border p-3 mb-3">
+                <div class="fw-bold text-dark mb-2 pb-1 border-bottom d-flex justify-content-between">
+                    <span>Baskı Kalemleri</span>
+                    <span class="text-muted small"><?= count($order['items']) ?> Adet Ürün</span>
                 </div>
-                
+
                 <?php foreach ($order['items'] as $item): 
-                    // Yanlış kaydedilmiş hatalı Özel Boyut etiketlerini filtrele (Paket seçiliyken çıkan 8.4x5.2 gibi)
                     $cleanOptions = [];
                     $hasPackage = false;
                     if (!empty($item['options_array'])) {
                         foreach ($item['options_array'] as $optStr) {
-                            if (stripos($optStr, 'Paket:') !== false) {
-                                $hasPackage = true;
-                            }
+                            if (stripos($optStr, 'Paket:') !== false) $hasPackage = true;
                         }
                         foreach ($item['options_array'] as $optStr) {
-                            // Eğer standart paket zaten seçiliyse ve 8.4x5.2 veya default kartvizit boyutu varsa gizle
                             if ($hasPackage && stripos($optStr, 'Özel Boyut:') !== false && (stripos($optStr, '8.4') !== false || stripos($optStr, '5.2') !== false)) {
                                 continue;
                             }
@@ -214,233 +173,181 @@ if ($action === 'view'):
                         }
                     }
                 ?>
-                    <div class="p-3 bg-light rounded-4 border mb-3">
-                        <div class="row align-items-center g-3">
-                            <!-- Önizleme ve İndirme Butonu -->
-                            <div class="col-md-3 text-center">
-                                <?php if (!empty($item['design_svg'])): ?>
-                                    <div class="border rounded-3 p-1 bg-white shadow-2xs mb-2 d-flex align-items-center justify-content-center" style="height: 100px; overflow: hidden;">
-                                        <?= $item['design_svg'] ?>
-                                    </div>
-                                    <a href="<?= SITE_URL ?>/admin/orders.php?action=download_svg&item_id=<?= $item['id'] ?>" class="btn btn-sm btn-primary w-100 py-1.5 fw-bold shadow-2xs rounded-pill">
-                                        <i class="bi bi-download me-1"></i> Vektörel SVG İndir
-                                    </a>
-                                <?php elseif (!empty($item['design_file'])): ?>
-                                    <div class="p-3 bg-white rounded-3 border mb-2 text-center">
-                                        <i class="bi bi-file-earmark-arrow-up text-primary fs-2 d-block mb-1"></i>
-                                        <span class="badge bg-light text-dark border small"><?= strtoupper(pathinfo($item['design_file'], PATHINFO_EXTENSION)) ?></span>
-                                    </div>
-                                    <a href="<?= SITE_URL . '/' . htmlspecialchars($item['design_file']) ?>" target="_blank" class="btn btn-sm btn-dark w-100 py-1.5 fw-bold shadow-2xs rounded-pill">
-                                        <i class="bi bi-cloud-arrow-down me-1"></i> Dosyayı İndir
-                                    </a>
-                                <?php else: ?>
-                                    <div class="p-3 bg-white rounded-3 border text-center text-muted">
-                                        <i class="bi bi-card-image fs-2 d-block mb-1 opacity-50"></i>
-                                        <span class="badge bg-secondary">Dosya Yok</span>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-
-                            <!-- Kalem Bilgileri -->
-                            <div class="col-md-6">
-                                <h6 class="fw-bold mb-1 text-dark"><?= htmlspecialchars($item['product_name']) ?></h6>
-                                <div class="badge bg-primary text-white rounded-pill px-3 py-1 mb-2">
-                                    Adet: <?= number_format($item['quantity'], 0, '', '.') ?> Adet
+                    <div class="d-flex flex-wrap align-items-center justify-content-between p-2.5 bg-light rounded-2 border mb-2 gap-2">
+                        <div class="d-flex align-items-center gap-3" style="min-width: 250px;">
+                            <?php if (!empty($item['design_svg'])): ?>
+                                <div class="bg-white border rounded p-1 text-center" style="width: 55px; height: 55px; overflow: hidden;">
+                                    <?= $item['design_svg'] ?>
                                 </div>
+                            <?php elseif (!empty($item['design_file'])): ?>
+                                <div class="bg-white border rounded p-1 text-center d-flex align-items-center justify-content-center" style="width: 55px; height: 55px;">
+                                    <i class="bi bi-file-earmark-arrow-up text-primary fs-4"></i>
+                                </div>
+                            <?php else: ?>
+                                <div class="bg-white border rounded p-1 text-center d-flex align-items-center justify-content-center text-muted" style="width: 55px; height: 55px;">
+                                    <i class="bi bi-card-image fs-4"></i>
+                                </div>
+                            <?php endif; ?>
 
+                            <div>
+                                <div class="fw-bold text-dark"><?= htmlspecialchars($item['product_name']) ?></div>
+                                <div class="text-muted small">Miktar: <strong><?= $item['quantity'] ?> Adet</strong></div>
                                 <?php if (!empty($cleanOptions)): ?>
-                                    <div class="small bg-white p-2.5 rounded-3 border text-dark mb-2 lh-base">
-                                        <?php foreach ($cleanOptions as $optLine): ?>
-                                            <div><i class="bi bi-check2 text-primary me-1"></i><?= htmlspecialchars($optLine) ?></div>
-                                        <?php endforeach; ?>
-                                    </div>
-                                <?php endif; ?>
-                                
-                                <?php if (!empty($item['design_notes'])): ?>
-                                    <div class="p-2.5 bg-warning-subtle text-dark rounded-3 border border-warning small mt-2">
-                                        <strong><i class="bi bi-chat-left-dots me-1"></i>Müşteri Notu:</strong> <?= nl2br(htmlspecialchars($item['design_notes'])) ?>
+                                    <div class="text-secondary small mt-0.5" style="font-size: 11.5px;">
+                                        <?= implode(' • ', array_map('htmlspecialchars', $cleanOptions)) ?>
                                     </div>
                                 <?php endif; ?>
                             </div>
+                        </div>
 
-                            <!-- Fiyat Kolonu -->
-                            <div class="col-md-3 text-md-end">
-                                <div class="fw-bold text-primary fs-4"><?= Helper::formatPrice($item['total_price']) ?></div>
-                                <small class="text-muted d-block">Birim: <?= Helper::formatPrice($item['unit_price']) ?></small>
+                        <div class="d-flex align-items-center gap-3 ms-auto text-end">
+                            <div>
+                                <div class="fw-bold text-primary fs-6"><?= Helper::formatPrice($item['total_price']) ?></div>
+                                <div class="text-muted" style="font-size: 11px;">Birim: <?= Helper::formatPrice($item['unit_price']) ?></div>
                             </div>
+                            <?php if (!empty($item['design_svg'])): ?>
+                                <a href="<?= SITE_URL ?>/admin/orders.php?action=download_svg&item_id=<?= $item['id'] ?>" class="btn btn-sm btn-primary py-1 px-2.5 text-nowrap">
+                                    <i class="bi bi-download me-1"></i> SVG İndir
+                                </a>
+                            <?php elseif (!empty($item['design_file'])): ?>
+                                <a href="<?= SITE_URL . '/' . htmlspecialchars($item['design_file']) ?>" target="_blank" class="btn btn-sm btn-dark py-1 px-2.5 text-nowrap">
+                                    <i class="bi bi-download me-1"></i> Dosyayı İndir
+                                </a>
+                            <?php endif; ?>
                         </div>
                     </div>
                 <?php endforeach; ?>
 
-                <!-- Finansal Toplamlar Özeti -->
-                <div class="text-end pt-3 border-top">
-                    <div class="row justify-content-end">
-                        <div class="col-md-5">
-                            <div class="d-flex justify-content-between text-muted small mb-1">
-                                <span>Ara Toplam:</span>
-                                <strong class="text-dark"><?= Helper::formatPrice($order['subtotal']) ?></strong>
-                            </div>
-                            <div class="d-flex justify-content-between text-muted small mb-1">
-                                <span>KDV (%20):</span>
-                                <strong class="text-dark"><?= Helper::formatPrice($order['tax_amount']) ?></strong>
-                            </div>
-                            <?php if ($order['discount_amount'] > 0): ?>
-                                <div class="d-flex justify-content-between text-success small mb-1">
-                                    <span>İndirim Tutarı:</span>
-                                    <strong>-<?= Helper::formatPrice($order['discount_amount']) ?></strong>
-                                </div>
-                            <?php endif; ?>
-                            <div class="d-flex justify-content-between text-muted small mb-2">
-                                <span>Kargo & Teslimat:</span>
-                                <strong class="text-dark"><?= Helper::formatPrice($order['shipping_fee']) ?></strong>
-                            </div>
-                            <div class="d-flex justify-content-between fs-5 fw-bold text-dark pt-2 border-top">
-                                <span>Genel Toplam:</span>
-                                <span class="text-primary"><?= Helper::formatPrice($order['total_amount']) ?></span>
-                            </div>
-                        </div>
+                <!-- Tutar Özeti -->
+                <div class="d-flex justify-content-end pt-2 border-top">
+                    <div style="min-width: 200px;" class="small text-end">
+                        <div class="text-muted mb-1">Ara Toplam: <strong><?= Helper::formatPrice($order['subtotal']) ?></strong></div>
+                        <div class="text-muted mb-1">KDV: <strong><?= Helper::formatPrice($order['tax_amount']) ?></strong></div>
+                        <div class="text-muted mb-1">Kargo: <strong><?= Helper::formatPrice($order['shipping_fee']) ?></strong></div>
+                        <div class="fw-bold fs-6 text-dark pt-1 border-top">Toplam: <span class="text-primary"><?= Helper::formatPrice($order['total_amount']) ?></span></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Adres ve Müşteri Kartı -->
-            <div class="apple-card p-4">
-                <h5 class="fw-bold mb-3 border-bottom pb-2 text-dark"><i class="bi bi-person-lines-fill text-primary me-2"></i>Müşteri & Teslimat Bilgileri</h5>
-                <div class="row g-4 small">
+            <!-- Müşteri ve Teslimat -->
+            <div class="bg-white rounded-3 border p-3">
+                <div class="fw-bold text-dark mb-2 pb-1 border-bottom">Müşteri & Teslimat Bilgisi</div>
+                <div class="row g-2 small">
                     <div class="col-md-6">
-                        <div class="p-3 bg-light rounded-4 border h-100">
-                            <h6 class="fw-bold text-muted small mb-3 text-uppercase">İletişim Bilgileri</h6>
-                            <div class="mb-2">
-                                <span class="text-muted d-block" style="font-size: 11px;">Müşteri Adı:</span>
-                                <strong class="text-dark fs-6"><?= htmlspecialchars($order['customer_name']) ?></strong>
-                            </div>
-                            <div class="mb-2">
-                                <span class="text-muted d-block" style="font-size: 11px;">Telefon:</span>
-                                <a href="tel:<?= htmlspecialchars($order['customer_phone']) ?>" class="fw-bold text-decoration-none">
-                                    <i class="bi bi-telephone text-primary me-1"></i><?= htmlspecialchars($order['customer_phone']) ?>
-                                </a>
-                                <a href="https://wa.me/90<?= preg_replace('/[^0-9]/', '', $order['customer_phone']) ?>" target="_blank" class="badge bg-success text-white ms-2 text-decoration-none py-1">
-                                    <i class="bi bi-whatsapp"></i> WhatsApp
-                                </a>
-                            </div>
-                            <div>
-                                <span class="text-muted d-block" style="font-size: 11px;">E-Posta:</span>
-                                <a href="mailto:<?= htmlspecialchars($order['customer_email']) ?>" class="text-dark text-decoration-none">
-                                    <i class="bi bi-envelope text-primary me-1"></i><?= htmlspecialchars($order['customer_email']) ?>
-                                </a>
-                            </div>
+                        <div class="text-muted">Ad Soyad: <strong class="text-dark"><?= htmlspecialchars($order['customer_name']) ?></strong></div>
+                        <div class="text-muted mt-1">Telefon: 
+                            <a href="tel:<?= htmlspecialchars($order['customer_phone']) ?>" class="fw-bold text-decoration-none"><?= htmlspecialchars($order['customer_phone']) ?></a>
+                            <a href="https://wa.me/90<?= preg_replace('/[^0-9]/', '', $order['customer_phone']) ?>" target="_blank" class="badge bg-success ms-1 text-decoration-none py-0.5">WhatsApp</a>
                         </div>
+                        <div class="text-muted mt-1">E-Posta: <?= htmlspecialchars($order['customer_email']) ?></div>
                     </div>
                     <div class="col-md-6">
-                        <div class="p-3 bg-light rounded-4 border h-100">
-                            <h6 class="fw-bold text-muted small mb-3 text-uppercase">Teslimat & Fatura</h6>
-                            <div class="mb-2">
-                                <span class="text-muted d-block" style="font-size: 11px;">Teslimat Adresi:</span>
-                                <div class="fw-bold text-dark"><?= nl2br(htmlspecialchars($order['shipping_address'])) ?></div>
-                                <div class="text-primary fw-bold mt-1"><?= htmlspecialchars($order['shipping_district']) ?> / <?= htmlspecialchars($order['shipping_city']) ?></div>
-                            </div>
-                            <?php if ($order['billing_type'] === 'corporate'): ?>
-                                <div class="mt-3 p-2.5 bg-white rounded-3 border">
-                                    <div class="badge bg-dark mb-1">Kurumsal Fatura</div>
-                                    <div class="fw-bold text-dark"><?= htmlspecialchars($order['billing_company']) ?></div>
-                                    <div class="text-muted small">Vergi No: <?= htmlspecialchars($order['tax_number']) ?> (<?= htmlspecialchars($order['tax_office']) ?>)</div>
-                                </div>
-                            <?php else: ?>
-                                <div class="text-muted small mt-2"><i class="bi bi-person me-1"></i>Bireysel Fatura</div>
-                            <?php endif; ?>
-                        </div>
+                        <div class="text-muted">Teslimat Adresi:</div>
+                        <div class="fw-semibold text-dark"><?= nl2br(htmlspecialchars($order['shipping_address'])) ?></div>
+                        <div class="text-primary fw-bold"><?= htmlspecialchars($order['shipping_district']) ?> / <?= htmlspecialchars($order['shipping_city']) ?></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Sağ Kolon: Durum & Kargo Güncelleme Formu -->
+        <!-- Sağ Kolon: Durum ve Kargo İşlemleri -->
         <div class="col-lg-4">
-            <div class="apple-card p-4 sticky-top shadow-sm" style="top: 20px;">
-                <h5 class="fw-bold mb-3 border-bottom pb-2 text-dark"><i class="bi bi-gear text-primary me-2"></i>Durum ve Kargo İşlemleri</h5>
-                
-                <form action="<?= SITE_URL ?>/admin/orders.php?action=update" method="POST">
+            <div class="bg-white rounded-3 border p-3">
+                <h6 class="fw-bold text-dark mb-3 pb-2 border-bottom">Sipariş & Kargo Yönetimi</h6>
+
+                <form action="<?= SITE_URL ?>/admin/orders.php?action=update" method="POST" id="orderUpdateForm">
                     <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
 
                     <div class="mb-3">
-                        <label class="form-label small fw-bold">Sipariş / Üretim Durumu</label>
-                        <select name="order_status" class="form-select rounded-3 py-2 fw-bold text-dark">
+                        <label class="form-label small fw-bold mb-1">Ödeme Durumu</label>
+                        <select name="payment_status" class="form-select form-select-sm">
+                            <option value="pending" <?= $order['payment_status'] === 'pending' ? 'selected' : '' ?>>⏳ Ödeme Bekliyor</option>
+                            <option value="paid" <?= $order['payment_status'] === 'paid' ? 'selected' : '' ?>>✅ Ödendi</option>
+                            <option value="failed" <?= $order['payment_status'] === 'failed' ? 'selected' : '' ?>>⚠️ Başarısız</option>
+                            <option value="refunded" <?= $order['payment_status'] === 'refunded' ? 'selected' : '' ?>>↩️ İade Edildi</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold mb-1">Sipariş Aşaması</label>
+                        <select name="order_status" id="orderStatusSelect" class="form-select form-select-sm">
                             <option value="pending_payment" <?= $order['order_status'] === 'pending_payment' ? 'selected' : '' ?>>⏳ Ödeme Bekleniyor</option>
                             <option value="payment_received" <?= $order['order_status'] === 'payment_received' ? 'selected' : '' ?>>✅ Ödeme Alındı</option>
-                            <option value="design_approval" <?= $order['order_status'] === 'design_approval' ? 'selected' : '' ?>>🎨 Tasarım Onayında</option>
                             <option value="preparing" <?= $order['order_status'] === 'preparing' ? 'selected' : '' ?>>⚙️ Hazırlanıyor</option>
                             <option value="in_production" <?= $order['order_status'] === 'in_production' ? 'selected' : '' ?>>🏭 Baskıda / Üretimde</option>
                             <option value="packaged" <?= $order['order_status'] === 'packaged' ? 'selected' : '' ?>>📦 Paketlendi</option>
                             <option value="shipped" <?= $order['order_status'] === 'shipped' ? 'selected' : '' ?>>🚚 Kargoya Verildi</option>
                             <option value="delivered" <?= $order['order_status'] === 'delivered' ? 'selected' : '' ?>>🎉 Teslim Edildi</option>
                             <option value="cancelled" <?= $order['order_status'] === 'cancelled' ? 'selected' : '' ?>>❌ İptal Edildi</option>
-                            <option value="refunded" <?= $order['order_status'] === 'refunded' ? 'selected' : '' ?>>↩️ İade Edildi</option>
                         </select>
+                        <div id="cargoRequiredAlert" class="small text-danger mt-1" style="display: none;">
+                            * "Kargoya Verildi" için aşağıdaki Takip Numarası zorunludur!
+                        </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold">Ödeme Durumu</label>
-                        <select name="payment_status" class="form-select rounded-3 py-2 fw-bold text-dark">
-                            <option value="pending" <?= $order['payment_status'] === 'pending' ? 'selected' : '' ?>>⏳ Ödeme Bekliyor</option>
-                            <option value="paid" <?= $order['payment_status'] === 'paid' ? 'selected' : '' ?>>✅ Ödendi (Tahsil Edildi)</option>
-                            <option value="failed" <?= $order['payment_status'] === 'failed' ? 'selected' : '' ?>>⚠️ Başarısız</option>
-                            <option value="refunded" <?= $order['payment_status'] === 'refunded' ? 'selected' : '' ?>>↩️ İade Edildi</option>
-                        </select>
-                    </div>
+                    <div class="p-2.5 bg-light rounded-2 border mb-3">
+                        <div class="fw-bold small text-dark mb-2"><i class="bi bi-truck me-1"></i>Kargo Bilgileri</div>
+                        
+                        <div class="mb-2">
+                            <label class="form-label text-muted" style="font-size: 11px;">Kargo Firması</label>
+                            <select name="cargo_company" class="form-select form-select-sm">
+                                <?php foreach (Cargo::getCompanies() as $key => $c): ?>
+                                    <option value="<?= $key ?>" <?= ($order['cargo_company'] === $key) ? 'selected' : '' ?>><?= $c['name'] ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
 
-                    <hr class="my-4">
+                        <div class="mb-1">
+                            <label class="form-label text-muted" style="font-size: 11px;">Takip Numarası <span class="text-danger" id="starReq" style="display: <?= $order['order_status'] === 'shipped' ? 'inline' : 'none' ?>;">*</span></label>
+                            <input type="text" name="cargo_tracking_code" id="cargoTrackingInput" class="form-control form-control-sm font-monospace" placeholder="Örn: 1234567890" value="<?= htmlspecialchars($order['cargo_tracking_code'] ?? '') ?>">
+                        </div>
 
-                    <h6 class="fw-bold mb-3 small text-primary"><i class="bi bi-truck me-1"></i> Kargo Gönderi Bilgileri</h6>
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold">Kargo Firması</label>
-                        <select name="cargo_company" class="form-select rounded-3">
-                            <option value="">Kargo Firması Seçin</option>
-                            <?php foreach (Cargo::getCompanies() as $key => $c): ?>
-                                <option value="<?= $key ?>" <?= ($order['cargo_company'] === $key) ? 'selected' : '' ?>><?= $c['name'] ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label small fw-bold">Kargo Takip No</label>
-                        <input type="text" name="cargo_tracking_code" class="form-control rounded-3" placeholder="Örn: 123456789012" value="<?= htmlspecialchars($order['cargo_tracking_code'] ?? '') ?>">
                         <?php if (!empty($order['cargo_tracking_code'])): ?>
-                            <a href="<?= Cargo::getTrackingLink($order['cargo_company'], $order['cargo_tracking_code']) ?>" target="_blank" class="small mt-2 d-inline-block text-decoration-none fw-bold text-primary">
-                                <i class="bi bi-box-arrow-up-right me-1"></i> Kargo Sitesinde Takip Et &rarr;
-                            </a>
+                            <div class="mt-2">
+                                <a href="<?= Cargo::getTrackingLink($order['cargo_company'], $order['cargo_tracking_code']) ?>" target="_blank" class="small text-decoration-none fw-bold text-primary">
+                                    <i class="bi bi-box-arrow-up-right me-1"></i> Kargo Sitesinde Gör &rarr;
+                                </a>
+                            </div>
                         <?php endif; ?>
                     </div>
 
-                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-pill shadow">
-                        <i class="bi bi-save me-1"></i> Değişiklikleri Kaydet
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">
+                        <i class="bi bi-check2 me-1"></i> Değişiklikleri Kaydet
                     </button>
                 </form>
 
+                <script>
+                document.getElementById('orderStatusSelect').addEventListener('change', function() {
+                    const isShipped = this.value === 'shipped';
+                    document.getElementById('cargoRequiredAlert').style.display = isShipped ? 'block' : 'none';
+                    document.getElementById('starReq').style.display = isShipped ? 'inline' : 'none';
+                    if (isShipped) {
+                        document.getElementById('cargoTrackingInput').setAttribute('required', 'required');
+                        document.getElementById('cargoTrackingInput').focus();
+                    } else {
+                        document.getElementById('cargoTrackingInput').removeAttribute('required');
+                    }
+                });
+                </script>
             </div>
         </div>
-
     </div>
 
-    <!-- Sipariş Silme Onay Modal'ı -->
+    <!-- Silme Modal -->
     <div class="modal fade" id="deleteOrderModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content rounded-4 border-0 shadow">
-                <div class="modal-header border-bottom-0 pb-0">
-                    <h5 class="modal-title fw-bold text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Siparişi Kalıcı Olarak Sil</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
-                </div>
-                <div class="modal-body py-4">
-                    <p class="mb-2"><strong>#<?= htmlspecialchars($order['order_number']) ?></strong> numaralı siparişi ve bu siparişe ait tüm baskı kalemlerini silmek üzeresiniz.</p>
-                    <p class="text-danger small mb-0"><strong>Uyarı:</strong> Bu işlem geri alınamaz!</p>
-                </div>
-                <div class="modal-footer border-top-0 pt-0">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Vazgeç</button>
-                    <form action="<?= SITE_URL ?>/admin/orders.php?action=delete" method="POST" class="d-inline">
-                        <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
-                        <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold">
-                            <i class="bi bi-trash3 me-1"></i> Evet, Kalıcı Olarak Sil
-                        </button>
-                    </form>
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content rounded-3 border-0 shadow">
+                <div class="modal-body text-center p-4">
+                    <i class="bi bi-exclamation-triangle text-danger fs-1 mb-2 d-block"></i>
+                    <h6 class="fw-bold mb-1">Siparişi Sil</h6>
+                    <p class="small text-muted mb-3">Bu sipariş ve baskı dosyaları kalıcı olarak silinecek.</p>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-sm btn-light px-3" data-bs-dismiss="modal">Vazgeç</button>
+                        <form action="<?= SITE_URL ?>/admin/orders.php?action=delete" method="POST" class="d-inline">
+                            <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
+                            <button type="submit" class="btn btn-sm btn-danger px-3 fw-bold">Evet, Sil</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -448,7 +355,7 @@ if ($action === 'view'):
 
 <?php 
 // =========================================================================
-// GÖRÜNÜM 2: SİPARİŞ LİSTESİ (action=list)
+// 2. SİPARİŞ LİSTESİ EKRANI (action=list)
 // =========================================================================
 else: 
     $statusFilter = $_GET['status'] ?? null;
@@ -456,7 +363,6 @@ else:
     $search = $_GET['search'] ?? null;
     $activeTab = $_GET['tab'] ?? 'all';
 
-    // Tab mantığına göre filtreleri ayarla
     if ($activeTab === 'paid') {
         $paymentFilter = 'paid';
     } elseif ($activeTab === 'pending_payment') {
@@ -474,178 +380,99 @@ else:
     $orders = $orderModel->getAll(100, $statusFilter, $paymentFilter, $search);
     $stats = $orderModel->getStats();
 ?>
-    <!-- Üst Başlık -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- Üst Satır: Başlık & Sade Özet Barı -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
         <div>
-            <h4 class="fw-bold mb-0 text-dark"><i class="bi bi-box-seam text-primary me-2"></i>Sipariş ve Üretim Yönetimi</h4>
-            <p class="text-muted small mb-0">Tüm baskı siparişlerinizi, ödeme durumlarını, üretim aşamalarını ve kargo takiplerini buradan yönetin.</p>
+            <h4 class="fw-bold mb-0 text-dark">Siparişler</h4>
+            <span class="text-muted small">Toplam <?= $stats['total_orders'] ?> sipariş kayıtlı</span>
+        </div>
+        <div class="d-flex align-items-center gap-3 small bg-white px-3 py-2 rounded-2 border">
+            <div>Ödenen Ciro: <strong class="text-success"><?= Helper::formatPrice($stats['paid_sum']) ?></strong> (<?= $stats['paid_orders'] ?>)</div>
+            <div class="text-muted">|</div>
+            <div>Bekleyen: <strong class="text-warning"><?= $stats['pending_payment'] ?></strong></div>
+            <div class="text-muted">|</div>
+            <div>Baskıda: <strong class="text-primary"><?= $stats['in_production'] ?></strong></div>
+            <div class="text-muted">|</div>
+            <div>Kargoda: <strong class="text-dark"><?= $stats['shipped'] ?></strong></div>
         </div>
     </div>
 
-    <!-- 📊 KPI İstatistik Kartları -->
-    <div class="row g-3 mb-4">
-        <!-- Toplam Sipariş -->
-        <div class="col-6 col-lg-3">
-            <div class="apple-card p-3 h-100 d-flex align-items-center gap-3">
-                <div class="rounded-4 bg-primary-subtle text-primary p-3 fs-3 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
-                    <i class="bi bi-receipt"></i>
-                </div>
-                <div>
-                    <span class="text-muted small d-block">Toplam Sipariş</span>
-                    <h4 class="fw-bold mb-0 text-dark"><?= number_format($stats['total_orders'], 0, '', '.') ?></h4>
-                </div>
-            </div>
-        </div>
-
-        <!-- Başarılı Ödemeler / Ciro -->
-        <div class="col-6 col-lg-3">
-            <div class="apple-card p-3 h-100 d-flex align-items-center gap-3">
-                <div class="rounded-4 bg-success-subtle text-success p-3 fs-3 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
-                    <i class="bi bi-cash-stack"></i>
-                </div>
-                <div>
-                    <span class="text-muted small d-block">Ödenen Ciro (<?= $stats['paid_orders'] ?> Sipariş)</span>
-                    <h4 class="fw-bold mb-0 text-success"><?= Helper::formatPrice($stats['paid_sum']) ?></h4>
-                </div>
-            </div>
-        </div>
-
-        <!-- Ödeme Bekleyenler -->
-        <div class="col-6 col-lg-3">
-            <div class="apple-card p-3 h-100 d-flex align-items-center gap-3">
-                <div class="rounded-4 bg-warning-subtle text-warning p-3 fs-3 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
-                    <i class="bi bi-hourglass-split"></i>
-                </div>
-                <div>
-                    <span class="text-muted small d-block">Ödeme Bekleyenler</span>
-                    <h4 class="fw-bold mb-0 text-dark"><?= number_format($stats['pending_payment'], 0, '', '.') ?></h4>
-                </div>
-            </div>
-        </div>
-
-        <!-- Baskı ve Üretimde Olanlar -->
-        <div class="col-6 col-lg-3">
-            <div class="apple-card p-3 h-100 d-flex align-items-center gap-3">
-                <div class="rounded-4 bg-info-subtle text-info p-3 fs-3 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
-                    <i class="bi bi-printer-fill"></i>
-                </div>
-                <div>
-                    <span class="text-muted small d-block">Baskı / Hazırlıkta</span>
-                    <h4 class="fw-bold mb-0 text-primary"><?= number_format($stats['in_production'], 0, '', '.') ?></h4>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 📑 Hızlı Filtre Sekmeleri (Apple Tabs) -->
-    <div class="apple-card p-2 mb-4">
-        <ul class="nav nav-pills flex-nowrap overflow-auto gap-2" style="white-space: nowrap;">
+    <!-- Sade Filtre Sekmeleri -->
+    <div class="border-bottom mb-3">
+        <ul class="nav nav-tabs border-bottom-0 gap-1 small">
             <li class="nav-item">
-                <a class="nav-link rounded-pill px-3 py-2 fw-bold <?= ($activeTab === 'all' && empty($statusFilter) && empty($paymentFilter)) ? 'active' : '' ?>" href="<?= SITE_URL ?>/admin/orders.php?tab=all">
-                    Tümü <span class="badge bg-secondary ms-1 rounded-pill"><?= $stats['total_orders'] ?></span>
+                <a class="nav-link <?= ($activeTab === 'all' && empty($statusFilter) && empty($paymentFilter)) ? 'active fw-bold' : 'text-muted' ?>" href="<?= SITE_URL ?>/admin/orders.php?tab=all">
+                    Tümü (<?= $stats['total_orders'] ?>)
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link rounded-pill px-3 py-2 fw-bold <?= ($activeTab === 'paid') ? 'active bg-success text-white' : 'text-success' ?>" href="<?= SITE_URL ?>/admin/orders.php?tab=paid">
-                    <i class="bi bi-check2-circle me-1"></i>Ödemesi Yapılanlar <span class="badge bg-success-subtle text-success ms-1 rounded-pill"><?= $stats['paid_orders'] ?></span>
+                <a class="nav-link <?= ($activeTab === 'paid') ? 'active fw-bold text-success' : 'text-muted' ?>" href="<?= SITE_URL ?>/admin/orders.php?tab=paid">
+                    Ödemesi Yapılanlar (<?= $stats['paid_orders'] ?>)
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link rounded-pill px-3 py-2 fw-bold <?= ($activeTab === 'pending_payment') ? 'active bg-warning text-dark' : 'text-warning-emphasis' ?>" href="<?= SITE_URL ?>/admin/orders.php?tab=pending_payment">
-                    <i class="bi bi-hourglass-split me-1"></i>Ödeme Bekleyenler <span class="badge bg-warning-subtle text-dark ms-1 rounded-pill"><?= $stats['pending_payment'] ?></span>
+                <a class="nav-link <?= ($activeTab === 'pending_payment') ? 'active fw-bold text-warning-emphasis' : 'text-muted' ?>" href="<?= SITE_URL ?>/admin/orders.php?tab=pending_payment">
+                    Ödeme Bekleyenler (<?= $stats['pending_payment'] ?>)
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link rounded-pill px-3 py-2 fw-bold <?= ($activeTab === 'in_production') ? 'active bg-primary text-white' : 'text-primary' ?>" href="<?= SITE_URL ?>/admin/orders.php?tab=in_production">
-                    <i class="bi bi-printer me-1"></i>Baskıda / Hazırlanıyor <span class="badge bg-primary-subtle text-primary ms-1 rounded-pill"><?= $stats['in_production'] ?></span>
+                <a class="nav-link <?= ($activeTab === 'in_production') ? 'active fw-bold text-primary' : 'text-muted' ?>" href="<?= SITE_URL ?>/admin/orders.php?tab=in_production">
+                    Baskıda / Hazırlanıyor (<?= $stats['in_production'] ?>)
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link rounded-pill px-3 py-2 fw-bold <?= ($activeTab === 'shipped') ? 'active' : '' ?>" href="<?= SITE_URL ?>/admin/orders.php?tab=shipped">
-                    <i class="bi bi-truck me-1"></i>Kargodakiler <span class="badge bg-secondary ms-1 rounded-pill"><?= $stats['shipped'] ?></span>
+                <a class="nav-link <?= ($activeTab === 'shipped') ? 'active fw-bold' : 'text-muted' ?>" href="<?= SITE_URL ?>/admin/orders.php?tab=shipped">
+                    Kargodakiler (<?= $stats['shipped'] ?>)
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link rounded-pill px-3 py-2 fw-bold <?= ($activeTab === 'delivered') ? 'active' : '' ?>" href="<?= SITE_URL ?>/admin/orders.php?tab=delivered">
-                    <i class="bi bi-box2-heart me-1"></i>Teslim Edilenler <span class="badge bg-secondary ms-1 rounded-pill"><?= $stats['delivered'] ?></span>
+                <a class="nav-link <?= ($activeTab === 'delivered') ? 'active fw-bold' : 'text-muted' ?>" href="<?= SITE_URL ?>/admin/orders.php?tab=delivered">
+                    Teslim Edilenler (<?= $stats['delivered'] ?>)
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link rounded-pill px-3 py-2 fw-bold <?= ($activeTab === 'cancelled') ? 'active bg-danger text-white' : 'text-danger' ?>" href="<?= SITE_URL ?>/admin/orders.php?tab=cancelled">
-                    <i class="bi bi-x-circle me-1"></i>İptal / İade <span class="badge bg-danger-subtle text-danger ms-1 rounded-pill"><?= $stats['cancelled'] ?></span>
+                <a class="nav-link <?= ($activeTab === 'cancelled') ? 'active fw-bold text-danger' : 'text-muted' ?>" href="<?= SITE_URL ?>/admin/orders.php?tab=cancelled">
+                    İptal / İade (<?= $stats['cancelled'] ?>)
                 </a>
             </li>
         </ul>
     </div>
 
-    <!-- Arama ve Ekstra Filtreler -->
-    <div class="apple-card p-3 mb-4">
-        <form action="<?= SITE_URL ?>/admin/orders.php" method="GET" class="row g-2 align-items-center">
+    <!-- Arama Çubuğu -->
+    <div class="mb-3">
+        <form action="<?= SITE_URL ?>/admin/orders.php" method="GET" class="d-flex gap-2">
             <input type="hidden" name="tab" value="<?= htmlspecialchars($activeTab) ?>">
-            
-            <div class="col-md-5">
-                <div class="input-group">
-                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-                    <input type="text" name="search" class="form-control border-start-0" placeholder="Sipariş No (Örn: BM2609...), Müşteri Adı, Telefon veya E-Posta..." value="<?= htmlspecialchars($search ?? '') ?>">
-                </div>
+            <div class="input-group input-group-sm" style="max-width: 400px;">
+                <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" name="search" class="form-control" placeholder="Sipariş no, müşteri veya tel ara..." value="<?= htmlspecialchars($search ?? '') ?>">
             </div>
-
-            <div class="col-md-3">
-                <select name="status" class="form-select">
-                    <option value="">Tüm Sipariş Durumları</option>
-                    <option value="pending_payment" <?= $statusFilter === 'pending_payment' ? 'selected' : '' ?>>⏳ Ödeme Bekleniyor</option>
-                    <option value="payment_received" <?= $statusFilter === 'payment_received' ? 'selected' : '' ?>>✅ Ödeme Alındı</option>
-                    <option value="design_approval" <?= $statusFilter === 'design_approval' ? 'selected' : '' ?>>🎨 Tasarım Onayında</option>
-                    <option value="preparing" <?= $statusFilter === 'preparing' ? 'selected' : '' ?>>⚙️ Hazırlanıyor</option>
-                    <option value="in_production" <?= $statusFilter === 'in_production' ? 'selected' : '' ?>>🏭 Baskıda / Üretimde</option>
-                    <option value="packaged" <?= $statusFilter === 'packaged' ? 'selected' : '' ?>>📦 Paketlendi</option>
-                    <option value="shipped" <?= $statusFilter === 'shipped' ? 'selected' : '' ?>>🚚 Kargoya Verildi</option>
-                    <option value="delivered" <?= $statusFilter === 'delivered' ? 'selected' : '' ?>>🎉 Teslim Edildi</option>
-                    <option value="cancelled" <?= $statusFilter === 'cancelled' ? 'selected' : '' ?>>❌ İptal Edildi</option>
-                </select>
-            </div>
-
-            <div class="col-md-2">
-                <select name="payment_status" class="form-select">
-                    <option value="">Tüm Ödemeler</option>
-                    <option value="paid" <?= $paymentFilter === 'paid' ? 'selected' : '' ?>>✅ Ödendi</option>
-                    <option value="pending" <?= $paymentFilter === 'pending' ? 'selected' : '' ?>>⏳ Bekliyor</option>
-                    <option value="failed" <?= $paymentFilter === 'failed' ? 'selected' : '' ?>>⚠️ Başarısız</option>
-                    <option value="refunded" <?= $paymentFilter === 'refunded' ? 'selected' : '' ?>>↩️ İade Edildi</option>
-                </select>
-            </div>
-
-            <div class="col-md-2 d-flex gap-2">
-                <button type="submit" class="btn btn-dark w-100 fw-bold"><i class="bi bi-filter"></i> Filtrele</button>
-                <?php if (!empty($search) || !empty($statusFilter) || !empty($paymentFilter) || $activeTab !== 'all'): ?>
-                    <a href="<?= SITE_URL ?>/admin/orders.php" class="btn btn-outline-secondary" title="Sıfırla"><i class="bi bi-x-lg"></i></a>
-                <?php endif; ?>
-            </div>
+            <button type="submit" class="btn btn-sm btn-dark px-3">Ara</button>
+            <?php if (!empty($search)): ?>
+                <a href="<?= SITE_URL ?>/admin/orders.php?tab=<?= urlencode($activeTab) ?>" class="btn btn-sm btn-outline-secondary">Temizle</a>
+            <?php endif; ?>
         </form>
     </div>
 
-    <!-- 📦 Sipariş Tablosu -->
-    <div class="apple-card p-4">
+    <!-- Sipariş Tablosu -->
+    <div class="bg-white rounded-3 border">
         <?php if (empty($orders)): ?>
-            <div class="text-center py-5 text-muted">
-                <i class="bi bi-inbox fs-1 d-block mb-3 text-secondary opacity-50"></i>
-                <h5 class="fw-bold text-dark">Kriterlere Uygun Sipariş Bulunamadı</h5>
-                <p class="small text-muted mb-3">Arama filtrenizi temizleyebilir veya diğer sekmelere göz atabilirsiniz.</p>
-                <a href="<?= SITE_URL ?>/admin/orders.php" class="btn btn-sm btn-primary rounded-pill px-4">Tüm Siparişleri Göster</a>
+            <div class="text-center py-5 text-muted small">
+                Bu sekmede gösterilecek sipariş bulunamadı.
             </div>
         <?php else: ?>
             <div class="table-responsive">
                 <table class="table table-hover align-middle small mb-0">
-                    <thead class="table-light">
+                    <thead class="table-light text-secondary" style="font-size: 12px;">
                         <tr>
-                            <th style="min-width: 130px;">Sipariş No / Tarih</th>
-                            <th style="min-width: 160px;">Müşteri Bilgisi</th>
-                            <th style="min-width: 140px;">Baskı Kalemleri</th>
-                            <th style="min-width: 110px;">Toplam Tutar</th>
-                            <th style="min-width: 130px;">Ödeme Durumu</th>
-                            <th style="min-width: 140px;">Sipariş / Üretim</th>
-                            <th style="min-width: 130px;">Kargo Durumu</th>
-                            <th class="text-end" style="min-width: 130px;">İşlemler</th>
+                            <th>Sipariş No</th>
+                            <th>Tarih</th>
+                            <th>Müşteri</th>
+                            <th>Kalemler</th>
+                            <th>Tutar</th>
+                            <th>Ödeme</th>
+                            <th>Aşama</th>
+                            <th>Kargo Takip</th>
+                            <th class="text-end">İşlem</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -653,68 +480,61 @@ else:
                             $items = $orderModel->getOrderItems($ord['id']);
                         ?>
                             <tr>
-                                <!-- Sipariş No ve Tarih -->
-                                <td>
-                                    <a href="<?= SITE_URL ?>/admin/orders.php?action=view&id=<?= $ord['id'] ?>" class="fw-bold font-monospace text-primary text-decoration-none fs-6 d-block">
+                                <!-- No -->
+                                <td class="fw-bold font-monospace">
+                                    <a href="<?= SITE_URL ?>/admin/orders.php?action=view&id=<?= $ord['id'] ?>" class="text-decoration-none">
                                         #<?= htmlspecialchars($ord['order_number']) ?>
                                     </a>
-                                    <span class="text-muted" style="font-size: 11px;">
-                                        <i class="bi bi-clock me-1"></i><?= date('d.m.Y H:i', strtotime($ord['created_at'])) ?>
-                                    </span>
                                 </td>
 
-                                <!-- Müşteri Bilgisi -->
-                                <td>
-                                    <div class="fw-bold text-dark"><?= htmlspecialchars($ord['customer_name']) ?></div>
-                                    <div class="text-muted" style="font-size: 11px;">
-                                        <i class="bi bi-telephone text-primary me-1"></i><?= htmlspecialchars($ord['customer_phone']) ?>
-                                    </div>
-                                    <div class="text-muted text-truncate" style="font-size: 11px; max-width: 150px;">
-                                        <?= htmlspecialchars($ord['shipping_district'] . ' / ' . $ord['shipping_city']) ?>
-                                    </div>
+                                <!-- Tarih -->
+                                <td class="text-muted" style="font-size: 11.5px;">
+                                    <?= date('d.m.Y H:i', strtotime($ord['created_at'])) ?>
                                 </td>
 
-                                <!-- Kalemler ve Vektör Dosyaları -->
+                                <!-- Müşteri -->
                                 <td>
-                                    <div class="small fw-semibold text-dark mb-1">
-                                        <?= count($items) ?> Kalem
-                                    </div>
+                                    <div class="fw-semibold text-dark"><?= htmlspecialchars($ord['customer_name']) ?></div>
+                                    <div class="text-muted" style="font-size: 11px;"><?= htmlspecialchars($ord['customer_phone']) ?></div>
+                                </td>
+
+                                <!-- Kalemler -->
+                                <td>
                                     <?php foreach ($items as $it): ?>
-                                        <div class="text-truncate mb-1 text-muted" style="max-width: 180px; font-size: 11px;" title="<?= htmlspecialchars($it['product_name']) ?>">
-                                            • <?= htmlspecialchars($it['product_name']) ?> (<?= $it['quantity'] ?> Adet)
+                                        <div class="text-truncate" style="max-width: 170px;" title="<?= htmlspecialchars($it['product_name']) ?>">
+                                            <?= htmlspecialchars($it['product_name']) ?> <span class="text-muted">(<?= $it['quantity'] ?>)</span>
                                         </div>
                                         <?php if (!empty($it['design_svg'])): ?>
-                                            <a href="<?= SITE_URL ?>/admin/orders.php?action=download_svg&item_id=<?= $it['id'] ?>" class="badge bg-primary text-white text-decoration-none py-1 px-2 d-inline-block mb-1 shadow-2xs">
-                                                <i class="bi bi-download me-1"></i> SVG İndir
+                                            <a href="<?= SITE_URL ?>/admin/orders.php?action=download_svg&item_id=<?= $it['id'] ?>" class="badge bg-primary-subtle text-primary text-decoration-none me-1" style="font-size: 10px;">
+                                                <i class="bi bi-download"></i> SVG
                                             </a>
                                         <?php elseif (!empty($it['design_file'])): ?>
-                                            <a href="<?= SITE_URL . '/' . htmlspecialchars($it['design_file']) ?>" target="_blank" class="badge bg-dark text-white text-decoration-none py-1 px-2 d-inline-block mb-1 shadow-2xs">
-                                                <i class="bi bi-cloud-arrow-down me-1"></i> Dosyayı İndir
+                                            <a href="<?= SITE_URL . '/' . htmlspecialchars($it['design_file']) ?>" target="_blank" class="badge bg-secondary text-decoration-none me-1" style="font-size: 10px;">
+                                                <i class="bi bi-download"></i> Dosya
                                             </a>
                                         <?php endif; ?>
                                     <?php endforeach; ?>
                                 </td>
 
-                                <!-- Tutar ve Yöntem -->
+                                <!-- Tutar -->
                                 <td>
-                                    <div class="fw-bold text-primary fs-6"><?= Helper::formatPrice($ord['total_amount']) ?></div>
-                                    <span class="badge bg-light text-dark border" style="font-size: 10px;"><?= strtoupper($ord['payment_method']) ?></span>
+                                    <div class="fw-bold text-dark"><?= Helper::formatPrice($ord['total_amount']) ?></div>
+                                    <span class="text-muted" style="font-size: 10.5px;"><?= strtoupper($ord['payment_method']) ?></span>
                                 </td>
 
-                                <!-- Ödeme Durumu (Hızlı Değiştirme Açılır Menüsü) -->
+                                <!-- Ödeme Durumu Dropdown -->
                                 <td>
                                     <div class="dropdown">
-                                        <button class="btn btn-sm p-0 border-0 dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        <a href="#" class="text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
                                             <?= Helper::getPaymentStatusBadge($ord['payment_status']) ?>
-                                        </button>
-                                        <ul class="dropdown-menu shadow border-0 small">
-                                            <li class="dropdown-header small text-muted">Ödeme Durumunu Değiştir</li>
+                                        </a>
+                                        <ul class="dropdown-menu shadow-sm small border-0">
                                             <li>
                                                 <form action="<?= SITE_URL ?>/admin/orders.php?action=quick_status" method="POST">
                                                     <input type="hidden" name="order_id" value="<?= $ord['id'] ?>">
                                                     <input type="hidden" name="type" value="payment_status">
                                                     <input type="hidden" name="status" value="paid">
-                                                    <button type="submit" class="dropdown-item text-success"><i class="bi bi-check2-circle me-1"></i> Ödendi</button>
+                                                    <button type="submit" class="dropdown-item text-success">✅ Ödendi Yap</button>
                                                 </form>
                                             </li>
                                             <li>
@@ -722,29 +542,20 @@ else:
                                                     <input type="hidden" name="order_id" value="<?= $ord['id'] ?>">
                                                     <input type="hidden" name="type" value="payment_status">
                                                     <input type="hidden" name="status" value="pending">
-                                                    <button type="submit" class="dropdown-item text-warning"><i class="bi bi-hourglass-split me-1"></i> Ödeme Bekliyor</button>
-                                                </form>
-                                            </li>
-                                            <li>
-                                                <form action="<?= SITE_URL ?>/admin/orders.php?action=quick_status" method="POST">
-                                                    <input type="hidden" name="order_id" value="<?= $ord['id'] ?>">
-                                                    <input type="hidden" name="type" value="payment_status">
-                                                    <input type="hidden" name="status" value="refunded">
-                                                    <button type="submit" class="dropdown-item text-dark"><i class="bi bi-arrow-return-left me-1"></i> İade Edildi</button>
+                                                    <button type="submit" class="dropdown-item text-warning">⏳ Bekliyor Yap</button>
                                                 </form>
                                             </li>
                                         </ul>
                                     </div>
                                 </td>
 
-                                <!-- Sipariş Durumu (Hızlı Değiştirme Açılır Menüsü) -->
+                                <!-- Sipariş Aşaması Dropdown -->
                                 <td>
                                     <div class="dropdown">
-                                        <button class="btn btn-sm p-0 border-0 dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        <a href="#" class="text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
                                             <?= Helper::getOrderStatusBadge($ord['order_status']) ?>
-                                        </button>
-                                        <ul class="dropdown-menu shadow border-0 small">
-                                            <li class="dropdown-header small text-muted">Aşamayı Değiştir</li>
+                                        </a>
+                                        <ul class="dropdown-menu shadow-sm small border-0">
                                             <li>
                                                 <form action="<?= SITE_URL ?>/admin/orders.php?action=quick_status" method="POST">
                                                     <input type="hidden" name="order_id" value="<?= $ord['id'] ?>">
@@ -762,12 +573,10 @@ else:
                                                 </form>
                                             </li>
                                             <li>
-                                                <form action="<?= SITE_URL ?>/admin/orders.php?action=quick_status" method="POST">
-                                                    <input type="hidden" name="order_id" value="<?= $ord['id'] ?>">
-                                                    <input type="hidden" name="type" value="order_status">
-                                                    <input type="hidden" name="status" value="shipped">
-                                                    <button type="submit" class="dropdown-item text-indigo">🚚 Kargoya Verildi</button>
-                                                </form>
+                                                <!-- Kargoya Ver Modal Tetikleyici (Takip Kodu Zorunlu) -->
+                                                <button type="button" class="dropdown-item text-dark fw-bold" data-bs-toggle="modal" data-bs-target="#shipModal<?= $ord['id'] ?>">
+                                                    🚚 Kargoya Ver...
+                                                </button>
                                             </li>
                                             <li>
                                                 <form action="<?= SITE_URL ?>/admin/orders.php?action=quick_status" method="POST">
@@ -777,66 +586,106 @@ else:
                                                     <button type="submit" class="dropdown-item text-success">🎉 Teslim Edildi</button>
                                                 </form>
                                             </li>
-                                            <li><hr class="dropdown-divider"></li>
+                                            <li><hr class="dropdown-divider my-1"></li>
                                             <li>
                                                 <form action="<?= SITE_URL ?>/admin/orders.php?action=quick_status" method="POST">
                                                     <input type="hidden" name="order_id" value="<?= $ord['id'] ?>">
                                                     <input type="hidden" name="type" value="order_status">
                                                     <input type="hidden" name="status" value="cancelled">
-                                                    <button type="submit" class="dropdown-item text-danger">❌ İptal Edildi</button>
+                                                    <button type="submit" class="dropdown-item text-danger">❌ İptal Et</button>
                                                 </form>
                                             </li>
                                         </ul>
                                     </div>
                                 </td>
 
-                                <!-- Kargo Takip -->
+                                <!-- Kargo Takip Kolonu -->
                                 <td>
                                     <?php if (!empty($ord['cargo_tracking_code'])): ?>
-                                        <div class="fw-bold text-dark" style="font-size: 11px;"><?= htmlspecialchars($ord['cargo_company'] ?: 'Kargo') ?></div>
-                                        <a href="<?= Cargo::getTrackingLink($ord['cargo_company'], $ord['cargo_tracking_code']) ?>" target="_blank" class="text-primary text-decoration-none small d-block font-monospace" title="Kargo Takip">
-                                            <?= htmlspecialchars($ord['cargo_tracking_code']) ?> <i class="bi bi-box-arrow-up-right" style="font-size: 10px;"></i>
+                                        <div style="font-size: 11px;" class="fw-bold text-dark"><?= htmlspecialchars($ord['cargo_company'] ?: 'Kargo') ?></div>
+                                        <a href="<?= Cargo::getTrackingLink($ord['cargo_company'], $ord['cargo_tracking_code']) ?>" target="_blank" class="font-monospace small text-primary text-decoration-none">
+                                            <?= htmlspecialchars($ord['cargo_tracking_code']) ?> <i class="bi bi-box-arrow-up-right" style="font-size: 9px;"></i>
                                         </a>
                                     <?php else: ?>
-                                        <span class="text-muted" style="font-size: 11px;">Henüz Girilmedi</span>
+                                        <button type="button" class="btn btn-xs btn-outline-primary py-0.5 px-2 rounded" style="font-size: 11px;" data-bs-toggle="modal" data-bs-target="#shipModal<?= $ord['id'] ?>">
+                                            <i class="bi bi-truck me-0.5"></i> Kargoya Ver
+                                        </button>
                                     <?php endif; ?>
                                 </td>
 
-                                <!-- İşlemler Butonları -->
+                                <!-- İşlemler -->
                                 <td class="text-end">
-                                    <div class="d-flex align-items-center justify-content-end gap-1">
-                                        <a href="<?= SITE_URL ?>/admin/orders.php?action=view&id=<?= $ord['id'] ?>" class="btn btn-sm btn-apple-secondary py-1 px-2.5 rounded-pill fw-bold" title="Detay / Yönet">
-                                            <i class="bi bi-eye"></i> İncele
+                                    <div class="d-inline-flex gap-1">
+                                        <a href="<?= SITE_URL ?>/admin/orders.php?action=view&id=<?= $ord['id'] ?>" class="btn btn-sm btn-light py-0.5 px-2 border" title="Detay">
+                                            İncele
                                         </a>
-                                        <button type="button" class="btn btn-sm btn-outline-danger py-1 px-2 rounded-circle" data-bs-toggle="modal" data-bs-target="#delModal<?= $ord['id'] ?>" title="Siparişi Sil">
+                                        <button type="button" class="btn btn-sm btn-light text-danger py-0.5 px-1.5 border" data-bs-toggle="modal" data-bs-target="#delModal<?= $ord['id'] ?>" title="Sil">
                                             <i class="bi bi-trash3"></i>
                                         </button>
                                     </div>
 
-                                    <!-- Satır Bazlı Silme Modal'ı -->
-                                    <div class="modal fade" id="delModal<?= $ord['id'] ?>" tabindex="-1" aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content rounded-4 border-0 shadow text-start">
-                                                <div class="modal-header border-bottom-0 pb-0">
-                                                    <h5 class="modal-title fw-bold text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Siparişi Kalıcı Olarak Sil</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                </div>
-                                                <div class="modal-body py-4">
-                                                    <p class="mb-1"><strong>#<?= htmlspecialchars($ord['order_number']) ?></strong> numaralı siparişi silmek istediğinize emin misiniz?</p>
-                                                    <p class="text-muted small mb-0">Müşteri: <strong><?= htmlspecialchars($ord['customer_name']) ?></strong> | Tutar: <strong><?= Helper::formatPrice($ord['total_amount']) ?></strong></p>
-                                                </div>
-                                                <div class="modal-footer border-top-0 pt-0">
-                                                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Vazgeç</button>
-                                                    <form action="<?= SITE_URL ?>/admin/orders.php?action=delete" method="POST" class="d-inline">
-                                                        <input type="hidden" name="order_id" value="<?= $ord['id'] ?>">
-                                                        <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold">
-                                                            <i class="bi bi-trash3 me-1"></i> Evet, Sil
+                                    <!-- Kargo Bilgisi Girme Modalı (ZORUNLU) -->
+                                    <div class="modal fade" id="shipModal<?= $ord['id'] ?>" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered modal-sm text-start">
+                                            <div class="modal-content rounded-3 border-0 shadow">
+                                                <form action="<?= SITE_URL ?>/admin/orders.php?action=ship_order" method="POST">
+                                                    <input type="hidden" name="order_id" value="<?= $ord['id'] ?>">
+                                                    <input type="hidden" name="redirect_to" value="<?= SITE_URL ?>/admin/orders.php?tab=<?= urlencode($activeTab) ?>">
+
+                                                    <div class="modal-header border-bottom py-2">
+                                                        <h6 class="modal-title fw-bold text-dark"><i class="bi bi-truck me-1"></i>Kargo Bilgilerini Gir</h6>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body py-3">
+                                                        <div class="small text-muted mb-3">
+                                                            Sipariş <strong>#<?= htmlspecialchars($ord['order_number']) ?></strong> için takip numarası girmeden kargoda durumuna geçilemez.
+                                                        </div>
+
+                                                        <div class="mb-2">
+                                                            <label class="form-label small fw-bold mb-1">Kargo Firması</label>
+                                                            <select name="cargo_company" class="form-select form-select-sm">
+                                                                <?php foreach (Cargo::getCompanies() as $key => $c): ?>
+                                                                    <option value="<?= $key ?>" <?= ($ord['cargo_company'] === $key) ? 'selected' : '' ?>><?= $c['name'] ?></option>
+                                                                <?php endforeach; ?>
+                                                            </select>
+                                                        </div>
+
+                                                        <div>
+                                                            <label class="form-label small fw-bold mb-1">Kargo Takip Numarası *</label>
+                                                            <input type="text" name="cargo_tracking_code" class="form-control form-control-sm font-monospace" placeholder="Örn: 1234567890" value="<?= htmlspecialchars($ord['cargo_tracking_code'] ?? '') ?>" required autofocus>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer border-top py-2">
+                                                        <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">İptal</button>
+                                                        <button type="submit" class="btn btn-sm btn-primary fw-bold">
+                                                            <i class="bi bi-check2 me-1"></i> Kargoya Verildi Yap
                                                         </button>
-                                                    </form>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Silme Onay Modal -->
+                                    <div class="modal fade" id="delModal<?= $ord['id'] ?>" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered modal-sm text-start">
+                                            <div class="modal-content rounded-3 border-0 shadow">
+                                                <div class="modal-body text-center p-4">
+                                                    <i class="bi bi-trash3 text-danger fs-2 mb-2 d-block"></i>
+                                                    <h6 class="fw-bold mb-1">Siparişi Sil</h6>
+                                                    <p class="small text-muted mb-3"><strong>#<?= htmlspecialchars($ord['order_number']) ?></strong> numaralı sipariş silinsin mi?</p>
+                                                    <div class="d-flex justify-content-center gap-2">
+                                                        <button type="button" class="btn btn-sm btn-light px-3" data-bs-dismiss="modal">Vazgeç</button>
+                                                        <form action="<?= SITE_URL ?>/admin/orders.php?action=delete" method="POST" class="d-inline">
+                                                            <input type="hidden" name="order_id" value="<?= $ord['id'] ?>">
+                                                            <button type="submit" class="btn btn-sm btn-danger px-3 fw-bold">Evet, Sil</button>
+                                                        </form>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
+
                                 </td>
                             </tr>
                         <?php endforeach; ?>
