@@ -6,5 +6,5 @@
 | **Memo** | - | - | - | 🟢 [BOŞTA] |
 
 ---
-- **Son Eşitleme:** 2026-09-29 21:35
-- **Durum:** ✅ Dekota Uyarı Levhaları kategorisi ve test ürünü (4 Ebat Paketi + Özel m² + Kalınlık + Montaj + Adet İndirimi + 100+ Türkçe İSG Piktogramlı Sign & Safety Studio) canlıya alındı. Memo için rehber dokümante edildi.
+- **Son Eşitleme:** 2026-09-29 21:45
+- **Durum:** ✅ Dekota Uyarı Levhaları Dolar ($/USD) m² hesaplama motoru, TCMB canlı kur, tam lira yuvarlama kuralı (`ceil()`), dinamik adet kademeleri ve Sign Studio vektör seçici canlıya alındı. Kilitler boştadır.
