@@ -56,27 +56,28 @@ $email = Helper::getSetting('site_email', 'destek@baskimatbaa.com');
             <div class="col-lg-2 col-6">
                 <h6 class="fw-bold mb-3">Popüler Baskılar</h6>
                 <ul class="list-unstyled small text-muted">
-                    <li class="mb-2"><a href="<?= SITE_URL ?>/category.php?slug=kartvizit" class="text-decoration-none text-muted">Kartvizit Çeşitleri</a></li>
-                    <li class="mb-2"><a href="<?= SITE_URL ?>/category.php?slug=el-ilani-brosur" class="text-decoration-none text-muted">Broşür & El İlanı</a></li>
-                    <li class="mb-2"><a href="<?= SITE_URL ?>/category.php?slug=kurumsal-urunler" class="text-decoration-none text-muted">Cepli Sunum Dosyası</a></li>
-                    <li class="mb-2"><a href="<?= SITE_URL ?>/category.php?slug=kase-cesitleri" class="text-decoration-none text-muted">Otomatik Kaşe</a></li>
-                    <li class="mb-2"><a href="<?= SITE_URL ?>/category.php?urgent=1" class="text-decoration-none text-danger fw-bold">Acil 24 Saat Baskı</a></li>
+                    <li class="mb-2"><a href="<?= SITE_URL ?>/product.php?slug=kurumsal-prestij-kartvizit" class="text-decoration-none text-muted">Kartvizit Çeşitleri</a></li>
+                    <li class="mb-2"><a href="<?= SITE_URL ?>/product.php?slug=dekota-isg-guvenlik-uyari-levhasi" class="text-decoration-none text-muted">Dekota Uyarı Levhaları</a></li>
+                    <li class="mb-2"><a href="<?= SITE_URL ?>/category.php" class="text-decoration-none text-muted">Tüm Kategoriler</a></li>
+                    <li class="mb-2"><a href="<?= SITE_URL ?>/dealer_apply.php" class="text-decoration-none text-danger fw-bold">E-Bayi Başvurusu (%25)</a></li>
                 </ul>
             </div>
 
             <div class="col-lg-2 col-6">
-                <h6 class="fw-bold mb-3">Kurumsal & Destek</h6>
+                <h6 class="fw-bold mb-3">Kurumsal &amp; Yasal</h6>
                 <ul class="list-unstyled small text-muted">
-                    <li class="mb-2"><a href="<?= SITE_URL ?>/order_tracking.php" class="text-decoration-none text-muted">Kargo & Sipariş Takibi</a></li>
-                    <li class="mb-2"><a href="<?= SITE_URL ?>/dealer_apply.php" class="text-decoration-none text-muted">E-Bayi Başvurusu</a></li>
-                    <li class="mb-2"><a href="<?= SITE_URL ?>/api/v1/" target="_blank" class="text-decoration-none text-muted">Geliştirici & AI API</a></li>
-                    <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Gizlilik & Güvenlik</a></li>
-                    <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Mesafeli Satış Sözleşmesi</a></li>
+                    <li class="mb-2"><a href="<?= SITE_URL ?>/contact.php" class="text-decoration-none text-muted">İletişim &amp; Ulaşım</a></li>
+                    <li class="mb-2"><a href="<?= SITE_URL ?>/delivery.php" class="text-decoration-none text-muted">Teslimat &amp; Kargo</a></li>
+                    <li class="mb-2"><a href="<?= SITE_URL ?>/terms.php" class="text-decoration-none text-muted">Mesafeli Satış Sözleşmesi</a></li>
+                    <li class="mb-2"><a href="<?= SITE_URL ?>/returns.php" class="text-decoration-none text-muted">İptal &amp; İade Koşulları</a></li>
+                    <li class="mb-2"><a href="<?= SITE_URL ?>/privacy.php" class="text-decoration-none text-muted">Gizlilik &amp; KVKK Politikası</a></li>
+                    <li class="mb-2"><a href="<?= SITE_URL ?>/order_tracking.php" class="text-decoration-none text-muted">Kargo &amp; Sipariş Takibi</a></li>
                 </ul>
             </div>
 
             <div class="col-lg-4 col-md-6">
-                <h6 class="fw-bold mb-3">Müşteri Hizmetleri & Destek</h6>
+                <h6 class="fw-bold mb-3">Müşteri Hizmetleri &amp; Destek</h6>
+                <div class="mb-2 small"><i class="bi bi-geo-alt text-danger me-2"></i><strong>Fabrika Adresi:</strong> Topkapı Matbaacılar Sitesi No: 14 Zeytinburnu / İstanbul</div>
                 <div class="mb-2 small"><i class="bi bi-telephone text-primary me-2"></i><strong>Telefon:</strong> <?= htmlspecialchars($phone) ?></div>
                 <div class="mb-2 small"><i class="bi bi-whatsapp text-success me-2"></i><strong>WhatsApp:</strong> +<?= htmlspecialchars($whatsapp) ?></div>
                 <div class="mb-3 small"><i class="bi bi-envelope text-primary me-2"></i><strong>E-Posta:</strong> <?= htmlspecialchars($email) ?></div>

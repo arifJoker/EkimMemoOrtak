@@ -448,30 +448,53 @@ class Product {
 
         // 0. Sert Zemin & Levha Modeli (rigid_board - Dekota Uyarı Levhaları vb.) Fiyat Hesaplama
         if (!empty($product['category_pricing_model']) && $product['category_pricing_model'] === 'rigid_board') {
-            $isCustomSize = ($selectedPackage === 'ozel' || ($customWidth > 0 && $customHeight > 0));
+            $isCustomSize = ($selectedPackage === 'ozel' || $selectedPackage === 'custom');
             $unitBasePrice = 95.00;
 
-            if ($isCustomSize && $customWidth > 0 && $customHeight > 0) {
-                // Dinamik m2 hesabı (USD / TRY Kuru ile ve yukarı yuvarlamalı)
-                $areaM2 = ($customWidth * $customHeight) / 10000;
-                $m2Usd = (float)($product['m2_usd_price'] ?? 0);
-                if ($m2Usd > 0) {
-                    $usdRate = Helper::getUsdRate();
-                    $rawPriceTry = $areaM2 * $m2Usd * $usdRate;
-                    $unitBasePrice = max(45.00, ceil($rawPriceTry)); // Örn: 47,52 TL -> 48 TL
-                } else {
-                    $unitBasePrice = max(45.00, ceil($areaM2 * 550.00));
-                }
-            } else {
-                if (!empty($presets[$selectedPackage]['price'])) {
-                    $unitBasePrice = (float)$presets[$selectedPackage]['price'];
-                }
+            // Kalınlık Seçimi (3mm, 5mm, 9mm) ve Ayrı m2 Dolar ($ USD) Maliyetleri
+            $thickness = $selectedOptions['thickness'] ?? '3mm';
+            if ($thickness !== '5mm' && $thickness !== '9mm') {
+                $thickness = '3mm';
             }
 
-            // Kalınlık Seçimi (5mm ise +%25)
-            $thickness = $selectedOptions['thickness'] ?? '3mm';
-            if ($thickness === '5mm') {
-                $unitBasePrice = ceil($unitBasePrice * 1.25);
+            $m2Usd3mm = (float)($product['m2_usd_price_3mm'] ?? $product['m2_usd_price'] ?? 14.50);
+            if ($m2Usd3mm <= 0) $m2Usd3mm = 14.50;
+
+            $m2Usd5mm = (float)($product['m2_usd_price_5mm'] ?? 18.50);
+            if ($m2Usd5mm <= 0) $m2Usd5mm = 18.50;
+
+            $m2Usd9mm = (float)($product['m2_usd_price_9mm'] ?? 26.00);
+            if ($m2Usd9mm <= 0) $m2Usd9mm = 26.00;
+
+            if ($thickness === '9mm') {
+                $activeM2Usd = $m2Usd9mm;
+                $thicknessMultiplier = $m2Usd9mm / $m2Usd3mm;
+            } elseif ($thickness === '5mm') {
+                $activeM2Usd = $m2Usd5mm;
+                $thicknessMultiplier = $m2Usd5mm / $m2Usd3mm;
+            } else {
+                $activeM2Usd = $m2Usd3mm;
+                $thicknessMultiplier = 1.0;
+            }
+
+            if ($isCustomSize) {
+                // Dinamik m2 hesabı (USD / TRY Kuru ile ve yukarı tam liraya yuvarlamalı)
+                $w = ($customWidth > 0) ? $customWidth : 40;
+                $h = ($customHeight > 0) ? $customHeight : 60;
+                $areaM2 = ($w * $h) / 10000;
+                $usdRate = Helper::getUsdRate();
+                $rawPriceTry = $areaM2 * $activeM2Usd * $usdRate;
+                $unitBasePrice = max(45.00, ceil($rawPriceTry)); // Örn: 47,52 TL -> 48 TL
+            } else {
+                $rawPkgPrice = 95.00;
+                if (!empty($presets[$selectedPackage]['price'])) {
+                    $rawPkgPrice = (float)$presets[$selectedPackage]['price'];
+                } elseif (!empty($presets['orta']['price'])) {
+                    $rawPkgPrice = (float)$presets['orta']['price'];
+                } elseif ($basePrice > 0) {
+                    $rawPkgPrice = $basePrice;
+                }
+                $unitBasePrice = ceil($rawPkgPrice * $thicknessMultiplier);
             }
 
             // Montaj Seçeneği
@@ -904,20 +927,32 @@ class Product {
             try {
                 $this->db->exec("ALTER TABLE products ADD COLUMN m2_usd_price DECIMAL(10,2) DEFAULT 0.00");
             } catch (Exception $e) {}
+            try {
+                $this->db->exec("ALTER TABLE products ADD COLUMN m2_usd_price_3mm DECIMAL(10,2) DEFAULT 14.50");
+            } catch (Exception $e) {}
+            try {
+                $this->db->exec("ALTER TABLE products ADD COLUMN m2_usd_price_5mm DECIMAL(10,2) DEFAULT 18.50");
+            } catch (Exception $e) {}
+            try {
+                $this->db->exec("ALTER TABLE products ADD COLUMN m2_usd_price_9mm DECIMAL(10,2) DEFAULT 26.00");
+            } catch (Exception $e) {}
 
             if (!$prodId) {
                 $insProd = $this->db->prepare("INSERT INTO products 
-                    (category_id, name, slug, sku, short_description, full_description, base_price, m2_usd_price, package_presets, featured_image, gallery, allow_online_editor, allow_design_upload, is_featured, is_urgent, status) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    (category_id, name, slug, sku, short_description, full_description, base_price, m2_usd_price, m2_usd_price_3mm, m2_usd_price_5mm, m2_usd_price_9mm, package_presets, featured_image, gallery, allow_online_editor, allow_design_upload, is_featured, is_urgent, status) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 $insProd->execute([
                     $catId,
                     'Dekota İSG & Güvenlik Uyarı Levhası',
                     'dekota-isg-guvenlik-uyari-levhasi',
                     'TB-LEVH-01',
-                    '3mm / 5mm Sert Dekota (Forex) zemin üzerine yüksek çözünürlüklü UV baskılı İSG, fabrika ve tesis güvenlik uyarı levhaları.',
-                    '3mm veya 5mm Sert Dekota (Forex) zemin üzerine direkt UV baskı teknolojisiyle üretilen yüksek dayanımlı uyarı levhaları. Solmaz, neme, suya ve güneşe tam dayanıklıdır.',
+                    '3mm / 5mm / 9mm Sert Dekota (Forex) zemin üzerine yüksek çözünürlüklü UV baskılı İSG, fabrika ve tesis güvenlik uyarı levhaları.',
+                    '3mm, 5mm veya 9mm Sert Dekota (Forex) zemin üzerine direkt UV baskı teknolojisiyle üretilen yüksek dayanımlı uyarı levhaları. Solmaz, neme, suya ve güneşe tam dayanıklıdır.',
                     95.00,
                     14.50,
+                    14.50,
+                    18.50,
+                    26.00,
                     $pkgJson,
                     'uploads/mockups/tambaski_dekota_mockup.jpg',
                     $galleryJson,
@@ -939,7 +974,7 @@ class Product {
                     $insTier->execute([$prodId, $t['quantity'], $t['multiplier'], $t['discount_percent']]);
                 }
             } else {
-                $this->db->prepare("UPDATE products SET category_id = ?, package_presets = ?, m2_usd_price = 14.50, featured_image = ?, gallery = ?, allow_online_editor = 1, status = 1 WHERE id = ?")
+                $this->db->prepare("UPDATE products SET category_id = ?, package_presets = ?, m2_usd_price = 14.50, m2_usd_price_3mm = 14.50, m2_usd_price_5mm = 18.50, m2_usd_price_9mm = 26.00, featured_image = ?, gallery = ?, allow_online_editor = 1, status = 1 WHERE id = ?")
                          ->execute([$catId, $pkgJson, 'uploads/mockups/tambaski_dekota_mockup.jpg', $galleryJson, $prodId]);
             }
         } catch (Exception $e) {}

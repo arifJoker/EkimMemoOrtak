@@ -6,5 +6,5 @@
 | **Memo** | - | - | - | 🟢 [BOŞTA] |
 
 ---
-- **Son Eşitleme:** 2026-09-29 21:45
-- **Durum:** ✅ Dekota Uyarı Levhaları Dolar ($/USD) m² hesaplama motoru, TCMB canlı kur, tam lira yuvarlama kuralı (`ceil()`), dinamik adet kademeleri ve Sign Studio vektör seçici canlıya alındı. Kilitler boştadır.
+- **Son Eşitleme:** 2026-09-29 22:20
+- **Durum:** ✅ Dekota Sign Studio canlı boyut/özel ebat seçici, 65+ Türkçe İSG/trafik/yasak piktogramı, zemin rengi ayarlayıcı, blokaj yapmayan ve rengi değiştirilebilir ikaz çerçevesi tamamlandı. Kök dizinde Memo & Antigravity için `CATEGORIES_AND_VARIANTS.md` rehberi oluşturuldu. Kilitler boştadır.

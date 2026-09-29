@@ -155,8 +155,30 @@ require_once __DIR__ . '/includes/header.php';
                     <div class="p-3 bg-light rounded-4 small border mb-3">
                         <div class="fw-bold text-dark mb-2 pb-1 border-bottom d-flex justify-content-between align-items-center">
                             <span><i class="bi bi-cpu me-1 text-primary"></i> Seçili Paket Özellikleri</span>
-                            <span id="tablePkgName" class="badge bg-primary text-white">Ekonomik</span>
+                            <span id="tablePkgName" class="badge bg-primary text-white"><?= $isDekota ? 'Orta Boy (35x50 cm)' : 'Standart' ?></span>
                         </div>
+                        <?php if ($isDekota): ?>
+                        <div class="d-flex justify-content-between py-1 border-bottom text-muted">
+                            <span>Zemin / Malzeme:</span>
+                            <strong class="text-dark" id="specPaper">3mm / 5mm Sert Dekota (Forex)</strong>
+                        </div>
+                        <div class="d-flex justify-content-between py-1 border-bottom text-muted">
+                            <span>Baskı Teknolojisi:</span>
+                            <strong class="text-dark" id="specLamination">Ultra HD UV Dijital Baskı</strong>
+                        </div>
+                        <div class="d-flex justify-content-between py-1 border-bottom text-muted">
+                            <span>Kenar / Kesim:</span>
+                            <strong class="text-dark" id="specCorners">CNC Milimetrik Düz Kesim</strong>
+                        </div>
+                        <div class="d-flex justify-content-between py-1 border-bottom text-muted">
+                            <span>Kullanım Alanı:</span>
+                            <strong class="text-dark" id="specFinish">İSG Güvenlik &amp; Tesis İkaz</strong>
+                        </div>
+                        <div class="d-flex justify-content-between pt-1 text-muted">
+                            <span>Dış Mekan Dayanımı:</span>
+                            <strong class="text-success" id="specWaterproof"><i class="bi bi-shield-check me-1"></i> %100 Su, Güneş &amp; Dış Ortam Korumalı</strong>
+                        </div>
+                        <?php else: ?>
                         <div class="d-flex justify-content-between py-1 border-bottom text-muted">
                             <span>Kağıt Türü:</span>
                             <strong class="text-dark" id="specPaper">350 gr. Birinci Sınıf Kuşe</strong>
@@ -175,8 +197,9 @@ require_once __DIR__ . '/includes/header.php';
                         </div>
                         <div class="d-flex justify-content-between pt-1 text-muted">
                             <span>Sıvı / Nem Dayanımı:</span>
-                            <strong class="text-success" id="specWaterproof"><i class="bi bi-check-circle-fill me-1"></i> %100 Su & Nem Korumalı</strong>
+                            <strong class="text-success" id="specWaterproof"><i class="bi bi-check-circle-fill me-1"></i> %100 Su &amp; Nem Korumalı</strong>
                         </div>
+                        <?php endif; ?>
                     </div>
 
                     <div class="mt-2">
@@ -895,7 +918,8 @@ require_once __DIR__ . '/includes/header.php';
                                 </label>
                                 <select name="thickness" id="dekotaThicknessSelect" class="form-select form-select-sm" onchange="calculateLivePrice()">
                                     <option value="3mm" selected>3 mm Sert Dekota (Standart Rijit)</option>
-                                    <option value="5mm">5 mm Sert Dekota (Ekstra Dayanıklı Dış Mekan +%25)</option>
+                                    <option value="5mm">5 mm Sert Dekota (Dış Mekan Dayanıklı)</option>
+                                    <option value="9mm">9 mm Sert Dekota (Ekstra Kalın / Ağır Hizmet)</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
@@ -1986,7 +2010,7 @@ require_once __DIR__ . '/includes/header.php';
         <div class="modal-content border-0 rounded-0 bg-light">
             
             <!-- Stüdyo Başlık Çubuğu -->
-            <div class="modal-header bg-dark text-white py-2 px-3 border-0 d-flex justify-content-between align-items-center">
+            <div class="modal-header bg-dark text-white py-2 px-3 border-0 d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div class="d-flex align-items-center gap-2">
                     <button type="button" class="btn btn-sm btn-outline-light rounded-pill px-3" data-bs-dismiss="modal">
                         <i class="bi bi-arrow-left me-1"></i> Geri Dön
@@ -2001,11 +2025,36 @@ require_once __DIR__ . '/includes/header.php';
                     </div>
                 </div>
 
+                <!-- Boyut & Yönlendirme Kontrolleri -->
+                <div class="d-flex align-items-center gap-2 bg-black bg-opacity-60 p-1.5 rounded-pill px-3 border border-secondary border-opacity-50">
+                    <span class="small text-white-50 fw-bold" style="font-size: 11.5px;">
+                        <i class="bi bi-aspect-ratio me-1 text-warning"></i> Boyut:
+                    </span>
+                    <select id="signStudioSizeSelect" class="form-select form-select-sm bg-dark text-white border-secondary py-0" style="font-size: 11.5px; width: 145px; height: 28px;" onchange="onSignStudioSizeSelect(this.value)">
+                        <option value="25x35">25 x 35 cm (Küçük)</option>
+                        <option value="35x50" selected>35 x 50 cm (Orta)</option>
+                        <option value="50x70">50 x 70 cm (Büyük)</option>
+                        <option value="70x100">70 x 100 cm (Mega)</option>
+                        <option value="custom">📐 Özel Boyut...</option>
+                    </select>
+
+                    <div id="signStudioCustomDimsBox" class="d-none align-items-center gap-1 bg-dark px-2 py-0.5 rounded-pill border border-warning">
+                        <span class="text-warning small fw-bold" style="font-size: 10px;">En:</span>
+                        <input type="number" id="signStudioCustomW" class="form-control form-control-sm bg-black text-warning border-0 text-center px-1 fw-bold" style="width: 48px; font-size: 11px; height: 24px;" value="40" min="10" max="300" oninput="onSignStudioCustomDimsChange()">
+                        <span class="text-white-50 small">x</span>
+                        <span class="text-warning small fw-bold" style="font-size: 10px;">Boy:</span>
+                        <input type="number" id="signStudioCustomH" class="form-control form-control-sm bg-black text-warning border-0 text-center px-1 fw-bold" style="width: 48px; font-size: 11px; height: 24px;" value="60" min="10" max="400" oninput="onSignStudioCustomDimsChange()">
+                        <span class="text-white-50 small" style="font-size: 10px;">cm</span>
+                        <button type="button" class="btn btn-warning btn-xs py-0 px-2 fw-bold text-dark rounded-pill" style="font-size: 10px; height: 22px;" onclick="onSignStudioCustomDimsChange()">Uygula</button>
+                    </div>
+
+                    <button type="button" class="btn btn-sm btn-outline-info rounded-pill px-2.5 py-0.5" style="font-size: 11px; height: 28px;" onclick="SignStudio.toggleOrientation()" title="Yatay / Dikey Yönünü Değiştir">
+                        <i class="bi bi-arrow-repeat me-1"></i> Yön Çevir
+                    </button>
+                </div>
+
                 <!-- Aksiyon Butonları -->
                 <div class="d-flex align-items-center gap-2">
-                    <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-3" onclick="SignStudio.addHazardBorder('yellow_black')">
-                        <i class="bi bi-border-style me-1"></i> İkaz Çerçevesi Ekle
-                    </button>
                     <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-2.5" onclick="if(confirm('Tüm levha tasarımı sıfırlansın mı?')) SignStudio.clearCanvas();">
                         <i class="bi bi-trash me-1"></i> Temizle
                     </button>
@@ -2018,14 +2067,14 @@ require_once __DIR__ . '/includes/header.php';
             <!-- Stüdyo Ana Çalışma Alanı (Sol Araçlar + Sağ Canvas) -->
             <div class="modal-body p-0 d-flex flex-column flex-lg-row overflow-hidden" style="height: calc(100vh - 56px);">
                 
-                <!-- SOL PANEL: Piktogramlar, Başlıklar, Yazı, Logo, Zemin -->
+                <!-- SOL PANEL: Piktogramlar, Başlıklar, Yazı, Zemin, Logo -->
                 <div class="sign-studio-sidebar bg-white border-end d-flex flex-column" style="width: 100%; max-width: 420px; z-index: 10;">
                     
                     <!-- Sekme Başlıkları -->
-                    <ul class="nav nav-pills nav-fill p-2 bg-light border-bottom gap-1" id="signStudioTabs" role="tablist" style="font-size: 11px;">
+                    <ul class="nav nav-pills nav-fill p-2 bg-light border-bottom gap-1" id="signStudioTabs" role="tablist" style="font-size: 10.5px;">
                         <li class="nav-item">
                             <button class="nav-link active py-2 px-1 fw-bold" id="tab-sign-vectors-btn" data-bs-toggle="pill" data-bs-target="#tab-sign-vectors">
-                                <i class="bi bi-shield-check d-block fs-6 mb-1 text-primary"></i> Piktogramlar
+                                <i class="bi bi-shield-check d-block fs-6 mb-1 text-primary"></i> Piktogram (65+)
                             </button>
                         </li>
                         <li class="nav-item">
@@ -2039,8 +2088,13 @@ require_once __DIR__ . '/includes/header.php';
                             </button>
                         </li>
                         <li class="nav-item">
+                            <button class="nav-link py-2 px-1 fw-bold" id="tab-sign-bg-btn" data-bs-toggle="pill" data-bs-target="#tab-sign-bg">
+                                <i class="bi bi-paint-bucket d-block fs-6 mb-1 text-warning"></i> Zemin &amp; Çerçeve
+                            </button>
+                        </li>
+                        <li class="nav-item">
                             <button class="nav-link py-2 px-1 fw-bold" id="tab-sign-logo-btn" data-bs-toggle="pill" data-bs-target="#tab-sign-logo">
-                                <i class="bi bi-image d-block fs-6 mb-1 text-info"></i> Logo Yükle
+                                <i class="bi bi-image d-block fs-6 mb-1 text-info"></i> Logo
                             </button>
                         </li>
                     </ul>
@@ -2053,7 +2107,7 @@ require_once __DIR__ . '/includes/header.php';
                             <!-- Arama -->
                             <div class="input-group input-group-sm mb-2 shadow-2xs">
                                 <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
-                                <input type="text" id="signVectorSearchInput" class="form-control" placeholder="Piktogram ara (Baret, Sigara, Yangın, Elektrik...)" oninput="filterSignVectors(this.value)">
+                                <input type="text" id="signVectorSearchInput" class="form-control" placeholder="Piktogram ara (Baret, Park, Sigara, Yangın, Elektrik...)" oninput="filterSignVectors(this.value)">
                             </div>
 
                             <!-- Kategori Filtre Butonları -->
@@ -2109,7 +2163,120 @@ require_once __DIR__ . '/includes/header.php';
                             </button>
                         </div>
 
-                        <!-- 4. FİRMA LOGOSU YÜKLE -->
+                        <!-- 4. ZEMİN (ARKA PLAN) & İKAZ ÇERÇEVESİ -->
+                        <div class="tab-pane fade" id="tab-sign-bg" role="tabpanel">
+                            <!-- ARKA PLAN RENGİ BÖLÜMÜ -->
+                            <div class="mb-4">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <h6 class="fw-bold small text-dark mb-0">
+                                        <i class="bi bi-paint-bucket text-warning me-1"></i> Zemin (Arka Plan) Rengi
+                                    </h6>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-2" style="font-size: 11px;" onclick="SignStudio.setBackgroundColor('#ffffff')">Sıfırla (Beyaz)</button>
+                                </div>
+                                <div class="d-flex gap-2 flex-wrap mb-2">
+                                    <button type="button" class="btn btn-sm btn-light border rounded-pill px-3 fw-bold" onclick="SignStudio.setBackgroundColor('#ffffff')">
+                                        <span class="rounded-circle d-inline-block me-1 border" style="width: 12px; height: 12px; background: #ffffff;"></span> Beyaz
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-warning rounded-pill px-3 fw-bold text-dark" onclick="SignStudio.setBackgroundColor('#ffcc00')">
+                                        <span class="rounded-circle d-inline-block me-1" style="width: 12px; height: 12px; background: #ffcc00;"></span> İSG Sarısı
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-danger rounded-pill px-3 fw-bold" onclick="SignStudio.setBackgroundColor('#dd2222')">
+                                        <span class="rounded-circle d-inline-block me-1" style="width: 12px; height: 12px; background: #dd2222;"></span> Kırmızı
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-success rounded-pill px-3 fw-bold" onclick="SignStudio.setBackgroundColor('#008844')">
+                                        <span class="rounded-circle d-inline-block me-1" style="width: 12px; height: 12px; background: #008844;"></span> İSG Yeşili
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold" onclick="SignStudio.setBackgroundColor('#0055aa')">
+                                        <span class="rounded-circle d-inline-block me-1" style="width: 12px; height: 12px; background: #0055aa;"></span> Mavi
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-dark rounded-pill px-3 fw-bold" onclick="SignStudio.setBackgroundColor('#111827')">
+                                        <span class="rounded-circle d-inline-block me-1" style="width: 12px; height: 12px; background: #111827;"></span> Siyah
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-secondary bg-opacity-25 border rounded-pill px-3 fw-bold text-dark" onclick="SignStudio.setBackgroundColor('#e5e7eb')">
+                                        <span class="rounded-circle d-inline-block me-1" style="width: 12px; height: 12px; background: #e5e7eb;"></span> Açık Gri
+                                    </button>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="small text-muted" style="font-size: 11px;">Özel Renk:</span>
+                                    <input type="color" id="signBgColorPicker" class="form-control form-control-color border-0 p-0" style="width: 36px; height: 32px;" value="#ffffff" onchange="SignStudio.setBackgroundColor(this.value)">
+                                    <span class="small text-muted" style="font-size: 11px;">İstediğiniz zemin tonunu seçebilirsiniz.</span>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <!-- İKAZ KENAR ÇERÇEVESİ BÖLÜMÜ -->
+                            <div class="mb-3">
+                                <h6 class="fw-bold small text-dark mb-1">
+                                    <i class="bi bi-border-style text-primary me-1"></i> İkaz Kenar Çerçevesi
+                                </h6>
+                                <p class="text-muted small mb-2" style="font-size: 11px;">
+                                    Çerçeve levhanın zeminine sabitlenir; üzerindeki piktogram ve metinleri seçmenizi veya taşımanızı <strong>asla engellemez</strong>.
+                                </p>
+
+                                <!-- Hazır Çerçeve Butonları -->
+                                <div class="d-flex flex-column gap-2 mb-3">
+                                    <button type="button" class="btn btn-sm btn-outline-warning rounded-3 text-start fw-bold d-flex align-items-center justify-content-between" onclick="SignStudio.addHazardBorder('yellow_black')">
+                                        <span><i class="bi bi-square-fill text-warning me-2"></i> Sarı İSG Emniyet Çerçevesi</span>
+                                        <span class="badge bg-warning text-dark" style="font-size: 10px;">Standart</span>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger rounded-3 text-start fw-bold d-flex align-items-center justify-content-between" onclick="SignStudio.addHazardBorder('red_white')">
+                                        <span><i class="bi bi-square-fill text-danger me-2"></i> Kırmızı Yasak &amp; Yangın Çerçevesi</span>
+                                        <span class="badge bg-danger text-white" style="font-size: 10px;">Yasak</span>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-dark rounded-3 text-start fw-bold d-flex align-items-center justify-content-between" onclick="SignStudio.addHazardBorder('striped')">
+                                        <span><i class="bi bi-dash-square-dotted text-warning me-2"></i> Çizgili / Kesik Dikkat İkaz Çerçevesi</span>
+                                        <span class="badge bg-dark text-warning" style="font-size: 10px;">Çizgili</span>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-3 text-start fw-bold" onclick="SignStudio.addHazardBorder('solid_black')">
+                                        <i class="bi bi-square text-dark me-2"></i> Düz Siyah Sade Kenarlık
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-light border rounded-3 text-start text-danger fw-semibold" onclick="SignStudio.removeBorder()">
+                                        <i class="bi bi-x-circle text-danger me-2"></i> Çerçeveyi Kaldır
+                                    </button>
+                                </div>
+
+                                <!-- Canlı Çerçeve Renk & Kalınlık Ayarları -->
+                                <div class="bg-light p-3 rounded-3 border">
+                                    <div class="fw-bold small text-dark mb-2" style="font-size: 11.5px;">
+                                        <i class="bi bi-sliders me-1 text-primary"></i> Çerçeve Rengi &amp; Kalınlık Ayarı:
+                                    </div>
+                                    
+                                    <div class="row g-2 align-items-center mb-2">
+                                        <div class="col-7">
+                                            <label class="form-label small text-muted mb-1" style="font-size: 11px;">Çerçeve Rengi:</label>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <input type="color" id="signBorderColorPicker" class="form-control form-control-color border-0 p-0" style="width: 32px; height: 28px;" value="#ffcc00" onchange="SignStudio.setBorderColor(this.value)">
+                                                <div class="d-flex gap-1">
+                                                    <span class="cursor-pointer rounded-circle border" style="width: 18px; height: 18px; background: #ffcc00;" onclick="SignStudio.setBorderColor('#ffcc00')" title="Sarı"></span>
+                                                    <span class="cursor-pointer rounded-circle border" style="width: 18px; height: 18px; background: #dd2222;" onclick="SignStudio.setBorderColor('#dd2222')" title="Kırmızı"></span>
+                                                    <span class="cursor-pointer rounded-circle border" style="width: 18px; height: 18px; background: #111827;" onclick="SignStudio.setBorderColor('#111827')" title="Siyah"></span>
+                                                    <span class="cursor-pointer rounded-circle border" style="width: 18px; height: 18px; background: #0055aa;" onclick="SignStudio.setBorderColor('#0055aa')" title="Mavi"></span>
+                                                    <span class="cursor-pointer rounded-circle border" style="width: 18px; height: 18px; background: #008844;" onclick="SignStudio.setBorderColor('#008844')" title="Yeşil"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-5">
+                                            <label class="form-label small text-muted mb-1" style="font-size: 11px;">Kalınlık:</label>
+                                            <select class="form-select form-select-sm" onchange="SignStudio.setBorderWidth(this.value)">
+                                                <option value="6">İnce (6 px)</option>
+                                                <option value="10" selected>Orta (10 px)</option>
+                                                <option value="16">Kalın (16 px)</option>
+                                                <option value="24">Mega (24 px)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="small text-muted" style="font-size: 11px;">Çizgi Tipi:</span>
+                                        <button type="button" class="btn btn-xs btn-outline-dark rounded-pill px-2.5" style="font-size: 10.5px;" onclick="SignStudio.setBorderStyle('solid')">Düz Çizgi</button>
+                                        <button type="button" class="btn btn-xs btn-outline-dark rounded-pill px-2.5" style="font-size: 10.5px;" onclick="SignStudio.setBorderStyle('dashed')">Kesik Çizgili İkaz</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 5. FİRMA LOGOSU YÜKLE -->
                         <div class="tab-pane fade" id="tab-sign-logo" role="tabpanel">
                             <h6 class="fw-bold small text-dark mb-2"><i class="bi bi-building text-info me-1"></i> Firma Logosu Ekleyin</h6>
                             <p class="text-muted small mb-3" style="font-size: 11.5px;">Şirket veya kurum logonuzu yükleyerek levhanın alt/üst köşesine yerleştirebilirsiniz.</p>
@@ -2170,6 +2337,68 @@ require_once __DIR__ . '/includes/header.php';
 <script>
 const isDekotaProduct = <?= $isDekota ? 'true' : 'false' ?>;
 const packageData = {
+    // 🏷️ Dekota Levha Paketleri
+    kucuk: {
+        name: 'Küçük Boy (25x35 cm)',
+        tag: '🛡️ Kapı & Pano İçi Kompakt Levha',
+        specPaper: '3mm / 5mm Sert Dekota (Forex)',
+        specLamination: 'Ultra HD UV Dijital Baskı',
+        specCorners: 'CNC Milimetrik Düz Kesim',
+        specFinish: 'Kapı Üstü & Atölye İçi Kullanım',
+        specWaterproof: '<i class="bi bi-shield-check me-1"></i> %100 Su & Güneş Korumalı',
+        title: 'Küçük Boy Dekota İSG Uyarı Levhası (25x35 cm)',
+        desc: 'Kapı girişleri, elektrik panoları, oda ve ofis içi yönlendirmeler için ideal kompakt güvenlik levhası.',
+        fullDesc: '<ul class="ps-3 mb-0"><li><strong>3mm/5mm Sert Dekota (Forex):</strong> Tok, kırılmaz ve eğilip bükülmez rijit zemin.</li><li><strong>Direkt UV Dijital Baskı:</strong> Güneş ışığında solmayan, suya ve kimyasallara dayanıklı canlı renkler.</li><li><strong>Kolay Montaj:</strong> Çift taraflı köpük bant veya vida ile her türlü duvara, panoya uygulanabilir.</li><li><strong>İSG Standartlarına Uygun:</strong> Standart sembol ve yazı formatı.</li></ul>'
+    },
+    orta: {
+        name: 'Orta Boy (35x50 cm)',
+        tag: '⭐ En Çok Tercih Edilen Standart Ebat',
+        specPaper: '3mm / 5mm Sert Dekota (Forex)',
+        specLamination: 'Ultra HD UV Dijital Baskı',
+        specCorners: 'CNC Milimetrik Düz Kesim',
+        specFinish: 'Koridor, Üretim Hatları & Panolar',
+        specWaterproof: '<i class="bi bi-shield-check me-1"></i> %100 Su, Nem & Güneş Korumalı',
+        title: 'Orta Boy Dekota İSG Uyarı Levhası (35x50 cm)',
+        desc: 'Fabrika içi koridorlar, üretim bantları ve ortak kullanım alanları için en popüler ve okunaklı levha ölçüsü.',
+        fullDesc: '<ul class="ps-3 mb-0"><li><strong>Mükemmel Okunabilirlik:</strong> 5-10 metre mesafeden rahatça fark edilir İSG uyarıları.</li><li><strong>Yüksek Dayanımlı UV Baskı:</strong> İç ve dış mekan koşullarında yıllarca solmadan kalır.</li><li><strong>CNC Hassas Kesim:</strong> Çapaksız ve düzgün kenarlar.</li><li><strong>İsteğe Bağlı Montaj:</strong> Bantlı veya delikli montaj seçeneği.</li></ul>'
+    },
+    buyuk: {
+        name: 'Büyük Boy (50x70 cm)',
+        tag: '🔥 Fabrika, Depo & Şantiye Alanı',
+        specPaper: '3mm / 5mm Sert Dekota (Forex)',
+        specLamination: 'Ultra HD UV Dijital Baskı',
+        specCorners: 'CNC Milimetrik Düz Kesim',
+        specFinish: 'Geniş Depolar & Şantiye Girişleri',
+        specWaterproof: '<i class="bi bi-shield-check me-1"></i> %100 Ağır Dış Ortam Korumalı',
+        title: 'Büyük Boy Dekota İSG Uyarı Levhası (50x70 cm)',
+        desc: 'Şantiye girişleri, yüksek tavanlı depolar ve geniş fabrika sahaları için uzaktan net görünen büyük levha.',
+        fullDesc: '<ul class="ps-3 mb-0"><li><strong>Geniş Görüş Açısı:</strong> 15-20 metre mesafeden dikkat çeken güçlü ikaz tasarımı.</li><li><strong>Sert Dekota Gövde:</strong> Rüzgar ve darbeye karşı mukavemetli yapı.</li><li><strong>Ultra HD Canlı Renkler:</strong> 300 DPI endüstriyel UV baskı kalitesi.</li></ul>'
+    },
+    mega: {
+        name: 'Mega Boy (70x100 cm)',
+        tag: '👑 Dev Ebat Dış Cephe & Otopark Levhası',
+        specPaper: '3mm / 5mm Sert Dekota (Forex)',
+        specLamination: 'Ultra HD UV Dijital Baskı',
+        specCorners: 'CNC Milimetrik Düz Kesim',
+        specFinish: 'Dış Cephe, Nizamiye & Yol Yönlendirme',
+        specWaterproof: '<i class="bi bi-shield-check me-1"></i> %100 Maksimum Mukavemet',
+        title: 'Mega Boy Dekota İSG Uyarı Levhası (70x100 cm)',
+        desc: 'Tesis girişleri, otoparklar, nizamiye ve dış cepheler için tasarlanmış devasa tabela formatında levha.',
+        fullDesc: '<ul class="ps-3 mb-0"><li><strong>Dev 70x100 cm Alan:</strong> Çoklu uyarı piktogramları ve detaylı talimat metinleri için geniş yüzey.</li><li><strong>Hava Şartlarına Tam Direnç:</strong> Yağmur, kar, don ve doğrudan güneş ışığına karşı tam dayanım.</li><li><strong>Profesyonel Kurumsal Görünüm:</strong> Tesisinizin İSG standartlarını en üst seviyeye taşır.</li></ul>'
+    },
+    ozel: {
+        name: 'Özel Ölçü Levha',
+        tag: '📐 İsteğinize Özel Boyut & m² Hesabı',
+        specPaper: '3mm / 5mm Sert Dekota (Forex)',
+        specLamination: 'Ultra HD UV Dijital Baskı',
+        specCorners: 'CNC Özel Ebat Kesim',
+        specFinish: 'Projeye Özel Ölçülendirme',
+        specWaterproof: '<i class="bi bi-shield-check me-1"></i> %100 Proje Standartlarında',
+        title: 'Özel Ölçülü Dekota İSG Uyarı Levhası',
+        desc: 'Alanınıza milimetrik uyan en ve boy değerlerini girerek anında fiyat hesaplayın ve sipariş verin.',
+        fullDesc: '<ul class="ps-3 mb-0"><li><strong>Dinamik m² Fiyatlandırması:</strong> Girilen ölçüye göre anında otomatik fiyat hesaplanır.</li><li><strong>Özel Proje Çözümü:</strong> İstediğiniz ebatta CNC kesim yapılır.</li></ul>'
+    },
+    // 🃏 Kartvizit Paketleri
     ekonomik: {
         name: 'Ekonomik Paket',
         tag: '💧 Mat Selefonlu & Suya Dayanıklı',
@@ -2565,14 +2794,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
             let w = 35;
             let h = 50;
+            let sizeKey = '35x50';
             const activePkg = window.currentSelectedPackageKey || document.querySelector('input[name="selected_package"]:checked')?.value || 'orta';
-            if (activePkg === 'kucuk') { w = 25; h = 35; }
-            else if (activePkg === 'orta') { w = 35; h = 50; }
-            else if (activePkg === 'buyuk') { w = 50; h = 70; }
-            else if (activePkg === 'mega') { w = 70; h = 100; }
+            
+            if (activePkg === 'kucuk') { w = 25; h = 35; sizeKey = '25x35'; }
+            else if (activePkg === 'orta') { w = 35; h = 50; sizeKey = '35x50'; }
+            else if (activePkg === 'buyuk') { w = 50; h = 70; sizeKey = '50x70'; }
+            else if (activePkg === 'mega') { w = 70; h = 100; sizeKey = '70x100'; }
             else if (activePkg === 'ozel') {
                 w = parseFloat(document.getElementById('dekotaWidthCm')?.value) || 40;
                 h = parseFloat(document.getElementById('dekotaHeightCm')?.value) || 60;
+                sizeKey = 'custom';
+            }
+
+            const sizeSelect = document.getElementById('signStudioSizeSelect');
+            const customBox = document.getElementById('signStudioCustomDimsBox');
+            const wInput = document.getElementById('signStudioCustomW');
+            const hInput = document.getElementById('signStudioCustomH');
+
+            if (sizeSelect) sizeSelect.value = sizeKey;
+            if (sizeKey === 'custom') {
+                if (customBox) { customBox.classList.remove('d-none'); customBox.classList.add('d-flex'); }
+                if (wInput) wInput.value = w;
+                if (hInput) hInput.value = h;
+            } else {
+                if (customBox) { customBox.classList.remove('d-flex'); customBox.classList.add('d-none'); }
             }
 
             const dimBadge = document.getElementById('signStudioDimBadge');
@@ -2585,6 +2831,50 @@ document.addEventListener('DOMContentLoaded', function() {
                 SignStudio.renderHeaderPicker('signStudioHeaderPresets');
             }
         });
+    };
+
+    window.onSignStudioSizeSelect = function(val) {
+        const customBox = document.getElementById('signStudioCustomDimsBox');
+        if (val === 'custom') {
+            if (customBox) {
+                customBox.classList.remove('d-none');
+                customBox.classList.add('d-flex');
+            }
+            const w = parseFloat(document.getElementById('signStudioCustomW')?.value) || 40;
+            const h = parseFloat(document.getElementById('signStudioCustomH')?.value) || 60;
+            if (window.SignStudio) {
+                SignStudio.setDimensions(w, h);
+            }
+        } else {
+            if (customBox) {
+                customBox.classList.remove('d-flex');
+                customBox.classList.add('d-none');
+            }
+            const parts = val.split('x');
+            if (parts.length === 2) {
+                const w = parseFloat(parts[0]);
+                const h = parseFloat(parts[1]);
+                if (window.SignStudio) {
+                    SignStudio.setDimensions(w, h);
+                }
+            }
+        }
+    };
+
+    window.onSignStudioCustomDimsChange = function() {
+        const wInput = document.getElementById('signStudioCustomW');
+        const hInput = document.getElementById('signStudioCustomH');
+        let w = parseFloat(wInput ? wInput.value : 40) || 40;
+        let h = parseFloat(hInput ? hInput.value : 60) || 60;
+
+        if (w < 10) w = 10;
+        if (h < 10) h = 10;
+        if (w > 300) w = 300;
+        if (h > 400) h = 400;
+
+        if (window.SignStudio) {
+            SignStudio.setDimensions(w, h);
+        }
     };
 
     window.filterSignVectors = function(term) {
@@ -2629,6 +2919,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const svgData = SignStudio.exportSvg();
         const pngData = SignStudio.exportPngDataUrl();
+        const curW = SignStudio.widthCm;
+        const curH = SignStudio.heightCm;
 
         const svgInput = document.getElementById('selectedDesignSvg');
         const fileInput = document.getElementById('selectedDesignFile');
@@ -2637,6 +2929,33 @@ document.addEventListener('DOMContentLoaded', function() {
         if (svgInput) svgInput.value = svgData;
         if (fileInput) fileInput.value = pngData;
         if (designTypeInput) designTypeInput.value = 'sign_studio';
+
+        // Tasarımda seçilen ebatı ürün sayfasındaki paket ve özel boyut seçenekleriyle senkronize et
+        let matchedPkg = null;
+        if ((curW === 25 && curH === 35) || (curW === 35 && curH === 25)) matchedPkg = 'kucuk';
+        else if ((curW === 35 && curH === 50) || (curW === 50 && curH === 35)) matchedPkg = 'orta';
+        else if ((curW === 50 && curH === 70) || (curW === 70 && curH === 50)) matchedPkg = 'buyuk';
+        else if ((curW === 70 && curH === 100) || (curW === 100 && curH === 70)) matchedPkg = 'mega';
+        else matchedPkg = 'ozel';
+
+        if (matchedPkg === 'ozel') {
+            const ozelRadio = document.getElementById('pkg_ozel') || document.querySelector('input[name="selected_package"][value="ozel"]');
+            if (ozelRadio) {
+                ozelRadio.checked = true;
+                if (typeof onPackageSelect === 'function') onPackageSelect('ozel');
+            }
+            const wInput = document.getElementById('dekotaWidthCm');
+            const hInput = document.getElementById('dekotaHeightCm');
+            if (wInput) wInput.value = curW;
+            if (hInput) hInput.value = curH;
+            if (typeof calculateCustomPrice === 'function') calculateCustomPrice();
+        } else {
+            const pkgRadio = document.getElementById('pkg_' + matchedPkg) || document.querySelector('input[name="selected_package"][value="' + matchedPkg + '"]');
+            if (pkgRadio) {
+                pkgRadio.checked = true;
+                if (typeof onPackageSelect === 'function') onPackageSelect(matchedPkg);
+            }
+        }
 
         const initSelector = document.getElementById('designInitialSelector');
         const savedContainer = document.getElementById('designSavedContainer');
@@ -2655,22 +2974,12 @@ document.addEventListener('DOMContentLoaded', function() {
             badgeEl.innerHTML = '<i class="bi bi-check2-all me-1"></i> Vektörel Baskıya Hazır';
         }
         if (badgeLabel) {
-            badgeLabel.textContent = 'Özel Dekota Levha Tasarımınız Kaydedildi';
+            badgeLabel.textContent = `Özel Dekota Levha Tasarımı (${curW} x ${curH} cm)`;
         }
 
         if (previewCard) {
-            const activePkg = window.currentSelectedPackageKey || document.querySelector('input[name="selected_package"]:checked')?.value || 'orta';
-            let w = 35, h = 50;
-            if (activePkg === 'kucuk') { w = 25; h = 35; }
-            else if (activePkg === 'orta') { w = 35; h = 50; }
-            else if (activePkg === 'buyuk') { w = 50; h = 70; }
-            else if (activePkg === 'mega') { w = 70; h = 100; }
-            else if (activePkg === 'ozel') {
-                w = parseFloat(document.getElementById('dekotaWidthCm')?.value) || 40;
-                h = parseFloat(document.getElementById('dekotaHeightCm')?.value) || 60;
-            }
-            previewCard.style.aspectRatio = `${w} / ${h}`;
-            previewCard.style.maxWidth = (w < h) ? '220px' : '360px';
+            previewCard.style.aspectRatio = `${curW} / ${curH}`;
+            previewCard.style.maxWidth = (curW < curH) ? '220px' : '360px';
         }
 
         if (previewBox) {
@@ -2687,7 +2996,7 @@ document.addEventListener('DOMContentLoaded', function() {
             Swal.fire({
                 icon: 'success',
                 title: 'Tasarımınız Kaydedildi!',
-                text: 'Dekota levha tasarımınız siparişinize eklendi. Şimdi sepete ekleyebilirsiniz.',
+                text: `${curW} x ${curH} cm ölçülerindeki dekota levha tasarımınız siparişinize eklendi.`,
                 confirmButtonText: 'Harika'
             });
         }

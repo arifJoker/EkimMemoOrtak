@@ -102,21 +102,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    $m2UsdPrice = (float)str_replace(',', '.', $_POST['m2_usd_price'] ?? 0.00);
+    $m2UsdPrice = (float)str_replace(',', '.', $_POST['m2_usd_price_3mm'] ?? $_POST['m2_usd_price'] ?? 0.00);
+    $m2UsdPrice3mm = (float)str_replace(',', '.', $_POST['m2_usd_price_3mm'] ?? $m2UsdPrice ?: 14.50);
+    $m2UsdPrice5mm = (float)str_replace(',', '.', $_POST['m2_usd_price_5mm'] ?? 18.50);
+    $m2UsdPrice9mm = (float)str_replace(',', '.', $_POST['m2_usd_price_9mm'] ?? 26.00);
 
     try {
         if ($productId > 0) {
             // Güncelle
             $stmt = $db->prepare("UPDATE products SET 
                 category_id = ?, name = ?, slug = ?, sku = ?, short_description = ?, full_description = ?,
-                base_price = ?, manual_base_price = ?, m2_usd_price = ?, tax_rate = ?, package_presets = ?,
+                base_price = ?, manual_base_price = ?, m2_usd_price = ?, m2_usd_price_3mm = ?, m2_usd_price_5mm = ?, m2_usd_price_9mm = ?, tax_rate = ?, package_presets = ?,
                 allow_online_editor = ?, allow_design_upload = ?, allow_design_service = ?, design_service_price = ?,
                 is_featured = ?, is_urgent = ?, status = ?, featured_image = ?, mockup_image = ?
                 WHERE id = ?");
             
             $stmt->execute([
                 $categoryId, $name, $slug, $sku, $shortDesc, $fullDesc,
-                $basePrice, $basePrice, $m2UsdPrice, $taxRate, $packagePresets,
+                $basePrice, $basePrice, $m2UsdPrice, $m2UsdPrice3mm, $m2UsdPrice5mm, $m2UsdPrice9mm, $taxRate, $packagePresets,
                 $allowOnlineEditor, $allowDesignUpload, $allowDesignService, $designServicePrice,
                 $isFeatured, $isUrgent, $status, $featuredImage, $mockupImage, $productId
             ]);
@@ -126,14 +129,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Yeni Ekle
             $stmt = $db->prepare("INSERT INTO products (
                 category_id, name, slug, sku, short_description, full_description,
-                base_price, manual_base_price, m2_usd_price, tax_rate, package_presets,
+                base_price, manual_base_price, m2_usd_price, m2_usd_price_3mm, m2_usd_price_5mm, m2_usd_price_9mm, tax_rate, package_presets,
                 allow_online_editor, allow_design_upload, allow_design_service, design_service_price,
                 is_featured, is_urgent, status, featured_image, mockup_image
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
             $stmt->execute([
                 $categoryId, $name, $slug, $sku, $shortDesc, $fullDesc,
-                $basePrice, $basePrice, $m2UsdPrice, $taxRate, $packagePresets,
+                $basePrice, $basePrice, $m2UsdPrice, $m2UsdPrice3mm, $m2UsdPrice5mm, $m2UsdPrice9mm, $taxRate, $packagePresets,
                 $allowOnlineEditor, $allowDesignUpload, $allowDesignService, $designServicePrice,
                 $isFeatured, $isUrgent, $status, $featuredImage, $mockupImage
             ]);
@@ -296,35 +299,49 @@ if ($action === 'add' || $action === 'edit') {
                     </div>
 
                     <div class="row g-3 mb-4">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label small fw-bold text-dark">Standart Taban Fiyatı (₺) *</label>
                             <div class="input-group">
                                 <span class="input-group-text fw-bold text-primary">₺</span>
-                                <input type="number" step="0.01" name="base_price" id="basePriceInput" class="form-control form-control-lg fw-bold text-dark" required
-                                       placeholder="900.00"
-                                       value="<?= htmlspecialchars($product['base_price'] ?? '900.00') ?>"
+                                <input type="number" step="0.01" name="base_price" id="basePriceInput" class="form-control fw-bold text-dark" required
+                                       placeholder="95.00"
+                                       value="<?= htmlspecialchars($product['base_price'] ?? '95.00') ?>"
                                        oninput="updatePackagePriceSuggestions(this.value)">
                             </div>
                             <small class="text-muted" style="font-size: 11px;">1.000 adet veya baz paket fiyattır (+KDV).</small>
                         </div>
 
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label small fw-bold text-dark">
-                                <i class="bi bi-currency-dollar text-success me-1"></i>Metrekare Fiyatı ($ / USD)
+                                <i class="bi bi-currency-dollar text-success me-1"></i>3 mm m² ($ USD)
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text bg-success-subtle text-success fw-bold">$</span>
-                                <input type="number" step="0.01" name="m2_usd_price" class="form-control form-control-lg fw-bold" placeholder="Örn: 14.50" value="<?= htmlspecialchars($product['m2_usd_price'] ?? '14.50') ?>">
+                                <input type="number" step="0.01" name="m2_usd_price_3mm" class="form-control fw-bold" placeholder="14.50" value="<?= htmlspecialchars($product['m2_usd_price_3mm'] ?? $product['m2_usd_price'] ?? '14.50') ?>">
                             </div>
-                            <small class="text-muted" style="font-size: 11px;">1 USD ≈ <?= number_format(Helper::getUsdRate(), 2, ',', '.') ?> ₺ (Canlı Kur)</small>
+                            <small class="text-muted" style="font-size: 10.5px;">1 USD ≈ <?= number_format(Helper::getUsdRate(), 2, ',', '.') ?> ₺</small>
                         </div>
 
-                        <div class="col-md-4">
-                            <label class="form-label small fw-bold text-dark">KDV Oranı (%)</label>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold text-dark">
+                                <i class="bi bi-currency-dollar text-primary me-1"></i>5 mm m² ($ USD)
+                            </label>
                             <div class="input-group">
-                                <input type="number" step="1" name="tax_rate" class="form-control form-control-lg" value="<?= htmlspecialchars($product['tax_rate'] ?? '20.00') ?>">
-                                <span class="input-group-text">%</span>
+                                <span class="input-group-text bg-primary-subtle text-primary fw-bold">$</span>
+                                <input type="number" step="0.01" name="m2_usd_price_5mm" class="form-control fw-bold" placeholder="18.50" value="<?= htmlspecialchars($product['m2_usd_price_5mm'] ?? '18.50') ?>">
                             </div>
+                            <small class="text-muted" style="font-size: 10.5px;">5mm Sert Dekota</small>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold text-dark">
+                                <i class="bi bi-currency-dollar text-warning me-1"></i>9 mm m² ($ USD)
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-warning-subtle text-dark fw-bold">$</span>
+                                <input type="number" step="0.01" name="m2_usd_price_9mm" class="form-control fw-bold" placeholder="26.00" value="<?= htmlspecialchars($product['m2_usd_price_9mm'] ?? '26.00') ?>">
+                            </div>
+                            <small class="text-muted" style="font-size: 10.5px;">9mm Ekstra Ağır Dekota</small>
                         </div>
                     </div>
 
