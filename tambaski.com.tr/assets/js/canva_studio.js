@@ -597,11 +597,17 @@ const CanvaStudio = {
         let frontSvg = (this.sidesData && this.sidesData.front && this.sidesData.front.svg) || currentSvg || window.savedFrontSvg || document.getElementById('selectedDesignSvg')?.value || '';
         let backSvg = (this.sidesData && this.sidesData.back && this.sidesData.back.svg) || window.savedBackSvg || document.getElementById('selectedDesignBackSvg')?.value || '';
 
-        // SVG responsive fit formatter
+        // SVG responsive fit formatter (Sıfır kenarlık ve %100 tam oturtma)
         const prepareSvg = (svg) => {
             if (!svg) return '';
-            let s = svg.replace(/<svg\b([^>]*)>/i, '<svg$1 style="width:100%;height:100%;object-fit:fill;display:block;" preserveAspectRatio="none">');
-            s = s.replace(/(\s+width="[^"]*")|(\s+height="[^"]*")/i, '');
+            let s = svg.replace(/<svg\b([^>]*)>/i, (match, attrs) => {
+                let cleanAttrs = attrs
+                    .replace(/\bwidth="[^"]*"/gi, '')
+                    .replace(/\bheight="[^"]*"/gi, '')
+                    .replace(/\bpreserveAspectRatio="[^"]*"/gi, '')
+                    .replace(/\bstyle="[^"]*"/gi, '');
+                return `<svg ${cleanAttrs} width="100%" height="100%" preserveAspectRatio="none" style="width:100%;height:100%;display:block;margin:0;padding:0;border:none;background:transparent;">`;
+            });
             return s;
         };
 
@@ -609,8 +615,16 @@ const CanvaStudio = {
         const renderedBack = prepareSvg(backSvg) || (this.isDoubleSided && backSvg ? '' : '<div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-muted" style="background:#f8fafc; font-size:11px;"><i class="bi bi-shield-check text-primary mb-1 fs-5"></i><span class="fw-bold">TamBaskı Kurumsal</span><small class="text-muted" style="font-size:9.5px;">Tek Yön Baskı (Arka Yüz Boş)</small></div>');
 
         // 1. Masaüstü Gerçekçi Fotoğraf Mockup'ını Doldur
-        if (deskFront) deskFront.innerHTML = renderedFront;
-        if (deskBack) deskBack.innerHTML = renderedBack;
+        if (deskFront) {
+            deskFront.style.background = 'transparent';
+            deskFront.style.border = 'none';
+            deskFront.innerHTML = renderedFront;
+        }
+        if (deskBack) {
+            deskBack.style.background = 'transparent';
+            deskBack.style.border = 'none';
+            deskBack.innerHTML = renderedBack;
+        }
 
         // 2. 3D Dönen Kart Sahnesini Doldur
         if (frontContainer) frontContainer.innerHTML = renderedFront;

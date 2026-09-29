@@ -56,14 +56,14 @@ require_once __DIR__ . '/includes/header.php';
                 <!-- 📸 ÜRÜN GÖRSELİ & GALERİ -->
                 <!-- ========================================================================= -->
                 <?php
-                $mainProductImage = !empty($product['image']) 
-                    ? (str_starts_with($product['image'], 'http') ? $product['image'] : SITE_URL . '/' . $product['image']) 
-                    : (!empty($product['mockup_image']) 
-                        ? (str_starts_with($product['mockup_image'], 'http') ? $product['mockup_image'] : SITE_URL . '/' . $product['mockup_image']) 
-                        : SITE_URL . '/uploads/mockups/tambaski_kartvizit_vip_mockup.jpg');
+                $mainProductImage = SITE_URL . '/uploads/mockups/tambaski_kartvizit_desk_mockup.jpg';
                 
-                $galleryImages = [];
-                if (!empty($mainProductImage)) $galleryImages[] = $mainProductImage;
+                $galleryImages = [
+                    SITE_URL . '/uploads/mockups/tambaski_kartvizit_desk_mockup.jpg',
+                    SITE_URL . '/uploads/mockups/tambaski_kartvizit_hand_mockup.jpg',
+                    SITE_URL . '/uploads/mockups/tambaski_kartvizit_vip_mockup.jpg'
+                ];
+                
                 if (!empty($product['gallery_array'])) {
                     foreach ($product['gallery_array'] as $gImg) {
                         $full = str_starts_with($gImg, 'http') ? $gImg : SITE_URL . '/' . $gImg;
@@ -894,232 +894,30 @@ require_once __DIR__ . '/includes/header.php';
                     <input type="hidden" name="custom_height" id="customHeight" value="<?= $product['standard_height'] ?? 5.2 ?>">
 
                     <!-- ========================================================================= -->
-                    <!-- 3. TASARIM TERCİHİ (1. Kendin Tasarla | 2. Hazır Şablon | 3. Dosya Yükle | 4. Grafik Desteği) -->
+                    <!-- 3. TASARIM TERCİHİ (Sadece Tek Buton & Tıklanınca Popup Modal Açılır) -->
                     <!-- ========================================================================= -->
                     <div class="design-choice-box" id="designSectionBox">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <label class="fw-bold small mb-0 text-dark" id="designSectionTitle"><i class="bi bi-palette text-primary me-1"></i> 3. Tasarım Yöntemini Seçin</label>
+                            <label class="fw-bold small mb-0 text-dark" id="designSectionTitle"><i class="bi bi-palette text-primary me-1"></i> 3. Tasarım Tercihi</label>
                             <span class="badge bg-primary-subtle text-primary shadow-2xs" id="designSectionStatusBadge" style="font-size: 10px;">
                                 <i class="bi bi-stars me-1"></i> İnteraktif Tasarım &amp; Şablonlar
                             </span>
                         </div>
                         
-                        <!-- 1. HENÜZ TASARIM OLUŞTURULMAMIŞKEN GÖRÜNEN SEÇİCİ PANEL -->
+                        <!-- 1. HENÜZ TASARIM OLUŞTURULMAMIŞKEN GÖRÜNEN TEK ANA BUTON -->
                         <div id="designInitialSelector">
-                            
-                            <!-- 🚀 TEK ANA BUTON: TASARLAMAYA BAŞLA -->
-                            <div class="mb-3">
-                                <button type="button" class="btn btn-danger w-100 py-3 fw-bold rounded-pill shadow-sm d-flex align-items-center justify-content-center gap-2" id="btnMainStartDesign" onclick="openCanvaStudio()" style="background: linear-gradient(135deg, #f15a24, #e11d48); border: none; font-size: 15.5px;">
+                            <div class="p-3 rounded-4 bg-white border shadow-2xs text-center">
+                                <button type="button" class="btn btn-danger w-100 py-3 fw-bold rounded-pill shadow-sm d-flex align-items-center justify-content-center gap-2" id="btnMainStartDesign" onclick="openDesignChoiceModal()" style="background: linear-gradient(135deg, #f15a24, #e11d48); border: none; font-size: 16px;">
                                     <i class="bi bi-palette-fill fs-5"></i>
                                     <span>🎨 Tasarlamaya Başla</span>
                                 </button>
-                            </div>
-
-                            <!-- 2 SEÇENEK: HAZIR ŞABLON KULLAN / KENDİ GÖRSELİM VAR -->
-                            <div class="row g-2 mb-3">
-                                <div class="col-12 col-sm-6">
-                                    <div class="card h-100 border-2 rounded-3 p-3 cursor-pointer design-option-card" id="optReadyTemplate" onclick="selectDesignOption('template')" style="transition: all 0.2s ease; border-color: #f59e0b; background: #fffdf5;">
-                                        <div class="d-flex align-items-center gap-2.5">
-                                            <div class="rounded-3 p-2 text-white shadow-2xs" style="background: linear-gradient(135deg, #f59e0b, #d97706); width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                                <i class="bi bi-grid-3x3-gap-fill fs-5"></i>
-                                            </div>
-                                            <div>
-                                                <div class="fw-bold text-dark small">🎨 Hazır Şablon Kullanarak Tasarla</div>
-                                                <div class="text-muted" style="font-size: 10.5px;">Mesleğinize özel şablonu seçip düzenleyin</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-sm-6">
-                                    <div class="card h-100 border rounded-3 p-3 cursor-pointer design-option-card" id="optCustomUpload" onclick="selectDesignOption('upload')" style="transition: all 0.2s ease; border-color: #cbd5e1; background: #ffffff;">
-                                        <div class="d-flex align-items-center gap-2.5">
-                                            <div class="rounded-3 p-2 text-white shadow-2xs" style="background: linear-gradient(135deg, #0284c7, #0369a1); width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                                <i class="bi bi-cloud-arrow-up-fill fs-5"></i>
-                                            </div>
-                                            <div>
-                                                <div class="fw-bold text-dark small">📤 Kendi Görselim Var (Baskı Dosyam Hazır)</div>
-                                                <div class="text-muted" style="font-size: 10.5px;">PDF, AI, PSD veya baskı görselinizi yükleyin</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 📑 SEÇENEK 1: HAZIR ŞABLON KULLAN (HIZLI BİLGİ GİRİŞİ & MESLEK SEÇİMİ) -->
-                            <div id="tabTemplate" class="design-tab-pane" style="display: block;">
-                                <div class="p-3 rounded-4 border bg-white mb-2 shadow-2xs" style="border-color: #fef08a !important; background: linear-gradient(180deg, #fefce8 0%, #ffffff 100%) !important;">
-                                    <div class="d-flex align-items-center gap-2 mb-2 pb-2 border-bottom">
-                                        <div class="rounded-3 p-2 text-white shadow-xs" style="background: linear-gradient(135deg, #eab308, #ca8a04); width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
-                                            <i class="bi bi-briefcase-fill fs-5"></i>
-                                        </div>
-                                        <div>
-                                            <div class="fw-bold text-dark small lh-1">Meslek &amp; Sektör Şablonları</div>
-                                            <span class="text-muted" style="font-size: 10.5px;">Bilgilerinizi 1 kez girin; tüm şablonlar otomatik hazırlansın, baştan yazmayın!</span>
-                                        </div>
-                                    </div>
-
-                                    <!-- 🚀 HIZLI BİLGİ DOLDURMA KUTUCUĞU -->
-                                    <div class="card border-0 rounded-3 shadow-2xs mb-3" style="background: #ffffff; border: 1px solid #fde047 !important;">
-                                        <div class="card-header bg-warning bg-opacity-10 py-2 px-3 border-bottom d-flex align-items-center justify-content-between">
-                                            <span class="fw-bold text-dark small">
-                                                <i class="bi bi-lightning-charge-fill text-warning me-1"></i> Hızlı Bilgi Girişi (Şablonlara Otomatik Uygulanır)
-                                            </span>
-                                            <button type="button" class="btn btn-2xs btn-outline-dark rounded-pill py-0 px-2" onclick="resetToTamBaskiCorporateInfo()" title="TamBaskı Kurumsal Kimliğini Yükle" style="font-size: 10px;">
-                                                <i class="bi bi-building me-1"></i> TamBaskı Bilgileri
-                                            </button>
-                                        </div>
-                                        <div class="card-body p-2 p-md-3">
-                                            <div class="row g-2">
-                                                <div class="col-6">
-                                                    <label class="form-label text-muted mb-0" style="font-size: 10.5px; font-weight: 600;">Ad Soyad</label>
-                                                    <input type="text" id="quickCardName" class="form-control form-control-sm rounded-2" placeholder="Örn: Arif Uz" oninput="onQuickInfoInput()">
-                                                </div>
-                                                <div class="col-6">
-                                                    <label class="form-label text-muted mb-0" style="font-size: 10.5px; font-weight: 600;">Unvan / Görev</label>
-                                                    <input type="text" id="quickCardTitle" class="form-control form-control-sm rounded-2" placeholder="Örn: Yönetici" oninput="onQuickInfoInput()">
-                                                </div>
-                                                <div class="col-6">
-                                                    <label class="form-label text-muted mb-0" style="font-size: 10.5px; font-weight: 600;">Firma / Marka</label>
-                                                    <input type="text" id="quickCardCompany" class="form-control form-control-sm rounded-2" placeholder="Örn: TamBaskı" oninput="onQuickInfoInput()">
-                                                </div>
-                                                <div class="col-6">
-                                                    <label class="form-label text-muted mb-0" style="font-size: 10.5px; font-weight: 600;">Telefon</label>
-                                                    <input type="text" id="quickCardPhone" class="form-control form-control-sm rounded-2" placeholder="Örn: 0850 308 00 00" oninput="onQuickInfoInput()">
-                                                </div>
-                                                <div class="col-6">
-                                                    <label class="form-label text-muted mb-0" style="font-size: 10.5px; font-weight: 600;">E-Posta</label>
-                                                    <input type="email" id="quickCardMail" class="form-control form-control-sm rounded-2" placeholder="Örn: info@tambaski.com.tr" oninput="onQuickInfoInput()">
-                                                </div>
-                                                <div class="col-6">
-                                                    <label class="form-label text-muted mb-0" style="font-size: 10.5px; font-weight: 600;">Web Sitesi</label>
-                                                    <input type="text" id="quickCardWeb" class="form-control form-control-sm rounded-2" placeholder="Örn: tambaski.com.tr" oninput="onQuickInfoInput()">
-                                                </div>
-                                                <div class="col-12">
-                                                    <label class="form-label text-muted mb-0" style="font-size: 10.5px; font-weight: 600;">Adres / Şehir</label>
-                                                    <input type="text" id="quickCardAddr" class="form-control form-control-sm rounded-2" placeholder="Örn: Topkapı Matbaacılar Sitesi Zeytinburnu / İstanbul" oninput="onQuickInfoInput()">
-                                                </div>
-                                            </div>
-                                            <div class="d-flex align-items-center justify-content-between mt-2 pt-2 border-top">
-                                                <span class="text-muted" style="font-size: 10px;">
-                                                    <i class="bi bi-shield-check text-success me-1"></i> Bilgileriniz tarayıcınızda saklanır.
-                                                </span>
-                                                <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 py-1 fw-bold shadow-2xs" onclick="applyQuickCardInfo()" style="font-size: 11px;">
-                                                    <i class="bi bi-check2-circle me-1"></i> Şablonları Güncelle
-                                                </button>
-                                            </div>
-                                            <div id="quickCardStatusNotice" class="text-success small fw-semibold mt-1" style="display: none; font-size: 10.5px;">
-                                                <i class="bi bi-check-circle-fill me-1"></i> Şablonlar girdiğiniz kurumsal kimlik bilgileriyle güncellendi!
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Sektör Seçici Dropdown -->
-                                    <div class="mb-3">
-                                        <label class="form-label small fw-bold text-dark mb-1 d-flex justify-content-between align-items-center">
-                                            <span><i class="bi bi-filter-circle text-primary me-1"></i> Sektör / Meslek Filtresi:</span>
-                                            <span class="badge bg-light text-muted border" id="productTemplatesCountBadge">Yükleniyor...</span>
-                                        </label>
-                                        <select class="form-select form-select-sm rounded-3 fw-semibold border-secondary shadow-2xs" id="industrySelectDropdown" onchange="onIndustrySelectChange(this.value)">
-                                            <option value="all">🌟 Tüm Meslekler &amp; Sektörler (Tümü)</option>
-                                            <option value="kurumsal">🏢 Genel Kurumsal &amp; İş Dünyası</option>
-                                            <option value="lüks">💎 VIP / Lüks &amp; Altın Varak</option>
-                                            <option value="hukuk">⚖️ Hukuk, Avukatlık &amp; Danışmanlık</option>
-                                            <option value="sağlık">🩺 Sağlık, Tıp, Doktor &amp; Diş Hekimi</option>
-                                            <option value="mimarlık">📐 İnşaat, Mimarlık &amp; Mühendislik</option>
-                                            <option value="emlak">🏡 Gayrimenkul, Emlak &amp; Değerleme</option>
-                                            <option value="teknoloji">💻 Teknoloji, Yazılım, Ajans &amp; Bilişim</option>
-                                            <option value="gıda">☕ Restoran, Kafe, Fırın &amp; Gıda</option>
-                                            <option value="güzellik">✂️ Güzellik, Kuaför, Berber &amp; Spa</option>
-                                            <option value="otomotiv">🚗 Otomotiv, Araç Servisi &amp; Nakliyat</option>
-                                            <option value="finans">💼 Finans, Muhasebe &amp; Sigorta</option>
-                                            <option value="eğitim">🎓 Eğitim, Kurs, Okul &amp; Akademi</option>
-                                        </select>
-                                    </div>
-
-                                    <!-- Şablonlar Grid Container -->
-                                    <div id="templatesListContainer">
-                                        <div class="row g-2 mb-2" id="dynamicTemplatesRow">
-                                            <!-- JavaScript ile canlı basılacak -->
-                                        </div>
-
-                                        <!-- Boş Durum / Özel Tasarla Butonu -->
-                                        <div id="noTemplatesNoticeBox" class="p-3 rounded-3 bg-white border text-center my-1" style="display: none;">
-                                            <div class="mb-2 text-warning"><i class="bi bi-palette-fill fs-3"></i></div>
-                                            <h6 class="fw-bold text-dark mb-1">Özel Tasarım Başlat</h6>
-                                            <p class="text-muted small mb-3" style="font-size: 11px;">
-                                                Dilediğiniz şablonu 'Kendin Tasarla' editörümüzde açıp logonuzu ve metinlerinizi özgürce düzenleyebilirsiniz.
-                                            </p>
-                                            <button type="button" class="btn btn-sm btn-warning text-dark fw-bold rounded-pill px-4 py-2 shadow-xs" onclick="openCanvaStudio()">
-                                                <i class="bi bi-palette-fill me-1 text-danger"></i> Editörde Tasarlamaya Başla
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 📤 TAB 3: DOSYA YÜKLE (BASKI DOSYAM HAZIR) -->
-                            <div id="tabUpload" class="design-tab-pane" style="display: none;">
-                                <div class="p-3 rounded-4 border bg-white mb-2 shadow-2xs" style="border-color: #bae6fd !important; background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%) !important;">
-                                    <div class="d-flex align-items-center gap-2 mb-2 pb-2 border-bottom">
-                                        <div class="rounded-3 p-2 text-white shadow-xs" style="background: linear-gradient(135deg, #0284c7, #0369a1); width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
-                                            <i class="bi bi-cloud-arrow-up-fill fs-5"></i>
-                                        </div>
-                                        <div>
-                                            <div class="fw-bold text-dark small lh-1">Baskı Dosyası Yükleme</div>
-                                            <span class="text-muted" style="font-size: 10.5px;">Hazırladığınız PDF, AI, PSD veya yüksek çözünürlüklü baskı dosyanızı ekleyin</span>
-                                        </div>
-                                    </div>
-
-                                    <!-- Sürükle Bırak Kutusu -->
-                                    <div class="dropzone-box text-center p-4 rounded-3 border-2 border-dashed my-2 cursor-pointer" id="dropzoneBox" style="background: #f8fafc; border-color: #38bdf8; transition: all 0.2s ease;">
-                                        <i class="bi bi-cloud-arrow-up text-primary dropzone-icon" style="font-size: 38px;"></i>
-                                        <div class="fw-bold text-dark small mt-2">Baskı Dosyanızı Buraya Sürükleyin veya Tıklayın</div>
-                                        <div class="text-muted" style="font-size: 11px;">PDF, AI, PSD, CDR, EPS, TIF, PNG, JPG (Maks. 100 MB)</div>
-                                        <input type="file" id="fileUploadInput" style="display: none;" accept=".pdf,.ai,.psd,.cdr,.eps,.tif,.tiff,.jpg,.jpeg,.png">
-                                        <div id="uploadStatus" class="mt-2 small fw-bold" style="display: none;"></div>
-                                    </div>
-
-                                    <div class="p-2 bg-light rounded-3 border small text-muted d-flex align-items-center gap-2" style="font-size: 11px;">
-                                        <i class="bi bi-shield-check text-success fs-5"></i>
-                                        <span>Yüklenen tüm dosyalar üretime alınmadan önce grafikerlerimiz tarafından CMYK renk, çözünürlük (300 DPI) ve kesim payı açısından <strong>ücretsiz kontrol edilir</strong>.</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 💬 TAB 4: GRAFİK TASARIM DESTEĞİ & WHATSAPP DANIŞMA -->
-                            <div id="tabSupport" class="design-tab-pane" style="display: none;">
-                                <div class="p-3 rounded-4 border bg-white mb-2 shadow-2xs" style="border-color: #bbf7d0 !important; background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%) !important;">
-                                    <div class="d-flex align-items-center gap-2 mb-2 pb-2 border-bottom">
-                                        <div class="rounded-3 p-2 text-white shadow-xs" style="background: linear-gradient(135deg, #16a34a, #22c55e); width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
-                                            <i class="bi bi-whatsapp fs-5"></i>
-                                        </div>
-                                        <div>
-                                            <div class="fw-bold text-dark small lh-1">Grafik Tasarım &amp; WhatsApp Destek Hattı</div>
-                                            <span class="text-muted" style="font-size: 10.5px;">Baskı öncesi profesyonel grafikerlerimizle birebir görüşün</span>
-                                        </div>
-                                    </div>
-                                    <p class="small text-muted mb-3" style="font-size: 11.5px; line-height: 1.4;">
-                                        Tasarımınız hazır değilse veya özel bir çalışma istiyorsanız; logonuzu, metinlerinizi ve isteklerinizi WhatsApp üzerinden grafiker ekibimize doğrudan iletebilirsiniz. Baskı öncesi onayınız alınır.
-                                    </p>
-
-                                    <!-- WhatsApp Doğrudan İletişim Butonu -->
-                                    <a href="https://wa.me/<?= Helper::getSetting('site_whatsapp', '905550000000') ?>?text=Merhaba,%20<?= urlencode($product['name']) ?>%20urunu%20icin%20grafik%20tasarim%20destegi%20almak%20istiyorum." target="_blank" class="btn btn-success w-100 py-2 fw-bold rounded-pill shadow-xs d-flex align-items-center justify-content-center gap-2 mb-3" style="background: #25D366; border: none;">
-                                        <i class="bi bi-whatsapp fs-5"></i>
-                                        <span>Grafikerimize WhatsApp'tan Yazın</span>
-                                    </a>
-
-                                    <?php if ($product['allow_design_service']): ?>
-                                        <div class="p-2 bg-white rounded-3 border mb-2">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="includeDesignService" name="include_design_service" value="1">
-                                                <label class="form-check-label small fw-bold text-dark" for="includeDesignService">
-                                                    <i class="bi bi-magic text-warning me-1"></i> Profesyonel Grafik Tasarım Hizmetini Siparişime Ekle (+<?= Helper::formatPrice($product['design_service_price']) ?>)
-                                                </label>
-                                            </div>
-                                        </div>
-                                    <?php endif; ?>
-
-                                    <textarea name="design_notes" id="designNotesArea" class="form-control form-control-sm" rows="2" placeholder="Sipariş notlarınız (Kartta yazacak isim, unvan, adres veya renk tercihleriniz)..."></textarea>
+                                
+                                <div class="d-flex align-items-center justify-content-center gap-2 flex-wrap mt-2 text-muted" style="font-size: 11px;">
+                                    <span class="d-inline-flex align-items-center gap-1"><i class="bi bi-magic text-warning"></i> 100+ Hazır Şablon</span>
+                                    <span>•</span>
+                                    <span class="d-inline-flex align-items-center gap-1"><i class="bi bi-cloud-arrow-up text-primary"></i> Kendi Görselini Yükle</span>
+                                    <span>•</span>
+                                    <span class="d-inline-flex align-items-center gap-1"><i class="bi bi-whatsapp text-success"></i> Grafiker Desteği</span>
                                 </div>
                             </div>
                         </div>
@@ -1264,8 +1062,148 @@ require_once __DIR__ . '/includes/header.php';
 </div>
 
 <!-- ========================================================================= -->
-<!-- ONLINE VEKTÖREL SVG DÜZENLEYİCİ MODAL -->
+<!-- 🎨 TASARIM YÖNTEMİ SEÇİM MODALI (POPUP) -->
 <!-- ========================================================================= -->
+<div class="modal fade" id="designChoiceModal" tabindex="-1" aria-labelledby="designChoiceModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-2xl rounded-4 overflow-hidden">
+            <!-- Modal Header -->
+            <div class="modal-header bg-dark text-white px-4 py-3 border-0 d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-danger p-2 rounded-circle shadow-xs"><i class="bi bi-palette-fill fs-6"></i></span>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0" id="designChoiceModalTitle">Tasarım Yönteminizi Seçin</h5>
+                        <small class="text-white-50" style="font-size: 11.5px;">Baskı siparişinizi hangi yöntemle hazırlamak istersiniz?</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body p-3 p-md-4 bg-light">
+                
+                <!-- Ana Seçenek Kartları (3 Yöntem) -->
+                <div id="choiceMainView">
+                    <div class="row g-3">
+                        
+                        <!-- 1. Seçenek: Hazır Şablon ile Online Tasarla -->
+                        <div class="col-12 col-md-4">
+                            <div class="card h-100 border-2 rounded-4 p-3 shadow-2xs hover-lift d-flex flex-column text-center position-relative cursor-pointer" onclick="handleDesignChoice('template')" style="border-color: #f59e0b; background: linear-gradient(180deg, #fffbeb 0%, #ffffff 100%); transition: all 0.2s ease;">
+                                <span class="position-absolute top-0 end-0 translate-middle-y badge bg-warning text-dark fw-bold rounded-pill shadow-xs" style="font-size: 10px; right: 12px;">En Kolay &amp; Hızlı</span>
+                                <div class="my-2 d-flex justify-content-center">
+                                    <div class="rounded-4 p-3 text-white shadow-sm" style="background: linear-gradient(135deg, #f59e0b, #d97706); width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="bi bi-grid-3x3-gap-fill fs-3"></i>
+                                    </div>
+                                </div>
+                                <h6 class="fw-bold text-dark mb-1">Hazır Şablon ile Tasarla</h6>
+                                <p class="text-muted small mb-3 flex-grow-1" style="font-size: 11.5px; line-height: 1.35;">
+                                    Mesleğinize özel 100+ şablondan birini seçin; isim, unvan ve logonuzu kolayca düzenleyin.
+                                </p>
+                                <button type="button" class="btn btn-warning text-dark fw-bold rounded-pill w-100 py-2 shadow-xs" style="font-size: 12px;">
+                                    <i class="bi bi-palette me-1"></i> Şablonları Aç
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 2. Seçenek: Kendi Görselim Var (Baskı Dosyası Yükle) -->
+                        <div class="col-12 col-md-4">
+                            <div class="card h-100 border rounded-4 p-3 shadow-2xs hover-lift d-flex flex-column text-center position-relative cursor-pointer" onclick="handleDesignChoice('upload')" style="border-color: #0284c7; background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%); transition: all 0.2s ease;">
+                                <span class="position-absolute top-0 end-0 translate-middle-y badge bg-info text-white fw-bold rounded-pill shadow-xs" style="font-size: 10px; right: 12px;">PDF / AI / PSD</span>
+                                <div class="my-2 d-flex justify-content-center">
+                                    <div class="rounded-4 p-3 text-white shadow-sm" style="background: linear-gradient(135deg, #0284c7, #0369a1); width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="bi bi-cloud-arrow-up-fill fs-3"></i>
+                                    </div>
+                                </div>
+                                <h6 class="fw-bold text-dark mb-1">Kendi Görselim Var</h6>
+                                <p class="text-muted small mb-3 flex-grow-1" style="font-size: 11.5px; line-height: 1.35;">
+                                    Hazır tasarım dosyanızı yükleyin. CMYK renk ve kesim payı kontrolü ücretsiz yapılır.
+                                </p>
+                                <button type="button" class="btn btn-primary fw-bold rounded-pill w-100 py-2 shadow-xs" style="font-size: 12px;">
+                                    <i class="bi bi-cloud-upload me-1"></i> Dosya Yükle
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 3. Seçenek: Grafiker Desteği İstiyorum -->
+                        <div class="col-12 col-md-4">
+                            <div class="card h-100 border rounded-4 p-3 shadow-2xs hover-lift d-flex flex-column text-center position-relative cursor-pointer" onclick="handleDesignChoice('support')" style="border-color: #16a34a; background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%); transition: all 0.2s ease;">
+                                <span class="position-absolute top-0 end-0 translate-middle-y badge bg-success text-white fw-bold rounded-pill shadow-xs" style="font-size: 10px; right: 12px;">Baskı Öncesi Onay</span>
+                                <div class="my-2 d-flex justify-content-center">
+                                    <div class="rounded-4 p-3 text-white shadow-sm" style="background: linear-gradient(135deg, #16a34a, #15803d); width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="bi bi-whatsapp fs-3"></i>
+                                    </div>
+                                </div>
+                                <h6 class="fw-bold text-dark mb-1">Grafiker Desteği</h6>
+                                <p class="text-muted small mb-3 flex-grow-1" style="font-size: 11.5px; line-height: 1.35;">
+                                    Tasarımınız yoksa profesyonel ekibimiz hazırlasın; WhatsApp üzerinden onay alın.
+                                </p>
+                                <button type="button" class="btn btn-success fw-bold rounded-pill w-100 py-2 shadow-xs" style="font-size: 12px;">
+                                    <i class="bi bi-headset me-1"></i> Destek Al
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- 📤 Modal İçi: Dosya Yükleme Paneli (Upload Seçilince Açılır) -->
+                <div id="choiceUploadView" style="display: none;">
+                    <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="showChoiceMainView()">
+                            <i class="bi bi-arrow-left me-1"></i> Seçeneklere Dön
+                        </button>
+                        <span class="fw-bold text-dark small"><i class="bi bi-cloud-arrow-up-fill text-primary me-1"></i> Baskı Dosyası Yükleme</span>
+                    </div>
+
+                    <div class="dropzone-box text-center p-4 rounded-4 border-2 border-dashed bg-white cursor-pointer" id="modalDropzoneBox" style="border-color: #38bdf8; transition: all 0.2s ease;">
+                        <i class="bi bi-cloud-arrow-up text-primary dropzone-icon" style="font-size: 42px;"></i>
+                        <div class="fw-bold text-dark mt-2">Baskı Dosyanızı Buraya Sürükleyin veya Tıklayın</div>
+                        <div class="text-muted small" style="font-size: 11.5px;">PDF, AI, PSD, CDR, EPS, TIF, PNG, JPG (Maks. 100 MB)</div>
+                        <input type="file" id="modalFileUploadInput" style="display: none;" accept=".pdf,.ai,.psd,.cdr,.eps,.tif,.tiff,.jpg,.jpeg,.png">
+                        <div id="modalUploadStatus" class="mt-2 small fw-bold" style="display: none;"></div>
+                    </div>
+
+                    <div class="p-3 bg-white rounded-3 border small text-muted d-flex align-items-center gap-2 mt-3" style="font-size: 11px;">
+                        <i class="bi bi-shield-check text-success fs-4"></i>
+                        <span>Yüklediğiniz dosya üretime alınmadan önce grafikerlerimiz tarafından CMYK renk formatı, çözünürlük (300 DPI) ve kesim payı açısından <strong>ücretsiz kontrol edilir</strong>.</span>
+                    </div>
+                </div>
+
+                <!-- 💬 Modal İçi: Grafiker Desteği Paneli (Support Seçilince Açılır) -->
+                <div id="choiceSupportView" style="display: none;">
+                    <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="showChoiceMainView()">
+                            <i class="bi bi-arrow-left me-1"></i> Seçeneklere Dön
+                        </button>
+                        <span class="fw-bold text-dark small"><i class="bi bi-whatsapp text-success me-1"></i> Grafiker Canlı Destek Hattı</span>
+                    </div>
+
+                    <div class="p-3 bg-white rounded-4 border mb-3">
+                        <p class="small text-muted mb-3" style="font-size: 12px; line-height: 1.45;">
+                            Tasarımınız hazır değilse; kartvizitte yazmasını istediğiniz bilgileri, firma logonuzu veya örnek beğendiğiniz bir görseli WhatsApp hattımız üzerinden grafiker ekibimize doğrudan gönderebilirsiniz. Baskı öncesi dijital onayınız alınır.
+                        </p>
+                        
+                        <a href="https://wa.me/<?= Helper::getSetting('site_whatsapp', '905550000000') ?>?text=<?= urlencode('Merhaba, ' . $product['name'] . ' için grafik tasarım desteği almak istiyorum.') ?>" target="_blank" class="btn btn-success w-100 py-3 fw-bold rounded-pill shadow-sm d-flex align-items-center justify-content-center gap-2 mb-3" style="background: #25D366; border: none; font-size: 15px;">
+                            <i class="bi bi-whatsapp fs-5"></i>
+                            <span>Grafikerimize WhatsApp'tan Yazın</span>
+                        </a>
+
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold text-dark mb-1">Sipariş Notlarınız (İsteğe Bağlı):</label>
+                            <textarea id="modalDesignNotesArea" class="form-control form-control-sm rounded-3" rows="2" placeholder="Kartvizitte yazacak isim, unvan, adres veya renk tercihleriniz..."></textarea>
+                        </div>
+
+                        <button type="button" class="btn btn-dark w-100 rounded-pill py-2 fw-bold small" onclick="applySupportOptionAndClose()">
+                            <i class="bi bi-check2-circle me-1"></i> Grafiker Desteğiyle Siparişe Devam Et
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- ========================================================================= -->
 <!-- 🎨 CANVA-STYLE INTERACTIVE VECTOR DESIGN STUDIO MODAL -->
 <!-- ========================================================================= -->
@@ -1781,8 +1719,8 @@ require_once __DIR__ . '/includes/header.php';
                 <div class="d-flex align-items-center gap-2">
                     <span class="badge bg-primary-subtle text-primary p-2 rounded-circle"><i class="bi bi-box-seam fs-6"></i></span>
                     <div>
-                        <h6 class="modal-title fw-bold text-white mb-0">Canlı Baskı &amp; Stüdyo Mockup Önizleme</h6>
-                        <small class="text-secondary" style="font-size: 11px;">Tasarımınızı gerçekçi masaüstü stüdyo fotoğrafı ve 3D alanda inceleyin</small>
+                        <h6 class="modal-title fw-bold text-white mb-0">Canlı Baskı &amp; Gerçekçi Mockup Önizleme</h6>
+                        <small class="text-secondary" style="font-size: 11px;">Tasarımınızı stüdyo fotoğrafı ve 3D alanda inceleyin</small>
                     </div>
                 </div>
                 
@@ -1807,7 +1745,7 @@ require_once __DIR__ . '/includes/header.php';
                     <div class="position-relative shadow-2xl rounded-4 overflow-hidden border border-secondary border-opacity-25" style="width: 100%; max-width: 580px; aspect-ratio: 1/1; background: url('<?= SITE_URL ?>/uploads/mockups/mockup_desk_dual_base.jpg') center/cover no-repeat; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7);">
                         
                         <!-- Üst Kart (Ön Yüz) -->
-                        <div id="deskMockupFront" class="position-absolute shadow-sm overflow-hidden d-flex align-items-center justify-content-center" style="left: 22.95%; top: 12.825%; width: 54.25%; height: 31.125%; background: #ffffff; border-radius: 2px;">
+                        <div id="deskMockupFront" class="position-absolute shadow-sm overflow-hidden d-flex align-items-center justify-content-center" style="left: 22.8%; top: 12.7%; width: 54.4%; height: 31.3%; background: transparent; border: none; padding: 0; margin: 0; border-radius: 2px;">
                             <!-- Live Front SVG -->
                         </div>
                         <span class="badge bg-dark bg-opacity-75 text-white position-absolute shadow-xs" style="left: 24.5%; top: 14.5%; font-size: 10px; pointer-events: none; z-index: 5;">
@@ -1815,7 +1753,7 @@ require_once __DIR__ . '/includes/header.php';
                         </span>
 
                         <!-- Alt Kart (Arka Yüz) -->
-                        <div id="deskMockupBack" class="position-absolute shadow-sm overflow-hidden d-flex align-items-center justify-content-center" style="left: 22.95%; top: 55.2%; width: 54.25%; height: 31.1%; background: #ffffff; border-radius: 2px;">
+                        <div id="deskMockupBack" class="position-absolute shadow-sm overflow-hidden d-flex align-items-center justify-content-center" style="left: 22.8%; top: 55.1%; width: 54.4%; height: 31.3%; background: transparent; border: none; padding: 0; margin: 0; border-radius: 2px;">
                             <!-- Live Back SVG -->
                         </div>
                         <span class="badge bg-dark bg-opacity-75 text-white position-absolute shadow-xs" style="left: 24.5%; top: 57%; font-size: 10px; pointer-events: none; z-index: 5;">
@@ -1835,9 +1773,9 @@ require_once __DIR__ . '/includes/header.php';
                     <div class="mockup-3d-scene" style="perspective: 1200px; width: 100%; display: flex; justify-content: center; align-items: center; padding: 25px 0;">
                         <div id="mockup3dCardInner" class="mockup-3d-card" style="width: 480px; height: 280px; position: relative; transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);" onclick="CanvaStudio.toggle3dFlip()" title="Çevirmek için tıklayın">
                             <!-- Ön Yüz -->
-                            <div id="mockup3dFrontFace" class="mockup-face position-absolute top-0 start-0 w-100 h-100 rounded-3 overflow-hidden shadow-lg bg-white" style="backface-visibility: hidden; transform: rotateY(0deg);"></div>
+                            <div id="mockup3dFrontFace" class="mockup-face position-absolute top-0 start-0 w-100 h-100 rounded-3 overflow-hidden shadow-lg" style="backface-visibility: hidden; transform: rotateY(0deg); background: transparent;"></div>
                             <!-- Arka Yüz -->
-                            <div id="mockup3dBackFace" class="mockup-face position-absolute top-0 start-0 w-100 h-100 rounded-3 overflow-hidden shadow-lg bg-white" style="backface-visibility: hidden; transform: rotateY(180deg);"></div>
+                            <div id="mockup3dBackFace" class="mockup-face position-absolute top-0 start-0 w-100 h-100 rounded-3 overflow-hidden shadow-lg" style="backface-visibility: hidden; transform: rotateY(180deg); background: transparent;"></div>
                         </div>
                     </div>
 
@@ -2310,12 +2248,77 @@ document.addEventListener('DOMContentLoaded', function() {
     window.availableTemplates = <?= json_encode($product['templates'] ?? []) ?>;
     window.availableIndustries = <?= json_encode($industries ?? []) ?>;
 
+    // 🎨 Tasarım Tercihi Popup Yönetimi
+    window.openDesignChoiceModal = function() {
+        const modalEl = document.getElementById('designChoiceModal');
+        if (!modalEl) return;
+        showChoiceMainView();
+        const modal = bootstrap.Modal.getOrCreateInstance ? bootstrap.Modal.getOrCreateInstance(modalEl) : new bootstrap.Modal(modalEl);
+        modal.show();
+    };
+
+    window.showChoiceMainView = function() {
+        const mainV = document.getElementById('choiceMainView');
+        const upV = document.getElementById('choiceUploadView');
+        const supV = document.getElementById('choiceSupportView');
+        if (mainV) mainV.style.display = 'block';
+        if (upV) upV.style.display = 'none';
+        if (supV) supV.style.display = 'none';
+    };
+
+    window.handleDesignChoice = function(choice) {
+        const choiceModalEl = document.getElementById('designChoiceModal');
+        if (choice === 'template') {
+            if (choiceModalEl) {
+                const modal = bootstrap.Modal.getInstance(choiceModalEl);
+                if (modal) modal.hide();
+            }
+            setTimeout(() => { openCanvaStudio(); }, 350);
+        } else if (choice === 'upload') {
+            const mainV = document.getElementById('choiceMainView');
+            const upV = document.getElementById('choiceUploadView');
+            if (mainV) mainV.style.display = 'none';
+            if (upV) upV.style.display = 'block';
+        } else if (choice === 'support') {
+            const mainV = document.getElementById('choiceMainView');
+            const supV = document.getElementById('choiceSupportView');
+            if (mainV) mainV.style.display = 'none';
+            if (supV) supV.style.display = 'block';
+        }
+    };
+
+    window.applySupportOptionAndClose = function() {
+        const modalNotes = document.getElementById('modalDesignNotesArea');
+        const mainNotes = document.getElementById('designNotesArea');
+        if (modalNotes && mainNotes) {
+            mainNotes.value = modalNotes.value;
+        }
+
+        const designTypeInput = document.getElementById('designTypeInput');
+        if (designTypeInput) designTypeInput.value = 'design_support';
+
+        const choiceModalEl = document.getElementById('designChoiceModal');
+        if (choiceModalEl) {
+            const modal = bootstrap.Modal.getInstance(choiceModalEl);
+            if (modal) modal.hide();
+        }
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Grafiker Desteği Seçildi',
+                text: 'Siparişiniz alındıktan sonra grafikerimiz tasarım onayı için sizinle WhatsApp üzerinden iletişime geçecektir.',
+                confirmButtonText: 'Tamam'
+            });
+        }
+    };
+
     // 🎨 Canva Studio Açılış Fonksiyonu
     window.openCanvaStudio = function(templateKey) {
         const modalEl = document.getElementById('canvaStudioModal');
         if (!modalEl) return;
 
-        const modal = new bootstrap.Modal(modalEl);
+        const modal = bootstrap.Modal.getOrCreateInstance ? bootstrap.Modal.getOrCreateInstance(modalEl) : new bootstrap.Modal(modalEl);
         modal.show();
 
         // Modal tamamen açıldığında Canvas'ı başlat (Görünürlük ve boyut hesaplaması için)
@@ -2445,7 +2448,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (initSelector) initSelector.style.display = 'block';
         if (savedContainer) savedContainer.style.display = 'none';
 
-        if (titleEl) titleEl.innerHTML = '<i class="bi bi-palette text-primary me-1"></i> 3. Tasarım Yöntemini Seçin';
+        if (titleEl) titleEl.innerHTML = '<i class="bi bi-palette text-primary me-1"></i> 3. Tasarım Tercihi';
         if (badgeEl) {
             badgeEl.className = 'badge bg-primary-subtle text-primary shadow-2xs';
             badgeEl.innerHTML = '<i class="bi bi-stars me-1"></i> İnteraktif Tasarım &amp; Şablonlar';
@@ -2459,52 +2462,42 @@ document.addEventListener('DOMContentLoaded', function() {
         if (hiddenBackSvgInput) hiddenBackSvgInput.value = '';
     };
 
-    window.activateDesignSupportTab = function() {
-        const supTabBtn = document.querySelector('.design-nav-btn[data-tab="tabSupport"]');
-        if (supTabBtn) supTabBtn.click();
-        const supChk = document.getElementById('includeDesignService');
-        if (supChk && !supChk.checked) {
-            supChk.checked = true;
-            supChk.dispatchEvent(new Event('change'));
-        }
-    };
-
-    // Sürükle Bırak Dosya Yükleme (Ajax) & Çözünürlük Kontrolü
-    const dropzone = document.getElementById('dropzoneBox');
-    const fileInput = document.getElementById('fileUploadInput');
-    const uploadStatus = document.getElementById('uploadStatus');
-    const preflightBox = document.getElementById('preflightAlertBox');
+    // Modal İçi Sürükle Bırak Dosya Yükleme (Ajax)
+    const modalDropzone = document.getElementById('modalDropzoneBox');
+    const modalFileInput = document.getElementById('modalFileUploadInput');
+    const modalUploadStatus = document.getElementById('modalUploadStatus');
     const designFileInput = document.getElementById('selectedDesignFile');
 
-    if (dropzone && fileInput) {
-        dropzone.addEventListener('click', () => fileInput.click());
+    if (modalDropzone && modalFileInput) {
+        modalDropzone.addEventListener('click', () => modalFileInput.click());
 
-        dropzone.addEventListener('dragover', (e) => {
+        modalDropzone.addEventListener('dragover', (e) => {
             e.preventDefault();
-            dropzone.classList.add('dragover');
+            modalDropzone.classList.add('dragover');
         });
 
-        dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+        modalDropzone.addEventListener('dragleave', () => modalDropzone.classList.remove('dragover'));
 
-        dropzone.addEventListener('drop', (e) => {
+        modalDropzone.addEventListener('drop', (e) => {
             e.preventDefault();
-            dropzone.classList.remove('dragover');
+            modalDropzone.classList.remove('dragover');
             if (e.dataTransfer.files.length) {
-                handleFileUpload(e.dataTransfer.files[0]);
+                handleModalFileUpload(e.dataTransfer.files[0]);
             }
         });
 
-        fileInput.addEventListener('change', () => {
-            if (fileInput.files.length) {
-                handleFileUpload(fileInput.files[0]);
+        modalFileInput.addEventListener('change', () => {
+            if (modalFileInput.files.length) {
+                handleModalFileUpload(modalFileInput.files[0]);
             }
         });
     }
 
-    function handleFileUpload(file) {
-        uploadStatus.style.display = 'block';
-        uploadStatus.className = 'mt-2 small text-primary fw-bold';
-        uploadStatus.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Dosya yükleniyor: ' + file.name;
+    function handleModalFileUpload(file) {
+        if (!modalUploadStatus) return;
+        modalUploadStatus.style.display = 'block';
+        modalUploadStatus.className = 'mt-2 small text-primary fw-bold';
+        modalUploadStatus.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Dosya yükleniyor: ' + file.name;
 
         const formData = new FormData();
         formData.append('file', file);
@@ -2516,18 +2509,36 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                uploadStatus.className = 'mt-2 small text-success fw-bold';
-                uploadStatus.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Dosya başarıyla yüklendi: ' + data.original_name;
-                designFileInput.value = data.file_path;
-                designTypeInput.value = 'uploaded';
+                modalUploadStatus.className = 'mt-2 small text-success fw-bold';
+                modalUploadStatus.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Dosya başarıyla yüklendi: ' + data.original_name;
+                if (designFileInput) designFileInput.value = data.file_path;
+                const designTypeInput = document.getElementById('designTypeInput');
+                if (designTypeInput) designTypeInput.value = 'uploaded';
+
+                setTimeout(() => {
+                    const choiceModalEl = document.getElementById('designChoiceModal');
+                    if (choiceModalEl) {
+                        const modal = bootstrap.Modal.getInstance(choiceModalEl);
+                        if (modal) modal.hide();
+                    }
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Baskı Dosyanız Yüklendi!',
+                            text: data.original_name + ' başarıyla siparişinize eklendi.',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    }
+                }, 800);
             } else {
-                uploadStatus.className = 'mt-2 small text-danger fw-bold';
-                uploadStatus.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i> ' + (data.error || 'Yükleme başarısız.');
+                modalUploadStatus.className = 'mt-2 small text-danger fw-bold';
+                modalUploadStatus.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i> ' + (data.error || 'Yükleme başarısız.');
             }
         })
         .catch(err => {
-            uploadStatus.className = 'mt-2 small text-danger fw-bold';
-            uploadStatus.innerHTML = 'Sunucu bağlantı hatası.';
+            modalUploadStatus.className = 'mt-2 small text-danger fw-bold';
+            modalUploadStatus.innerHTML = 'Sunucu bağlantı hatası.';
         });
     }
 
