@@ -11,10 +11,14 @@ switch ($action) {
     case 'add':
         $productId = (int)($_POST['product_id'] ?? 0);
         $quantity = (int)($_POST['quantity'] ?? 100);
-        $options = $_POST['options'] ?? [];
-        $customSize = !empty($_POST['custom_width']) && !empty($_POST['custom_height']) ? [
-            'width'  => (float)$_POST['custom_width'],
-            'height' => (float)$_POST['custom_height']
+        $selectedPackage = trim($_POST['selected_package'] ?? $_POST['package'] ?? 'standart');
+        $sizeType = $_POST['size_type'] ?? 'standard';
+        $isCustomSize = ($sizeType === 'custom' || $selectedPackage === 'ozel' || !empty($_POST['is_custom_size']));
+
+        $customSize = ($isCustomSize && !empty($_POST['custom_width']) && !empty($_POST['custom_height'])) ? [
+            'width'     => (float)$_POST['custom_width'],
+            'height'    => (float)$_POST['custom_height'],
+            'is_custom' => true
         ] : null;
 
         $designData = [
@@ -25,7 +29,6 @@ switch ($action) {
             'notes'   => $_POST['design_notes'] ?? null
         ];
 
-        $selectedPackage = trim($_POST['selected_package'] ?? $_POST['package'] ?? 'standart');
         $customPaperId = (int)($_POST['custom_paper_id'] ?? 0);
 
         $res = $cart->add($productId, $quantity, $options, $customSize, $designData, $selectedPackage, $customPaperId);

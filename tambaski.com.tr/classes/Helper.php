@@ -343,11 +343,13 @@ class Helper {
             'pending_payment'   => ['label' => 'Ödeme Bekleniyor', 'class' => 'bg-warning text-dark'],
             'payment_received'  => ['label' => 'Ödeme Alındı', 'class' => 'bg-info text-white'],
             'design_approval'   => ['label' => 'Tasarım Onayında', 'class' => 'bg-primary text-white'],
+            'preparing'         => ['label' => 'Hazırlanıyor', 'class' => 'bg-primary text-white'],
             'in_production'     => ['label' => 'Baskıda / Üretimde', 'class' => 'bg-purple text-white', 'style' => 'background-color:#8b5cf6;color:#fff'],
             'packaged'          => ['label' => 'Paketlendi', 'class' => 'bg-secondary text-white'],
             'shipped'           => ['label' => 'Kargoya Verildi', 'class' => 'bg-indigo text-white', 'style' => 'background-color:#4f46e5;color:#fff'],
             'delivered'         => ['label' => 'Teslim Edildi', 'class' => 'bg-success text-white'],
-            'cancelled'         => ['label' => 'İptal Edildi', 'class' => 'bg-danger text-white']
+            'cancelled'         => ['label' => 'İptal Edildi', 'class' => 'bg-danger text-white'],
+            'refunded'          => ['label' => 'İade Edildi', 'class' => 'bg-dark text-white']
         ];
 
         $badge = $map[$status] ?? ['label' => $status, 'class' => 'bg-secondary text-white'];

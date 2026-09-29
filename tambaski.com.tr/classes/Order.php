@@ -201,18 +201,85 @@ class Order {
     }
 
     /**
-     * Tüm Siparişleri Listele (Admin Paneli)
+     * Siparişi ve Kalemlerini Tamamen Sil
      */
-    public function getAll($limit = 50, $status = null, $search = null) {
+    public function delete($orderId) {
+        try {
+            $this->db->beginTransaction();
+            $delItems = $this->db->prepare("DELETE FROM order_items WHERE order_id = ?");
+            $delItems->execute([(int)$orderId]);
+            $delOrder = $this->db->prepare("DELETE FROM orders WHERE id = ?");
+            $res = $delOrder->execute([(int)$orderId]);
+            $this->db->commit();
+            return $res;
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            return false;
+        }
+    }
+
+    /**
+     * Sipariş İstatistikleri ve KPI Özetleri
+     */
+    public function getStats() {
+        try {
+            $totalOrders = (int)$this->db->query("SELECT COUNT(*) FROM orders")->fetchColumn();
+            $paidSum = (float)$this->db->query("SELECT COALESCE(SUM(total_amount), 0) FROM orders WHERE payment_status = 'paid'")->fetchColumn();
+            $paidOrders = (int)$this->db->query("SELECT COUNT(*) FROM orders WHERE payment_status = 'paid'")->fetchColumn();
+            $pendingPayment = (int)$this->db->query("SELECT COUNT(*) FROM orders WHERE payment_status = 'pending'")->fetchColumn();
+            $inProduction = (int)$this->db->query("SELECT COUNT(*) FROM orders WHERE order_status IN ('in_production', 'design_approval', 'payment_received', 'preparing')")->fetchColumn();
+            $shipped = (int)$this->db->query("SELECT COUNT(*) FROM orders WHERE order_status = 'shipped'")->fetchColumn();
+            $delivered = (int)$this->db->query("SELECT COUNT(*) FROM orders WHERE order_status = 'delivered'")->fetchColumn();
+            $cancelled = (int)$this->db->query("SELECT COUNT(*) FROM orders WHERE order_status IN ('cancelled', 'refunded') OR payment_status = 'refunded'")->fetchColumn();
+
+            return [
+                'total_orders'    => $totalOrders,
+                'paid_sum'        => $paidSum,
+                'paid_orders'     => $paidOrders,
+                'pending_payment' => $pendingPayment,
+                'in_production'   => $inProduction,
+                'shipped'         => $shipped,
+                'delivered'       => $delivered,
+                'cancelled'       => $cancelled
+            ];
+        } catch (Exception $e) {
+            return [
+                'total_orders'    => 0,
+                'paid_sum'        => 0,
+                'paid_orders'     => 0,
+                'pending_payment' => 0,
+                'in_production'   => 0,
+                'shipped'         => 0,
+                'delivered'       => 0,
+                'cancelled'       => 0
+            ];
+        }
+    }
+
+    /**
+     * Tüm Siparişleri Listele (Admin Paneli Gelişmiş Filtreleme)
+     */
+    public function getAll($limit = 100, $status = null, $paymentStatus = null, $search = null) {
         $sql = "SELECT * FROM orders WHERE 1=1";
         $params = [];
 
-        if ($status) {
-            $sql .= " AND order_status = ?";
-            $params[] = $status;
+        if (!empty($status)) {
+            if ($status === 'in_production_group') {
+                $sql .= " AND order_status IN ('payment_received', 'design_approval', 'in_production', 'preparing', 'packaged')";
+            } elseif ($status === 'cancelled_group') {
+                $sql .= " AND (order_status IN ('cancelled', 'refunded') OR payment_status = 'refunded')";
+            } else {
+                $sql .= " AND order_status = ?";
+                $params[] = $status;
+            }
         }
 
-        if ($search) {
+        if (!empty($paymentStatus)) {
+            $sql .= " AND payment_status = ?";
+            $params[] = $paymentStatus;
+        }
+
+        if (!empty($search)) {
             $sql .= " AND (order_number LIKE ? OR customer_name LIKE ? OR customer_phone LIKE ? OR customer_email LIKE ?)";
             $term = "%{$search}%";
             $params[] = $term;

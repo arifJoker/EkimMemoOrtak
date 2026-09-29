@@ -190,7 +190,8 @@ class Cart {
                 }
             }
 
-            if (!empty($customSize) && !empty($customSize['width']) && !empty($customSize['height'])) {
+            $isOzel = ($options['selected_package'] ?? '') === 'ozel' || ($options['package'] ?? '') === 'ozel' || !empty($customSize['is_custom']);
+            if ($isOzel && !empty($customSize) && !empty($customSize['width']) && !empty($customSize['height'])) {
                 $optionLabels[] = 'Özel Boyut: ' . $customSize['width'] . ' x ' . $customSize['height'] . ' cm';
             }
 
