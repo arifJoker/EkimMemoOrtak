@@ -7,9 +7,26 @@ $pageDesc = Helper::getSetting('site_slogan', 'Türkiye\'nin En Hızlı ve Kalit
 $productModel = new Product();
 $featuredProducts = $productModel->getAll(8, null, true);
 $urgentProducts = $productModel->getAll(4, null, false, true);
+$allActiveProducts = $productModel->getAll();
 $dbConn = Database::getInstance()->getConnection();
 $categories = $dbConn ? $dbConn->query("SELECT * FROM categories WHERE status = 1 ORDER BY sort_order ASC")->fetchAll() : [];
 $templates = $dbConn ? $dbConn->query("SELECT dt.*, p.slug as prod_slug, p.name as prod_name FROM design_templates dt JOIN products p ON dt.product_id = p.id WHERE dt.status = 1 LIMIT 3")->fetchAll() : [];
+
+// Kategori bazlı akıllı vitrin gruplaması (Her kategori kartında o kategorinin ürünleri döner)
+$categoryShowcase = [];
+if (!empty($categories) && !empty($allActiveProducts)) {
+    foreach ($categories as $cat) {
+        $catProds = array_values(array_filter($allActiveProducts, function($p) use ($cat) {
+            return (int)$p['category_id'] === (int)$cat['id'];
+        }));
+        if (!empty($catProds)) {
+            $categoryShowcase[] = [
+                'category' => $cat,
+                'products' => $catProds
+            ];
+        }
+    }
+}
 
 require_once __DIR__ . '/includes/header.php';
 ?>
@@ -507,7 +524,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </section>
 
-<!-- Öne Çıkan Ürünler & Fiyat Hesaplayıcı Vitrini -->
+<!-- Öne Çıkan Ürünler & Kategori Bazlı Akıllı Dönen Vitrin -->
 <section class="py-5 bg-white border-top border-bottom">
     <div class="container">
         <div class="d-flex justify-content-between align-items-end mb-4">
@@ -516,56 +533,134 @@ document.addEventListener('DOMContentLoaded', function() {
                 <h3 class="fw-bold mb-1">Öne Çıkan Matbaa Ürünleri</h3>
                 <p class="text-muted small mb-0">Yüksek baskı kalitesi, zengin varyant seçenekleri ve tiraj indirimleri</p>
             </div>
+            <a href="<?= SITE_URL ?>/category.php" class="btn btn-sm btn-apple-outline d-none d-sm-inline-flex">
+                Tüm Kategoriler <i class="bi bi-arrow-right ms-1"></i>
+            </a>
         </div>
 
-        <div class="row g-4">
-            <?php foreach ($featuredProducts as $prod): ?>
-                <div class="col-lg-3 col-md-6">
-                    <div class="apple-card product-card">
-                        
-                        <div class="product-badges">
-                            <?php if ($prod['is_urgent']): ?>
-                                <span class="badge-urgent"><i class="bi bi-lightning-fill"></i> Acil</span>
-                            <?php endif; ?>
-                            <?php if ($prod['allow_online_editor']): ?>
-                                <span class="badge-vector"><i class="bi bi-palette-fill"></i> Şablonlu</span>
-                            <?php endif; ?>
-                        </div>
-
-                        <div class="product-img-wrapper" style="height: 200px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #f8fafc;">
-                            <?php 
-                                $prodImg = !empty($prod['featured_image']) ? $prod['featured_image'] : (!empty($prod['mockup_image']) ? $prod['mockup_image'] : '');
-                                if (empty($prodImg) && (stripos($prod['name'], 'kartvizit') !== false || stripos($prod['slug'], 'kartvizit') !== false)) {
-                                    $prodImg = 'uploads/mockups/tambaski_kartvizit_vip_mockup.jpg';
-                                }
-                            ?>
-                            <?php if (!empty($prodImg)): ?>
-                                <img src="<?= SITE_URL . '/' . htmlspecialchars($prodImg) ?>" alt="<?= htmlspecialchars($prod['name']) ?>" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease;">
-                            <?php else: ?>
-                                <i class="bi bi-printer text-muted" style="font-size: 64px; opacity: 0.3;"></i>
-                            <?php endif; ?>
-                        </div>
-
-                        <div class="product-body">
-                            <span class="text-muted small mb-1"><?= htmlspecialchars($prod['category_name'] ?? 'Matbaa') ?></span>
-                            <a href="<?= SITE_URL ?>/product.php?slug=<?= $prod['slug'] ?>" class="product-title"><?= htmlspecialchars($prod['name']) ?></a>
-                            <p class="product-desc"><?= htmlspecialchars($prod['short_description'] ?? '') ?></p>
+        <?php if (!empty($categoryShowcase)): 
+            $colClass = (count($categoryShowcase) <= 2) ? 'col-lg-5 col-md-6 col-12' : ((count($categoryShowcase) == 3) ? 'col-lg-4 col-md-6 col-12' : 'col-lg-3 col-md-6 col-12');
+        ?>
+            <div class="row g-4 justify-content-center">
+                <?php foreach ($categoryShowcase as $cIdx => $catItem): 
+                    $cat = $catItem['category'];
+                    $catProds = $catItem['products'];
+                    $carouselId = 'catCarousel_' . $cat['id'];
+                    $hasMultiple = count($catProds) > 1;
+                ?>
+                    <div class="<?= $colClass ?>">
+                        <div class="apple-card product-card p-3 h-100 d-flex flex-column border shadow-sm">
                             
-                            <div class="product-price-row">
-                                <div>
-                                    <span class="product-price"><?= Helper::formatPrice($prod['base_price']) ?></span>
-                                    <span class="product-price-sub">'den başlayan fiyatlarla <small class="text-muted fw-normal" style="font-size:11px;">(+KDV)</small></span>
-                                </div>
-                                <a href="<?= SITE_URL ?>/product.php?slug=<?= $prod['slug'] ?>" class="btn btn-sm btn-apple">
-                                    Hesapla <i class="bi bi-chevron-right ms-1"></i>
+                            <!-- Kategori Başlık Barı -->
+                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                                <a href="<?= SITE_URL ?>/category.php?slug=<?= $cat['slug'] ?>" class="text-decoration-none d-flex align-items-center gap-2">
+                                    <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                        <i class="<?= !empty($cat['icon']) ? $cat['icon'] : 'bi bi-grid-fill' ?>" style="font-size: 15px;"></i>
+                                    </div>
+                                    <span class="fw-bold text-dark hover-primary" style="font-size: 14px;"><?= htmlspecialchars($cat['name']) ?></span>
                                 </a>
+                                <span class="badge bg-light text-secondary border px-2 py-1" style="font-size: 11px;">
+                                    <?= count($catProds) ?> Ürün <?= $hasMultiple ? '<i class="bi bi-arrow-repeat text-primary ms-1" title="Otomatik Dönüş"></i>' : '' ?>
+                                </span>
+                            </div>
+
+                            <!-- Kategori İçi Dönen Ürünler Carouseli -->
+                            <div id="<?= $carouselId ?>" class="carousel slide carousel-fade category-rotating-carousel flex-grow-1 d-flex flex-column" data-bs-ride="<?= $hasMultiple ? 'carousel' : 'false' ?>" data-bs-interval="<?= 4000 + ($cIdx * 900) ?>" data-bs-pause="hover">
+                                
+                                <div class="carousel-inner flex-grow-1">
+                                    <?php foreach ($catProds as $pIdx => $prod): 
+                                        $prodImg = !empty($prod['featured_image']) ? $prod['featured_image'] : (!empty($prod['mockup_image']) ? $prod['mockup_image'] : '');
+                                        if (empty($prodImg) && (stripos($prod['name'], 'kartvizit') !== false || stripos($prod['slug'], 'kartvizit') !== false)) {
+                                            $prodImg = 'uploads/mockups/tambaski_kartvizit_vip_mockup.jpg';
+                                        }
+                                    ?>
+                                        <div class="carousel-item <?= $pIdx === 0 ? 'active' : '' ?>">
+                                            
+                                            <div class="position-relative">
+                                                <div class="product-badges">
+                                                    <?php if (!empty($prod['is_urgent'])): ?>
+                                                        <span class="badge-urgent"><i class="bi bi-lightning-fill"></i> Acil</span>
+                                                    <?php endif; ?>
+                                                    <?php if (!empty($prod['allow_online_editor'])): ?>
+                                                        <span class="badge-vector"><i class="bi bi-palette-fill"></i> Şablonlu</span>
+                                                    <?php endif; ?>
+                                                </div>
+
+                                                <a href="<?= SITE_URL ?>/product.php?slug=<?= $prod['slug'] ?>" class="d-block text-decoration-none">
+                                                    <div class="product-img-wrapper" style="height: 220px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #f8fafc; border-radius: 12px;">
+                                                        <?php if (!empty($prodImg)): ?>
+                                                            <img src="<?= SITE_URL . '/' . htmlspecialchars($prodImg) ?>" alt="<?= htmlspecialchars($prod['name']) ?>" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease;">
+                                                        <?php else: ?>
+                                                            <i class="bi bi-printer text-muted" style="font-size: 64px; opacity: 0.3;"></i>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </a>
+                                            </div>
+
+                                            <div class="product-body pt-3 d-flex flex-column justify-content-between">
+                                                <div>
+                                                    <a href="<?= SITE_URL ?>/product.php?slug=<?= $prod['slug'] ?>" class="product-title fw-bold text-dark text-decoration-none d-block mb-1" style="font-size: 15px; line-height: 1.3;" title="<?= htmlspecialchars($prod['name']) ?>">
+                                                        <?= htmlspecialchars($prod['name']) ?>
+                                                    </a>
+                                                    <p class="product-desc text-muted small mb-3" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 38px; line-height: 1.35;">
+                                                        <?= htmlspecialchars(!empty($prod['short_description']) ? $prod['short_description'] : 'Yüksek çözünürlüklü baskı ve birinci sınıf malzeme kalitesi.') ?>
+                                                    </p>
+                                                </div>
+                                                
+                                                <div class="product-price-row pt-2 border-top d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <span class="product-price fw-bold text-primary" style="font-size: 18px;"><?= Helper::formatPrice($prod['base_price']) ?></span>
+                                                        <span class="product-price-sub d-block text-muted" style="font-size: 11px;">'den başlayan fiyatlarla <small class="text-muted fw-normal" style="font-size:10px;">(+KDV)</small></span>
+                                                    </div>
+                                                    <a href="<?= SITE_URL ?>/product.php?slug=<?= $prod['slug'] ?>" class="btn btn-sm btn-apple px-3 py-2 fw-semibold">
+                                                        <i class="bi bi-bag-check-fill me-1"></i> Sipariş Ver <i class="bi bi-chevron-right ms-1"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+
+                                <!-- Çoklu ürün varsa modern alt göstergeler (Indicators) -->
+                                <?php if ($hasMultiple): ?>
+                                    <div class="d-flex justify-content-center align-items-center gap-1 pt-2 mt-auto">
+                                        <?php foreach ($catProds as $pIdx => $prod): ?>
+                                            <button type="button" 
+                                                    data-bs-target="#<?= $carouselId ?>" 
+                                                    data-bs-slide-to="<?= $pIdx ?>" 
+                                                    class="btn p-0 rounded-pill border-0 <?= $pIdx === 0 ? 'bg-primary' : 'bg-secondary bg-opacity-25' ?>" 
+                                                    style="width: <?= $pIdx === 0 ? '16px' : '6px' ?>; height: 5px; transition: all 0.3s ease;" 
+                                                    aria-label="Ürün <?= $pIdx + 1 ?>"></button>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
+
+                            </div>
+
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php else: ?>
+            <div class="row g-4 justify-content-center">
+                <?php foreach ($featuredProducts as $prod): ?>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="apple-card product-card p-3">
+                            <div class="product-body">
+                                <a href="<?= SITE_URL ?>/product.php?slug=<?= $prod['slug'] ?>" class="product-title"><?= htmlspecialchars($prod['name']) ?></a>
+                                <div class="product-price-row mt-3">
+                                    <span class="product-price"><?= Helper::formatPrice($prod['base_price']) ?></span>
+                                    <a href="<?= SITE_URL ?>/product.php?slug=<?= $prod['slug'] ?>" class="btn btn-sm btn-apple">
+                                        <i class="bi bi-bag-check-fill me-1"></i> Sipariş Ver <i class="bi bi-chevron-right ms-1"></i>
+                                    </a>
+                                </div>
                             </div>
                         </div>
-
                     </div>
-                </div>
-            <?php endforeach; ?>
-        </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
     </div>
 </section>
 
@@ -619,8 +714,40 @@ document.addEventListener('DOMContentLoaded', function() {
                     <i class="bi bi-award-fill me-2"></i>E-Bayi Başvurusu Yap
                 </a>
             </div>
-        </div>
     </div>
 </section>
+
+<script>
+// Kategori Bazlı Akıllı Dönen Vitrin Kontrolcüsü
+document.addEventListener('DOMContentLoaded', function () {
+    const rotatingCarousels = document.querySelectorAll('.category-rotating-carousel');
+    rotatingCarousels.forEach(function (carouselEl, cIdx) {
+        // Gösterge (Indicator) noktalarını güncelle
+        carouselEl.addEventListener('slide.bs.carousel', function (e) {
+            const dots = carouselEl.querySelectorAll('[data-bs-slide-to]');
+            dots.forEach(function (dot, idx) {
+                if (idx === e.to) {
+                    dot.classList.remove('bg-secondary', 'bg-opacity-25');
+                    dot.classList.add('bg-primary');
+                    dot.style.width = '16px';
+                } else {
+                    dot.classList.remove('bg-primary');
+                    dot.classList.add('bg-secondary', 'bg-opacity-25');
+                    dot.style.width = '6px';
+                }
+            });
+        });
+
+        // Eğer birden fazla ürün varsa döngüyü kademeli (staggered) başlat
+        const items = carouselEl.querySelectorAll('.carousel-item');
+        if (items.length > 1 && typeof bootstrap !== 'undefined') {
+            const bsCarousel = bootstrap.Carousel.getOrCreateInstance(carouselEl);
+            setTimeout(function() {
+                bsCarousel.cycle();
+            }, 800 + (cIdx * 600));
+        }
+    });
+});
+</script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
