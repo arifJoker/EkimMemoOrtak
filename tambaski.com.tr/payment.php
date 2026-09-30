@@ -56,6 +56,15 @@ if ($paymentMethod === 'paytr') {
             <div class="alert alert-danger rounded-4 shadow-sm p-4">
                 <h5 class="fw-bold"><i class="bi bi-exclamation-octagon-fill me-2"></i>Ödeme Başlatma Hatası</h5>
                 <p class="small mb-3"><?= htmlspecialchars($paymentError) ?></p>
+                <?php if (Auth::isAdmin()): ?>
+                    <div class="mb-3 p-3 bg-white rounded-3 border">
+                        <div class="text-danger fw-bold small mb-1"><i class="bi bi-gear-fill me-1"></i> Yönetici Hızlı Ayar:</div>
+                        <div class="text-muted small mb-2">PayTR Mağaza No (Merchant ID), Mağaza Anahtarı (Merchant Key) ve Gizli Anahtar (Merchant Salt) bilgilerinizi girmek için:</div>
+                        <a href="<?= SITE_URL ?>/admin/payment_settings.php" class="btn btn-sm btn-primary fw-bold">
+                            <i class="bi bi-sliders me-1"></i> PayTR API Ayarlarına Git
+                        </a>
+                    </div>
+                <?php endif; ?>
                 <div class="d-flex gap-2">
                     <a href="<?= SITE_URL ?>/checkout.php" class="btn btn-sm btn-apple-secondary">Bilgileri Düzenle</a>
                     <a href="<?= SITE_URL ?>/success.php?order_number=<?= urlencode($order['order_number']) ?>" class="btn btn-sm btn-warning">Havale/EFT ile Öde</a>

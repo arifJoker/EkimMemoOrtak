@@ -1,6 +1,9 @@
 <?php
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 require_once __DIR__ . '/config/config.php';
-$db = Database::getInstance()->getConnection();
+try {
+    $db = Database::getInstance()->getConnection();
 
 // 1. paper_types
 $db->exec("CREATE TABLE IF NOT EXISTS paper_types (
@@ -70,7 +73,48 @@ if (!in_array('package_presets', $cols)) {
     $db->exec("ALTER TABLE products ADD COLUMN package_presets TEXT NULL AFTER allowed_finishings;");
 }
 
-// 4. Default settings
+// 4. api_keys Tablosu ve Memo Entegrasyonu
+$db->exec("CREATE TABLE IF NOT EXISTS api_keys (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NULL,
+    name VARCHAR(100) NOT NULL,
+    api_key VARCHAR(64) NOT NULL UNIQUE,
+    api_secret VARCHAR(64) NOT NULL,
+    role VARCHAR(50) DEFAULT 'memo',
+    permissions TEXT NULL,
+    rate_limit INT DEFAULT 120,
+    status ENUM('active', 'inactive') DEFAULT 'active',
+    last_used_at DATETIME NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+// Eger role sutunu yoksa ekle
+$apiCols = $db->query("SHOW COLUMNS FROM api_keys")->fetchAll(PDO::FETCH_COLUMN);
+if (!in_array('role', $apiCols)) {
+    $db->exec("ALTER TABLE api_keys ADD COLUMN role VARCHAR(50) DEFAULT 'memo' AFTER api_secret;");
+}
+if (!in_array('rate_limit', $apiCols)) {
+    $db->exec("ALTER TABLE api_keys ADD COLUMN rate_limit INT DEFAULT 120 AFTER permissions;");
+}
+
+// Memo API Anahtari ekle veya guncelle
+$memoKey = 'tb_live_memo_7f9b2c4e1a8d5063';
+$memoSec = 'tb_sec_memo_e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+$chkMemo = $db->prepare("SELECT id FROM api_keys WHERE api_key = ?");
+$chkMemo->execute([$memoKey]);
+if (!$chkMemo->fetch()) {
+    $db->prepare("INSERT INTO api_keys (name, api_key, api_secret, role, permissions, status) VALUES (?, ?, ?, ?, ?, ?)")
+       ->execute([
+           'Memo - Ürün ve İçerik Yöneticisi',
+           $memoKey,
+           $memoSec,
+           'memo',
+           json_encode(['products:all', 'categories:read', 'media:upload']),
+           'active'
+       ]);
+}
+
+// 5. Default settings
 Helper::saveSetting('usd_try_rate', '38.50');
 Helper::saveSetting('cutting_labor_percent', '5');
 Helper::saveSetting('sheet_width', '70');
@@ -78,3 +122,6 @@ Helper::saveSetting('sheet_height', '100');
 Helper::saveSetting('gift_waste_threshold', '2');
 
 echo "MIGRATION_SUCCESS\n";
+} catch (Throwable $e) {
+    echo "ERR: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine() . "\n";
+}

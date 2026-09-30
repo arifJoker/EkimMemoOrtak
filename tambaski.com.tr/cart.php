@@ -144,6 +144,71 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    if ($action === 'add_vehicle_sticker' || ($_GET['action'] ?? '') === 'add_vehicle_sticker') {
+        $rawInput = file_get_contents('php://input');
+        $data = json_decode($rawInput, true);
+        if (!$data && !empty($_POST)) {
+            $data = $_POST;
+        }
+
+        $brand = $data['brand'] ?? 'Fiat';
+        $model = $data['model'] ?? 'Egea';
+        $year = $data['year'] ?? '2015-2026';
+        $widthCm = (float)($data['width_cm'] ?? 45);
+        $heightCm = (float)($data['height_cm'] ?? 20);
+        $material = $data['material'] ?? '1. Sınıf Cast Araç Folyosu';
+        $tint = $data['window_tint'] ?? 'Standart';
+        $price = (float)($data['price'] ?? 185);
+
+        $db = Database::getInstance()->getConnection();
+        // Varsayılan Araç Giydirme veya ilk ürünü bul
+        $pStmt = $db->query("SELECT id FROM products WHERE slug LIKE '%arac%' OR slug LIKE '%folyo%' OR slug LIKE '%sticker%' LIMIT 1");
+        $pRow = $pStmt->fetch();
+        $pId = $pRow['id'] ?? 1;
+
+        $userId = Auth::id();
+        $options = [
+            'Araç Marka / Model' => "{$brand} {$model} ({$year})",
+            'Araç Rengi'         => $data['vehicle_color'] ?? '#ffffff',
+            'Cam Filmi'          => $tint,
+            'Folyo Malzemesi'    => $material,
+            'Net Birebir Ölçü'   => "{$widthCm} cm x {$heightCm} cm ({$data['area_m2']} m²)"
+        ];
+
+        $customSize = [
+            'width'     => $widthCm,
+            'height'    => $heightCm,
+            'is_custom' => true
+        ];
+
+        $stmt = $db->prepare("INSERT INTO cart_items (
+            session_id, user_id, product_id, quantity, selected_options, custom_size,
+            design_type, unit_price, total_price
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+        $stmt->execute([
+            session_id(),
+            $userId,
+            $pId,
+            1,
+            json_encode($options, JSON_UNESCAPED_UNICODE),
+            json_encode($customSize),
+            'vehicle_studio',
+            $price,
+            $price
+        ]);
+
+        if (!empty($rawInput) && (strpos($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') !== false || isset($_GET['action']))) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true, 'redirect' => SITE_URL . '/cart.php']);
+            exit;
+        }
+
+        Helper::setFlash('success', "🚗 {$brand} {$model} için birebir özel stickerınız sepetinize eklendi!");
+        header("Location: " . SITE_URL . "/cart.php");
+        exit;
+    }
+
     if ($action === 'remove_coupon') {
         $cart->removeCoupon();
         Helper::setFlash('info', 'Kupon kodu kaldırıldı.');

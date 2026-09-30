@@ -19,9 +19,9 @@ setlocale(LC_TIME, 'tr_TR.UTF-8', 'tr_TR', 'turkish');
 // Site URL ve Dizin Sabitleri
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443)) ? "https://" : "http://";
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-$scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
-$basePath = preg_replace('/(\/admin|\/api|\/api\/v1)$/', '', $scriptDir);
-if ($basePath === '/') {
+$scriptDir = dirname($_SERVER['SCRIPT_NAME'] ?? '');
+$basePath = preg_replace('/(\/admin.*|\/api.*|\/docs.*)$/', '', $scriptDir);
+if ($basePath === '/' || $basePath === '\\') {
     $basePath = '';
 }
 

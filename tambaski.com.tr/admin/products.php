@@ -39,14 +39,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $shortDesc = trim($_POST['short_description'] ?? '');
     $fullDesc = $_POST['full_description'] ?? '';
 
-    // Fiyatlandırma (1. Faz - Net Paket & Taban Fiyat Modeli)
-    $basePrice = (float)str_replace(',', '.', $_POST['base_price'] ?? 900.00);
+    // Kategori Bilgisini Çek (Kartvizit mi Dekota mı ayrımı için)
+    $catStmt = $db->prepare("SELECT pricing_model, slug FROM categories WHERE id = ?");
+    $catStmt->execute([$categoryId]);
+    $catData = $catStmt->fetch();
+    $isDekotaCat = ($catData && ($catData['pricing_model'] === 'rigid_board' || str_contains($catData['slug'], 'dekota')));
+
+    // Fiyatlandırma ve m2 USD Değerleri
     $taxRate = (float)str_replace(',', '.', $_POST['tax_rate'] ?? 20.00);
+    if ($isDekotaCat) {
+        $basePrice = (float)str_replace(',', '.', $_POST['base_price_dekota'] ?? $_POST['base_price'] ?? 95.00);
+        $m2UsdPrice3mm = (float)str_replace(',', '.', $_POST['m2_usd_price_3mm'] ?? 14.50);
+        $m2UsdPrice5mm = (float)str_replace(',', '.', $_POST['m2_usd_price_5mm'] ?? 18.50);
+        $m2UsdPrice9mm = (float)str_replace(',', '.', $_POST['m2_usd_price_9mm'] ?? 26.00);
+        $m2UsdPrice = $m2UsdPrice3mm;
+    } else {
+        $basePrice = (float)str_replace(',', '.', $_POST['base_price_kartvizit'] ?? $_POST['base_price'] ?? 650.00);
+        $m2UsdPrice = 0.00;
+        $m2UsdPrice3mm = 0.00;
+        $m2UsdPrice5mm = 0.00;
+        $m2UsdPrice9mm = 0.00;
+    }
 
     // Dinamik Paket Önayarları (JSON)
     $packagesArray = [];
-    if (!empty($_POST['packages']) && is_array($_POST['packages'])) {
-        foreach ($_POST['packages'] as $idx => $pkg) {
+    $rawPackages = $isDekotaCat ? ($_POST['packages_dekota'] ?? $_POST['packages'] ?? []) : ($_POST['packages_kartvizit'] ?? $_POST['packages'] ?? []);
+    if (!empty($rawPackages) && is_array($rawPackages)) {
+        foreach ($rawPackages as $idx => $pkg) {
             $pkgName = trim($pkg['name'] ?? '');
             if (empty($pkgName)) continue;
             $pkgKey = !empty($pkg['key']) ? Helper::slugify($pkg['key']) : Helper::slugify($pkgName);
@@ -61,14 +80,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ];
         }
     }
-    // Eğer hiçbir paket kalmadıysa varsayılan 4 paket ekle
+    // Eğer hiçbir paket kalmadıysa varsayılan paketleri ekle
     if (empty($packagesArray)) {
-        $packagesArray = [
-            'ekonomik' => ['name' => 'Ekonomik', 'active' => 1, 'price' => round($basePrice * 0.85, 2), 'desc' => '250gr Bristol, Tek Yön Renkli', 'badge' => 'Uygun Fiyat'],
-            'standart' => ['name' => 'Standart', 'active' => 1, 'price' => $basePrice, 'desc' => '350gr Kuşe, Çift Taraf Mat Selefon', 'badge' => 'Çok Satan'],
-            'premium'  => ['name' => 'Premium', 'active' => 1, 'price' => round($basePrice * 1.45, 2), 'desc' => 'Soft-Touch Kadife Selefon & Kabartma Lak', 'badge' => 'Özel Doku'],
-            'vip'      => ['name' => 'VIP Prestij', 'active' => 1, 'price' => round($basePrice * 1.85, 2), 'desc' => 'Tuale Fantezi / Altın Varak Yaldız', 'badge' => 'Lüks Seri']
-        ];
+        if ($isDekotaCat) {
+            $packagesArray = [
+                'kucuk'  => ['name' => 'Küçük Boy (25x35 cm)', 'active' => 1, 'price' => 95.00,  'desc' => 'Kapı üstü, elektrik panosu, ofis içi', 'badge' => 'Kompakt'],
+                'orta'   => ['name' => 'Orta Boy (35x50 cm)',  'active' => 1, 'price' => 145.00, 'desc' => 'Koridorlar, üretim hatları (Standart)', 'badge' => 'Popüler'],
+                'buyuk'  => ['name' => 'Büyük Boy (50x70 cm)', 'active' => 1, 'price' => 240.00, 'desc' => 'Şantiye girişleri, depolar, geniş fabrika', 'badge' => 'Görünür'],
+                'mega'   => ['name' => 'Mega Boy (70x100 cm)', 'active' => 1, 'price' => 420.00, 'desc' => 'Dış cephe, nizamiye, yol yönlendirme', 'badge' => 'Maksimum']
+            ];
+        } else {
+            $packagesArray = [
+                'ekonomik' => ['name' => 'Ekonomik', 'active' => 1, 'price' => round($basePrice * 0.85, 2), 'desc' => '250gr Bristol, Tek Yön Renkli Baskı', 'badge' => 'Uygun Fiyat'],
+                'standart' => ['name' => 'Standart', 'active' => 1, 'price' => $basePrice, 'desc' => '350gr Kuşe, Çift Taraf Mat Selefon', 'badge' => 'Çok Satan'],
+                'premium'  => ['name' => 'Premium', 'active' => 1, 'price' => round($basePrice * 1.45, 2), 'desc' => 'Soft-Touch Kadife Selefon & Kabartma Lak', 'badge' => 'Özel Doku'],
+                'vip'      => ['name' => 'VIP Prestij', 'active' => 1, 'price' => round($basePrice * 1.85, 2), 'desc' => 'Tuale Fantezi / Altın Varak Yaldız', 'badge' => 'Lüks Seri']
+            ];
+        }
     }
     $packagePresets = json_encode($packagesArray, JSON_UNESCAPED_UNICODE);
 
@@ -101,11 +129,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mockupImage = $upMock['file_path'];
         }
     }
-
-    $m2UsdPrice = (float)str_replace(',', '.', $_POST['m2_usd_price_3mm'] ?? $_POST['m2_usd_price'] ?? 0.00);
-    $m2UsdPrice3mm = (float)str_replace(',', '.', $_POST['m2_usd_price_3mm'] ?? $m2UsdPrice ?: 14.50);
-    $m2UsdPrice5mm = (float)str_replace(',', '.', $_POST['m2_usd_price_5mm'] ?? 18.50);
-    $m2UsdPrice9mm = (float)str_replace(',', '.', $_POST['m2_usd_price_9mm'] ?? 26.00);
 
     try {
         if ($productId > 0) {
@@ -148,26 +171,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Adet Tiraj Kademelerini Güncelle / Ekle
         $db->prepare("DELETE FROM product_quantity_tiers WHERE product_id = ?")->execute([$productId]);
         $tiersToSave = [];
-        if (!empty($_POST['dynamic_tiers']) && is_array($_POST['dynamic_tiers'])) {
-            foreach ($_POST['dynamic_tiers'] as $dt) {
-                $q = (int)($dt['quantity'] ?? 0);
-                $d = (float)($dt['discount_percent'] ?? 0);
-                if ($q > 0) {
-                    $tiersToSave[$q] = $d;
-                }
-            }
-        } elseif (!empty($_POST['tiers']) && is_array($_POST['tiers'])) {
-            foreach ($_POST['tiers'] as $qty => $discount) {
-                $q = (int)$qty;
-                $d = (float)$discount;
-                if ($q > 0) {
-                    $tiersToSave[$q] = $d;
-                }
-            }
-        }
 
-        if (empty($tiersToSave)) {
-            $tiersToSave = [1000 => 0, 2000 => 15, 3000 => 22, 5000 => 30, 10000 => 38];
+        if ($isDekotaCat) {
+            // Dekota için Dinamik Kademeler (1, 5, 10, 25, 50, 100...)
+            if (!empty($_POST['dynamic_tiers']) && is_array($_POST['dynamic_tiers'])) {
+                foreach ($_POST['dynamic_tiers'] as $dt) {
+                    $q = (int)($dt['quantity'] ?? 0);
+                    $d = (float)($dt['discount_percent'] ?? 0);
+                    if ($q > 0) {
+                        $tiersToSave[$q] = $d;
+                    }
+                }
+            }
+            if (empty($tiersToSave)) {
+                $tiersToSave = [1 => 0, 5 => 0, 10 => 10, 25 => 20, 50 => 30, 100 => 40];
+            }
+        } else {
+            // Kartvizit için Orijinal 5 Sabit Tiraj Kademesi (1.000, 2.000, 3.000, 5.000, 10.000)
+            $kartvizitTiers = $_POST['tiers_kartvizit'] ?? $_POST['tiers'] ?? [];
+            if (!empty($kartvizitTiers) && is_array($kartvizitTiers)) {
+                foreach ($kartvizitTiers as $qty => $discount) {
+                    $q = (int)$qty;
+                    $d = (float)$discount;
+                    if ($q > 0) {
+                        $tiersToSave[$q] = $d;
+                    }
+                }
+            }
+            if (empty($tiersToSave)) {
+                $tiersToSave = [1000 => 0, 2000 => 15, 3000 => 22, 5000 => 30, 10000 => 38];
+            }
         }
 
         ksort($tiersToSave);
@@ -249,9 +282,17 @@ if ($action === 'add' || $action === 'edit') {
 
                         <div class="col-md-4">
                             <label class="form-label small fw-bold text-dark">Kategori *</label>
-                            <select name="category_id" class="form-select" required>
-                                <?php foreach ($categories as $cat): ?>
-                                    <option value="<?= $cat['id'] ?>" <?= (isset($product['category_id']) && $product['category_id'] == $cat['id']) ? 'selected' : '' ?>>
+                            <select name="category_id" id="categorySelect" class="form-select" required onchange="onCategoryTypeChange()">
+                                <?php foreach ($categories as $cat): 
+                                    $cSlug = $cat['slug'] ?? '';
+                                    $cModel = $cat['pricing_model'] ?? 'package_tier';
+                                    $isDk = ($cModel === 'rigid_board' || str_contains($cSlug, 'dekota'));
+                                    $catType = $isDk ? 'dekota' : 'kartvizit';
+                                ?>
+                                    <option value="<?= $cat['id'] ?>" 
+                                            data-type="<?= $catType ?>"
+                                            data-model="<?= htmlspecialchars($cModel) ?>"
+                                            <?= (isset($product['category_id']) && $product['category_id'] == $cat['id']) ? 'selected' : '' ?>>
                                         <?= htmlspecialchars($cat['name']) ?>
                                     </option>
                                 <?php endforeach; ?>
@@ -289,195 +330,378 @@ if ($action === 'add' || $action === 'edit') {
                     </div>
                 </div>
 
-                <!-- 2. Fiyatlandırma & Dinamik Paketler Kartı -->
-                <div class="apple-card p-4 mb-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-                        <h6 class="fw-bold mb-0 text-dark">
-                            <i class="bi bi-tag text-success me-2"></i>2. Fiyatlandırma &amp; Paketler
+                <?php
+                $isCurrentDekota = false;
+                if (!empty($product)) {
+                    $pCatId = $product['category_id'] ?? 0;
+                    foreach ($categories as $cat) {
+                        if ($cat['id'] == $pCatId) {
+                            if (($cat['pricing_model'] ?? '') === 'rigid_board' || str_contains($cat['slug'], 'dekota')) {
+                                $isCurrentDekota = true;
+                            }
+                            break;
+                        }
+                    }
+                }
+                $tierMap = [];
+                if (!empty($tiers)) {
+                    foreach ($tiers as $t) {
+                        $tierMap[(int)$t['quantity']] = (float)$t['discount_percent'];
+                    }
+                }
+                ?>
+
+                <!-- ============================================================= -->
+                <!-- A. KARTVİZİT & STANDART MATBAA FİYATLANDIRMA BLOĞU -->
+                <!-- ============================================================= -->
+                <div id="pricingBoxKartvizit" style="<?= $isCurrentDekota ? 'display: none;' : '' ?>">
+                    <!-- 2. Kartvizit Fiyatlandırma & 4 Hazır Paket Kartı -->
+                    <div class="apple-card p-4 mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                            <h6 class="fw-bold mb-0 text-dark">
+                                <i class="bi bi-tag text-primary me-2"></i>2. Fiyatlandırma &amp; Paketler (Kartvizit &amp; Matbaa)
+                            </h6>
+                            <span class="badge bg-primary-subtle text-primary px-2.5 py-1 rounded-pill">4 Paket &amp; Tiraj Modeli</span>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark">Standart Taban Fiyatı (₺) *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text fw-bold text-primary">₺</span>
+                                    <input type="number" step="0.01" name="base_price_kartvizit" id="basePriceKartvizit" class="form-control fw-bold text-dark"
+                                           placeholder="650.00"
+                                           value="<?= htmlspecialchars($product['base_price'] ?? '650.00') ?>"
+                                           oninput="updateKartvizitPackageSuggestions(this.value)">
+                                </div>
+                                <small class="text-muted" style="font-size: 11px;">1.000 adet Standart Paket taban fiyattır (+KDV).</small>
+                            </div>
+                        </div>
+
+                        <!-- 4 Sabit Kartvizit Paketi Listesi -->
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label small fw-bold text-dark mb-0">Ürün Paketleri (Müşterinin Seçeceği 4 Kart):</label>
+                            <small class="text-muted" style="font-size: 11px;">Taban fiyat girildiğinde paket fiyatları çarpanlarla otomatik önerilir.</small>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-bordered align-middle small mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 45px;" class="text-center">Aktif</th>
+                                        <th style="width: 130px;">Paket Adı</th>
+                                        <th style="width: 100px;">Kod (Key)</th>
+                                        <th style="width: 140px;">Paket Fiyatı (₺)</th>
+                                        <th>Paket Özellik Açıklaması</th>
+                                        <th style="width: 110px;">Rozet (Badge)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $kartvizitPresets = [
+                                        1 => [
+                                            'key' => 'ekonomik', 'name' => 'Ekonomik', 'badge' => 'Uygun Fiyat',
+                                            'input_id' => 'pkgEkoPrice',
+                                            'price' => $presets['ekonomik']['price'] ?? round(($product['base_price'] ?? 650) * 0.85, 2),
+                                            'desc' => $presets['ekonomik']['desc'] ?? '250gr Bristol, Tek Yön Renkli Baskı'
+                                        ],
+                                        2 => [
+                                            'key' => 'standart', 'name' => 'Standart', 'badge' => 'Çok Satan',
+                                            'input_id' => 'pkgStdPrice',
+                                            'price' => $presets['standart']['price'] ?? ($product['base_price'] ?? 650.00),
+                                            'desc' => $presets['standart']['desc'] ?? '350gr Kuşe, Çift Taraf Mat Selefon'
+                                        ],
+                                        3 => [
+                                            'key' => 'premium', 'name' => 'Premium', 'badge' => 'Özel Doku',
+                                            'input_id' => 'pkgPremPrice',
+                                            'price' => $presets['premium']['price'] ?? round(($product['base_price'] ?? 650) * 1.45, 2),
+                                            'desc' => $presets['premium']['desc'] ?? 'Soft-Touch Kadife Selefon & Kabartma Lak'
+                                        ],
+                                        4 => [
+                                            'key' => 'vip', 'name' => 'VIP Prestij', 'badge' => 'Lüks Seri',
+                                            'input_id' => 'pkgVipPrice',
+                                            'price' => $presets['vip']['price'] ?? round(($product['base_price'] ?? 650) * 1.85, 2),
+                                            'desc' => $presets['vip']['desc'] ?? 'Tuale Fantezi / Altın Varak Yaldız'
+                                        ],
+                                    ];
+                                    foreach ($kartvizitPresets as $pNum => $pData):
+                                    ?>
+                                    <tr>
+                                        <td class="text-center">
+                                            <input type="checkbox" name="packages_kartvizit[<?= $pNum ?>][active]" value="1" class="form-check-input" checked>
+                                        </td>
+                                        <td>
+                                            <input type="text" name="packages_kartvizit[<?= $pNum ?>][name]" class="form-control form-control-sm fw-bold"
+                                                   value="<?= htmlspecialchars($pData['name']) ?>" required>
+                                        </td>
+                                        <td>
+                                            <input type="text" name="packages_kartvizit[<?= $pNum ?>][key]" class="form-control form-control-sm font-monospace text-muted"
+                                                   value="<?= htmlspecialchars($pData['key']) ?>" readonly>
+                                        </td>
+                                        <td>
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text">₺</span>
+                                                <input type="number" step="0.01" name="packages_kartvizit[<?= $pNum ?>][price]" id="<?= $pData['input_id'] ?>" class="form-control font-monospace fw-bold"
+                                                       value="<?= htmlspecialchars($pData['price']) ?>" required>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <input type="text" name="packages_kartvizit[<?= $pNum ?>][desc]" class="form-control form-control-sm"
+                                                   value="<?= htmlspecialchars($pData['desc']) ?>">
+                                        </td>
+                                        <td>
+                                            <input type="text" name="packages_kartvizit[<?= $pNum ?>][badge]" class="form-control form-control-sm"
+                                                   value="<?= htmlspecialchars($pData['badge']) ?>">
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 3. Kartvizit Sabit 5 Tiraj İndirim Oranları (%) Kartı -->
+                    <div class="apple-card p-4">
+                        <h6 class="fw-bold mb-3 border-bottom pb-2 text-dark">
+                            <i class="bi bi-layers text-primary me-2"></i>3. Adet / Tiraj İndirim Oranları (%)
                         </h6>
-                        <span class="badge bg-success-subtle text-success px-2.5 py-1 rounded-pill">Dinamik Paket Modeli</span>
-                    </div>
+                        <p class="text-muted small mb-3">Tiraj arttıkça 1.000 adet birim fiyatına uygulanacak indirim yüzdesidir. 1.000 adet fiyatı baz alınarak sistem otomatik çarpar.</p>
 
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold text-dark">Standart Taban Fiyatı (₺) *</label>
-                            <div class="input-group">
-                                <span class="input-group-text fw-bold text-primary">₺</span>
-                                <input type="number" step="0.01" name="base_price" id="basePriceInput" class="form-control fw-bold text-dark" required
-                                       placeholder="95.00"
-                                       value="<?= htmlspecialchars($product['base_price'] ?? '95.00') ?>"
-                                       oninput="updatePackagePriceSuggestions(this.value)">
+                        <div class="row g-2">
+                            <div class="col">
+                                <label class="form-label small fw-bold text-center d-block mb-1">1.000 Adet</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="number" name="tiers_kartvizit[1000]" class="form-control text-center font-monospace" value="<?= $tierMap[1000] ?? 0 ?>" readonly>
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <small class="text-muted text-center d-block" style="font-size: 10px;">(Baz Fiyat)</small>
                             </div>
-                            <small class="text-muted" style="font-size: 11px;">1.000 adet veya baz paket fiyattır (+KDV).</small>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold text-dark">
-                                <i class="bi bi-currency-dollar text-success me-1"></i>3 mm m² ($ USD)
-                            </label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-success-subtle text-success fw-bold">$</span>
-                                <input type="number" step="0.01" name="m2_usd_price_3mm" class="form-control fw-bold" placeholder="14.50" value="<?= htmlspecialchars($product['m2_usd_price_3mm'] ?? $product['m2_usd_price'] ?? '14.50') ?>">
+                            <div class="col">
+                                <label class="form-label small fw-bold text-center d-block mb-1">2.000 Adet</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="number" name="tiers_kartvizit[2000]" class="form-control text-center font-monospace" value="<?= $tierMap[2000] ?? 15 ?>">
+                                    <span class="input-group-text">%</span>
+                                </div>
                             </div>
-                            <small class="text-muted" style="font-size: 10.5px;">1 USD ≈ <?= number_format(Helper::getUsdRate(), 2, ',', '.') ?> ₺</small>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold text-dark">
-                                <i class="bi bi-currency-dollar text-primary me-1"></i>5 mm m² ($ USD)
-                            </label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-primary-subtle text-primary fw-bold">$</span>
-                                <input type="number" step="0.01" name="m2_usd_price_5mm" class="form-control fw-bold" placeholder="18.50" value="<?= htmlspecialchars($product['m2_usd_price_5mm'] ?? '18.50') ?>">
+                            <div class="col">
+                                <label class="form-label small fw-bold text-center d-block mb-1">3.000 Adet</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="number" name="tiers_kartvizit[3000]" class="form-control text-center font-monospace" value="<?= $tierMap[3000] ?? 22 ?>">
+                                    <span class="input-group-text">%</span>
+                                </div>
                             </div>
-                            <small class="text-muted" style="font-size: 10.5px;">5mm Sert Dekota</small>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold text-dark">
-                                <i class="bi bi-currency-dollar text-warning me-1"></i>9 mm m² ($ USD)
-                            </label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-warning-subtle text-dark fw-bold">$</span>
-                                <input type="number" step="0.01" name="m2_usd_price_9mm" class="form-control fw-bold" placeholder="26.00" value="<?= htmlspecialchars($product['m2_usd_price_9mm'] ?? '26.00') ?>">
+                            <div class="col">
+                                <label class="form-label small fw-bold text-center d-block mb-1">5.000 Adet</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="number" name="tiers_kartvizit[5000]" class="form-control text-center font-monospace" value="<?= $tierMap[5000] ?? 30 ?>">
+                                    <span class="input-group-text">%</span>
+                                </div>
                             </div>
-                            <small class="text-muted" style="font-size: 10.5px;">9mm Ekstra Ağır Dekota</small>
+                            <div class="col">
+                                <label class="form-label small fw-bold text-center d-block mb-1">10.000 Adet</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="number" name="tiers_kartvizit[10000]" class="form-control text-center font-monospace" value="<?= $tierMap[10000] ?? 38 ?>">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-
-                    <!-- Dinamik Paketler Listesi -->
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <label class="form-label small fw-bold text-dark mb-0">Ürün Paketleri (Müşterinin Seçeceği Kartlar):</label>
-                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 shadow-2xs" onclick="addPackageRow()">
-                            <i class="bi bi-plus-circle me-1"></i> Yeni Paket Ekle
-                        </button>
-                    </div>
-                    
-                    <div class="table-responsive">
-                        <table class="table table-bordered align-middle small mb-0" id="packagesTable">
-                            <thead class="table-light">
-                                <tr>
-                                    <th style="width: 45px;" class="text-center">Aktif</th>
-                                    <th style="width: 140px;">Paket Adı</th>
-                                    <th style="width: 110px;">Kod (Key)</th>
-                                    <th style="width: 145px;">Paket Fiyatı (₺)</th>
-                                    <th>Paket Özellik Açıklaması</th>
-                                    <th style="width: 110px;">Rozet (Badge)</th>
-                                    <th style="width: 45px;" class="text-center">Sil</th>
-                                </tr>
-                            </thead>
-                            <tbody id="packagesTbody">
-                                <?php
-                                $pkgIndex = 0;
-                                $currentPresets = !empty($presets) ? $presets : [
-                                    'ekonomik' => ['name' => 'Ekonomik', 'active' => 1, 'price' => round(($product['base_price'] ?? 900) * 0.85, 2), 'desc' => '250gr Bristol, Tek Yön Düz Baskı', 'badge' => 'Uygun'],
-                                    'standart' => ['name' => 'Standart', 'active' => 1, 'price' => ($product['base_price'] ?? 900.00), 'desc' => '350gr Kuşe, Çift Taraf Mat Selefon', 'badge' => 'Popüler'],
-                                    'premium'  => ['name' => 'Premium', 'active' => 1, 'price' => round(($product['base_price'] ?? 900) * 1.45, 2), 'desc' => 'Soft-Touch Kadife Selefon & Kabartma Lak', 'badge' => 'Özel Doku'],
-                                    'vip'      => ['name' => 'VIP Prestij', 'active' => 1, 'price' => round(($product['base_price'] ?? 900) * 1.85, 2), 'desc' => 'Tuale Fantezi / Altın Varak Yaldız', 'badge' => 'Lüks Seri']
-                                ];
-                                foreach ($currentPresets as $pKey => $pData):
-                                    $pkgIndex++;
-                                ?>
-                                <tr class="package-row" id="pkg_row_<?= $pkgIndex ?>">
-                                    <td class="text-center">
-                                        <input type="checkbox" name="packages[<?= $pkgIndex ?>][active]" value="1" class="form-check-input"
-                                               <?= (!isset($pData['active']) || !empty($pData['active'])) ? 'checked' : '' ?>>
-                                    </td>
-                                    <td>
-                                        <input type="text" name="packages[<?= $pkgIndex ?>][name]" class="form-control form-control-sm fw-bold"
-                                               value="<?= htmlspecialchars($pData['name'] ?? ucfirst($pKey)) ?>" required placeholder="Paket Adı">
-                                    </td>
-                                    <td>
-                                        <input type="text" name="packages[<?= $pkgIndex ?>][key]" class="form-control form-control-sm font-monospace text-muted"
-                                               value="<?= htmlspecialchars($pKey) ?>" placeholder="kod">
-                                    </td>
-                                    <td>
-                                        <div class="input-group input-group-sm">
-                                            <span class="input-group-text">₺</span>
-                                            <input type="number" step="0.01" name="packages[<?= $pkgIndex ?>][price]" class="form-control font-monospace fw-bold pkg-price-inp"
-                                                   value="<?= htmlspecialchars($pData['price'] ?? ($product['base_price'] ?? 900)) ?>" required>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <input type="text" name="packages[<?= $pkgIndex ?>][desc]" class="form-control form-control-sm"
-                                               placeholder="Kağıt, selefon, kesim detayları"
-                                               value="<?= htmlspecialchars($pData['desc'] ?? '') ?>">
-                                    </td>
-                                    <td>
-                                        <input type="text" name="packages[<?= $pkgIndex ?>][badge]" class="form-control form-control-sm"
-                                               placeholder="Örn: Popüler"
-                                               value="<?= htmlspecialchars($pData['badge'] ?? '') ?>">
-                                    </td>
-                                    <td class="text-center">
-                                        <button type="button" class="btn btn-xs btn-outline-danger" onclick="removePackageRow('pkg_row_<?= $pkgIndex ?>')" title="Paketi Sil">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
                     </div>
                 </div>
 
-                <!-- 3. Dinamik Adet / Tiraj İndirimleri Kartı -->
-                <div class="apple-card p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-                        <div>
+                <!-- ============================================================= -->
+                <!-- B. DEKOTA UYARI LEVHALARI FİYATLANDIRMA BLOĞU -->
+                <!-- ============================================================= -->
+                <div id="pricingBoxDekota" style="<?= !$isCurrentDekota ? 'display: none;' : '' ?>">
+                    <!-- 2. Dekota Fiyatlandırma & m² Dolar Formülü Kartı -->
+                    <div class="apple-card p-4 mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
                             <h6 class="fw-bold mb-0 text-dark">
-                                <i class="bi bi-layers text-primary me-2"></i>3. Adet / Tiraj İndirim Kademeleri (%)
+                                <i class="bi bi-tag text-success me-2"></i>2. Fiyatlandırma &amp; m² Dolar Formülü (Dekota Levhalar)
                             </h6>
-                            <small class="text-muted" style="font-size: 11px;">Hem standart paketlerde hem de özel ölçülü levha baskılarında bu adet indirimleri otomatik uygulanır.</small>
+                            <span class="badge bg-success-subtle text-success px-2.5 py-1 rounded-pill">Sert Zemin Modeli</span>
                         </div>
-                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 shadow-2xs" onclick="addTierRow()">
-                            <i class="bi bi-plus-circle me-1"></i> Yeni Kademe Ekle
-                        </button>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold text-dark">Taban Fiyatı (₺) *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text fw-bold text-primary">₺</span>
+                                    <input type="number" step="0.01" name="base_price_dekota" id="basePriceDekota" class="form-control fw-bold text-dark"
+                                           placeholder="95.00"
+                                           value="<?= htmlspecialchars($product['base_price'] ?? '95.00') ?>">
+                                </div>
+                                <small class="text-muted" style="font-size: 11px;">Küçük Boy (25x35 cm) baz fiyattır (+KDV).</small>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold text-dark">
+                                    <i class="bi bi-currency-dollar text-success me-1"></i>3 mm m² ($ USD)
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-success-subtle text-success fw-bold">$</span>
+                                    <input type="number" step="0.01" name="m2_usd_price_3mm" class="form-control fw-bold" placeholder="14.50" value="<?= htmlspecialchars($product['m2_usd_price_3mm'] ?? $product['m2_usd_price'] ?? '14.50') ?>">
+                                </div>
+                                <small class="text-muted" style="font-size: 10.5px;">1 USD ≈ <?= number_format(Helper::getUsdRate(), 2, ',', '.') ?> ₺</small>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold text-dark">
+                                    <i class="bi bi-currency-dollar text-primary me-1"></i>5 mm m² ($ USD)
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-primary-subtle text-primary fw-bold">$</span>
+                                    <input type="number" step="0.01" name="m2_usd_price_5mm" class="form-control fw-bold" placeholder="18.50" value="<?= htmlspecialchars($product['m2_usd_price_5mm'] ?? '18.50') ?>">
+                                </div>
+                                <small class="text-muted" style="font-size: 10.5px;">5mm Sert Dekota</small>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold text-dark">
+                                    <i class="bi bi-currency-dollar text-warning me-1"></i>9 mm m² ($ USD)
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-warning-subtle text-dark fw-bold">$</span>
+                                    <input type="number" step="0.01" name="m2_usd_price_9mm" class="form-control fw-bold" placeholder="26.00" value="<?= htmlspecialchars($product['m2_usd_price_9mm'] ?? '26.00') ?>">
+                                </div>
+                                <small class="text-muted" style="font-size: 10.5px;">9mm Ekstra Ağır Dekota</small>
+                            </div>
+                        </div>
+
+                        <!-- 4 Standart Ebat Paketi Listesi -->
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label small fw-bold text-dark mb-0">Standart Ebat Paketleri (Müşterinin Seçeceği 4 Boyut):</label>
+                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 shadow-2xs" onclick="addPackageRow()">
+                                <i class="bi bi-plus-circle me-1"></i> Yeni Paket Ekle
+                            </button>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-bordered align-middle small mb-0" id="packagesTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 45px;" class="text-center">Aktif</th>
+                                        <th style="width: 160px;">Paket Adı</th>
+                                        <th style="width: 100px;">Kod (Key)</th>
+                                        <th style="width: 140px;">Paket Fiyatı (₺)</th>
+                                        <th>Paket Özellik Açıklaması</th>
+                                        <th style="width: 110px;">Rozet (Badge)</th>
+                                        <th style="width: 45px;" class="text-center">Sil</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="packagesTbody">
+                                    <?php
+                                    $pkgIndex = 0;
+                                    $dekotaPresets = !empty($presets) ? $presets : [
+                                        'kucuk' => ['name' => 'Küçük Boy (25x35 cm)', 'active' => 1, 'price' => 95.00,  'desc' => 'Kapı üstü, elektrik panosu, ofis içi', 'badge' => 'Kompakt'],
+                                        'orta'  => ['name' => 'Orta Boy (35x50 cm)',  'active' => 1, 'price' => 145.00, 'desc' => 'Koridorlar, üretim hatları (Standart)', 'badge' => 'Popüler'],
+                                        'buyuk' => ['name' => 'Büyük Boy (50x70 cm)', 'active' => 1, 'price' => 240.00, 'desc' => 'Şantiye girişleri, depolar, geniş fabrika', 'badge' => 'Görünür'],
+                                        'mega'  => ['name' => 'Mega Boy (70x100 cm)', 'active' => 1, 'price' => 420.00, 'desc' => 'Dış cephe, nizamiye, yol yönlendirme', 'badge' => 'Maksimum']
+                                    ];
+                                    foreach ($dekotaPresets as $pKey => $pData):
+                                        $pkgIndex++;
+                                    ?>
+                                    <tr class="package-row" id="pkg_row_<?= $pkgIndex ?>">
+                                        <td class="text-center">
+                                            <input type="checkbox" name="packages_dekota[<?= $pkgIndex ?>][active]" value="1" class="form-check-input"
+                                                   <?= (!isset($pData['active']) || !empty($pData['active'])) ? 'checked' : '' ?>>
+                                        </td>
+                                        <td>
+                                            <input type="text" name="packages_dekota[<?= $pkgIndex ?>][name]" class="form-control form-control-sm fw-bold"
+                                                   value="<?= htmlspecialchars($pData['name'] ?? ucfirst($pKey)) ?>" required placeholder="Paket Adı">
+                                        </td>
+                                        <td>
+                                            <input type="text" name="packages_dekota[<?= $pkgIndex ?>][key]" class="form-control form-control-sm font-monospace text-muted"
+                                                   value="<?= htmlspecialchars($pKey) ?>" placeholder="kod">
+                                        </td>
+                                        <td>
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text">₺</span>
+                                                <input type="number" step="0.01" name="packages_dekota[<?= $pkgIndex ?>][price]" class="form-control font-monospace fw-bold pkg-price-inp"
+                                                       value="<?= htmlspecialchars($pData['price'] ?? 95.00) ?>" required>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <input type="text" name="packages_dekota[<?= $pkgIndex ?>][desc]" class="form-control form-control-sm"
+                                                   placeholder="Ebat ve kullanım alanı detayları"
+                                                   value="<?= htmlspecialchars($pData['desc'] ?? '') ?>">
+                                        </td>
+                                        <td>
+                                            <input type="text" name="packages_dekota[<?= $pkgIndex ?>][badge]" class="form-control form-control-sm"
+                                                   placeholder="Örn: Popüler"
+                                                   value="<?= htmlspecialchars($pData['badge'] ?? '') ?>">
+                                        </td>
+                                        <td class="text-center">
+                                            <button type="button" class="btn btn-xs btn-outline-danger" onclick="removePackageRow('pkg_row_<?= $pkgIndex ?>')" title="Paketi Sil">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
-                    <div class="table-responsive">
-                        <table class="table table-bordered align-middle small mb-0" id="tiersTable">
-                            <thead class="table-light">
-                                <tr>
-                                    <th style="width: 220px;">Baskı / Sipariş Adedi</th>
-                                    <th style="width: 200px;">İndirim Oranı (%)</th>
-                                    <th style="width: 60px;" class="text-center">Sil</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tiersTbody">
-                                <?php
-                                $tierIdx = 0;
-                                $displayTiers = !empty($tiers) ? $tiers : [
-                                    ['quantity' => 1000, 'discount_percent' => 0],
-                                    ['quantity' => 2000, 'discount_percent' => 15],
-                                    ['quantity' => 3000, 'discount_percent' => 22],
-                                    ['quantity' => 5000, 'discount_percent' => 30],
-                                    ['quantity' => 10000, 'discount_percent' => 38]
-                                ];
-                                foreach ($displayTiers as $tRow):
-                                    $tierIdx++;
-                                ?>
-                                <tr class="tier-row" id="tier_row_<?= $tierIdx ?>">
-                                    <td>
-                                        <div class="input-group input-group-sm">
-                                            <input type="number" name="dynamic_tiers[<?= $tierIdx ?>][quantity]" class="form-control font-monospace fw-bold text-center" value="<?= (int)$tRow['quantity'] ?>" required placeholder="Örn: 10">
-                                            <span class="input-group-text">Adet</span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group input-group-sm">
-                                            <input type="number" step="0.5" name="dynamic_tiers[<?= $tierIdx ?>][discount_percent]" class="form-control font-monospace fw-bold text-center" value="<?= (float)$tRow['discount_percent'] ?>" required placeholder="0">
-                                            <span class="input-group-text">% İndirim</span>
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <button type="button" class="btn btn-xs btn-outline-danger" onclick="removeTierRow('tier_row_<?= $tierIdx ?>')" title="Kademeyi Sil">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
+                    <!-- 3. Dekota Dinamik Adet Kademeleri (%) Kartı -->
+                    <div class="apple-card p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                            <div>
+                                <h6 class="fw-bold mb-0 text-dark">
+                                    <i class="bi bi-layers text-primary me-2"></i>3. Adet / Tiraj İndirim Kademeleri (%)
+                                </h6>
+                                <small class="text-muted" style="font-size: 11px;">Dekota levhalarda toplu siparişler için kademeli indirim tablosu.</small>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 shadow-2xs" onclick="addTierRow()">
+                                <i class="bi bi-plus-circle me-1"></i> Yeni Kademe Ekle
+                            </button>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered align-middle small mb-0" id="tiersTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 220px;">Sipariş Levha Adedi</th>
+                                        <th style="width: 200px;">İndirim Oranı (%)</th>
+                                        <th style="width: 60px;" class="text-center">Sil</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tiersTbody">
+                                    <?php
+                                    $tierIdx = 0;
+                                    $displayDekotaTiers = !empty($tiers) ? $tiers : [
+                                        ['quantity' => 1, 'discount_percent' => 0],
+                                        ['quantity' => 5, 'discount_percent' => 0],
+                                        ['quantity' => 10, 'discount_percent' => 10],
+                                        ['quantity' => 25, 'discount_percent' => 20],
+                                        ['quantity' => 50, 'discount_percent' => 30],
+                                        ['quantity' => 100, 'discount_percent' => 40]
+                                    ];
+                                    foreach ($displayDekotaTiers as $tRow):
+                                        $tierIdx++;
+                                    ?>
+                                    <tr class="tier-row" id="tier_row_<?= $tierIdx ?>">
+                                        <td>
+                                            <div class="input-group input-group-sm">
+                                                <input type="number" name="dynamic_tiers[<?= $tierIdx ?>][quantity]" class="form-control font-monospace fw-bold text-center" value="<?= (int)$tRow['quantity'] ?>" required placeholder="Örn: 10">
+                                                <span class="input-group-text">Adet</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="input-group input-group-sm">
+                                                <input type="number" step="0.5" name="dynamic_tiers[<?= $tierIdx ?>][discount_percent]" class="form-control font-monospace fw-bold text-center" value="<?= (float)$tRow['discount_percent'] ?>" required placeholder="0">
+                                                <span class="input-group-text">% İndirim</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <button type="button" class="btn btn-xs btn-outline-danger" onclick="removeTierRow('tier_row_<?= $tierIdx ?>')" title="Kademeyi Sil">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
@@ -622,7 +846,30 @@ if ($action === 'add' || $action === 'edit') {
         this.dataset.manual = 'true';
     });
 
-    function updatePackagePriceSuggestions(val) {
+    function onCategoryTypeChange() {
+        const catSelect = document.getElementById('categorySelect');
+        if (!catSelect) return;
+        const selectedOpt = catSelect.options[catSelect.selectedIndex];
+        const catType = selectedOpt.getAttribute('data-type') || 'kartvizit';
+
+        const boxKartvizit = document.getElementById('pricingBoxKartvizit');
+        const boxDekota = document.getElementById('pricingBoxDekota');
+
+        if (catType === 'dekota') {
+            if (boxKartvizit) boxKartvizit.style.display = 'none';
+            if (boxDekota) boxDekota.style.display = 'block';
+        } else {
+            if (boxKartvizit) boxKartvizit.style.display = 'block';
+            if (boxDekota) boxDekota.style.display = 'none';
+        }
+    }
+
+    // Sayfa açıldığında kategoriye göre doğru kutuyu göster
+    document.addEventListener('DOMContentLoaded', function() {
+        onCategoryTypeChange();
+    });
+
+    function updateKartvizitPackageSuggestions(val) {
         const base = parseFloat(val) || 0;
         const ekoInput = document.getElementById('pkgEkoPrice');
         const stdInput = document.getElementById('pkgStdPrice');
@@ -630,9 +877,13 @@ if ($action === 'add' || $action === 'edit') {
         const vipInput = document.getElementById('pkgVipPrice');
 
         if (stdInput) stdInput.value = base.toFixed(2);
-        if (ekoInput && !ekoInput.dataset.manual) ekoInput.value = (base * 0.85).toFixed(2);
-        if (premInput && !premInput.dataset.manual) premInput.value = (base * 1.45).toFixed(2);
-        if (vipInput && !vipInput.dataset.manual) vipInput.value = (base * 1.85).toFixed(2);
+        if (ekoInput) ekoInput.value = (base * 0.85).toFixed(2);
+        if (premInput) premInput.value = (base * 1.45).toFixed(2);
+        if (vipInput) vipInput.value = (base * 1.85).toFixed(2);
+    }
+
+    function updatePackagePriceSuggestions(val) {
+        updateKartvizitPackageSuggestions(val);
     }
 
     let packageCounter = <?= $pkgIndex ?>;

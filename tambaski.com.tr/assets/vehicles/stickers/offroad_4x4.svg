@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 450 200" width="100%" height="100%">
+  <text x="20" y="130" font-family="Impact, sans-serif" font-size="140" font-weight="900" font-style="italic" fill="#dc2626" stroke="#000" stroke-width="4">4X4</text>
+  <text x="250" y="80" font-family="Arial Black" font-size="34" font-weight="bold" font-style="italic" fill="#0f172a">OFF-ROAD</text>
+  <text x="250" y="125" font-family="Arial Black" font-size="24" font-weight="bold" fill="#64748b">MUD &amp; ROCK</text>
+  <!-- Çamur Sıçraması Efekti -->
+  <circle cx="210" cy="40" r="8" fill="#0f172a"/>
+  <circle cx="230" cy="25" r="5" fill="#dc2626"/>
+  <circle cx="390" cy="150" r="10" fill="#0f172a"/>
+  <circle cx="420" cy="130" r="6" fill="#0f172a"/>
+  <polygon points="10,155 440,155 420,175 0,175" fill="#0f172a"/>
+</svg>

@@ -1,0 +1,9 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /docs/api/
+
+    RewriteRule ^rules\.md$ rules.php?format=markdown [L,QSA]
+    RewriteRule ^rules\.json$ rules.php?format=json [L,QSA]
+    RewriteRule ^download$ rules.php?format=download [L,QSA]
+    RewriteRule ^openapi\.json$ openapi.php [L,QSA]
+</IfModule>

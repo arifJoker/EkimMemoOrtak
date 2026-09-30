@@ -73,6 +73,7 @@ $topCats = $dbConn ? $dbConn->query("SELECT * FROM categories WHERE status = 1 O
 
             <!-- Ana Menü (Logo ile aynı hizada, sağa kaymış) -->
             <nav class="header-main-nav d-none d-lg-flex me-auto">
+                <a href="<?= SITE_URL ?>/vehicle_studio.php" class="nav-link-modern fw-bold text-primary" style="color: #f15a24 !important;"><i class="bi bi-car-front-fill me-1"></i>🚗 Araç Stüdyosu</a>
                 <a href="<?= SITE_URL ?>/category.php?slug=kartvizit" class="nav-link-modern">Kartvizit</a>
                 <a href="<?= SITE_URL ?>/category.php?slug=dekota-uyari-levhalari" class="nav-link-modern fw-semibold text-dark"><i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>Dekota Uyarı Levhaları</a>
                 <a href="<?= SITE_URL ?>/category.php?slug=el-ilani-brosur" class="nav-link-modern">Broşür & El İlanı</a>

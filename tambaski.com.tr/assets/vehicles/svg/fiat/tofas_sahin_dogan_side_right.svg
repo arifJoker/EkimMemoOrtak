@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 440" width="100%" height="100%" 
+     data-brand="Fiat" data-model="Tofaş Şahin / Doğan / Kartal" data-category="Efsane Kasa" 
+     data-length-mm="4316" data-scale-factor="4.6913" data-angle="side_right">
+  <defs>
+    <!-- Zemin Gölgesi -->
+    <radialGradient id="ground-shadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.6"/>
+      <stop offset="70%" stop-color="#000000" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    
+    <!-- 3D Metalik Kaporta Işık Gradiyenti -->
+    <linearGradient id="body-highlight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.4"/>
+      <stop offset="25%" stop-color="#ffffff" stop-opacity="0.1"/>
+      <stop offset="65%" stop-color="#000000" stop-opacity="0.0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.45"/>
+    </linearGradient>
+
+    <!-- Cam Yansıması -->
+    <linearGradient id="glass-reflection" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.35"/>
+      <stop offset="40%" stop-color="#ffffff" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.2"/>
+    </linearGradient>
+    
+    <!-- Jant Gradiyenti -->
+    <radialGradient id="rim-gradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="45%" stop-color="#a0a5aa"/>
+      <stop offset="75%" stop-color="#40454a"/>
+      <stop offset="100%" stop-color="#151719"/>
+    </radialGradient>
+  </defs>
+
+  <!-- ================= 0. ZEMİN GÖLGESİ ================= -->
+  <g id="layer-ground-shadow">
+    <ellipse cx="500" cy="355" rx="440" ry="24" fill="url(#ground-shadow)" />
+  </g>
+
+  <!-- ================= 1. DİNAMİK KAPORTA BOYASI (RENK SEÇİCİ) ================= -->
+  <!-- fill rengi JS ile dinamik olarak değiştirilir (örn: #ffffff, #1e293b, #dc2626, #2563eb vs.) -->
+  <g id="layer-body-paint">
+    <path id="vehicle-body-path" d="M 50 280 C 45 235, 70 205, 140 190 L 260 160 C 310 130, 360 110, 440 110 L 640 110 C 720 110, 770 130, 840 175 L 930 215 C 960 230, 965 245, 965 285 L 965 315 C 965 335, 945 340, 885 340 L 805 340 C 805 260, 705 260, 705 340 L 305 340 C 305 260, 205 260, 205 340 L 95 340 C 55 340, 50 325, 50 280 Z" fill="#e2e8f0" stroke="#1e293b" stroke-width="2.5" stroke-linejoin="round" />
+  </g>
+
+  <!-- ================= 2. 3D KAPORTA IŞIK & GÖLGE KATMANI (METALLIC/GLOSS OVERLAY) ================= -->
+  <g id="layer-body-lighting" style="pointer-events: none;">
+    <path d="M 50 280 C 45 235, 70 205, 140 190 L 260 160 C 310 130, 360 110, 440 110 L 640 110 C 720 110, 770 130, 840 175 L 930 215 C 960 230, 965 245, 965 285 L 965 315 C 965 335, 945 340, 885 340 L 805 340 C 805 260, 705 260, 705 340 L 305 340 C 305 260, 205 260, 205 340 L 95 340 C 55 340, 50 325, 50 280 Z" fill="url(#body-highlight)" style="mix-blend-mode: overlay;" />
+  </g>
+
+  <!-- ================= 3. CAM VE 0-4 NUMARA CAM FİLMİ KATMANI ================= -->
+  <g id="layer-windows">
+    <!-- Standart Cam Tabanı -->
+    <path d="M 160 190 L 270 160 C 315 135, 355 120, 420 120 L 525 120 L 525 195 L 180 195 C 165 195, 155 195, 160 190 Z M 540 120 L 635 120 C 690 120, 735 135, 780 165 L 835 200 C 840 205, 835 210, 825 210 L 540 210 Z" fill="#64748b" stroke="#0f172a" stroke-width="2" />
+    
+    <!-- Cam Yansıması -->
+    <path d="M 160 190 L 270 160 C 315 135, 355 120, 420 120 L 525 120 L 525 195 L 180 195 C 165 195, 155 195, 160 190 Z M 540 120 L 635 120 C 690 120, 735 135, 780 165 L 835 200 C 840 205, 835 210, 825 210 L 540 210 Z" fill="url(#glass-reflection)" />
+    
+    <!-- DİNAMİK CAM FİLMİ KATMANI (0, 1, 2, 3, 4 Numara) -->
+    <!-- Opacity JS ile ayarlanır: 0 No: 0.05, 1 No: 0.35, 2 No: 0.60, 3 No: 0.82, 4 No: 0.96 -->
+    <path id="vehicle-window-tint" d="M 160 190 L 270 160 C 315 135, 355 120, 420 120 L 525 120 L 525 195 L 180 195 C 165 195, 155 195, 160 190 Z M 540 120 L 635 120 C 690 120, 735 135, 780 165 L 835 200 C 840 205, 835 210, 825 210 L 540 210 Z" fill="#05070a" opacity="0.35" style="transition: opacity 0.3s ease;" />
+  </g>
+
+  <!-- ================= 4. DETAYLAR (FARLAR, IZGARA, ÇITALAR, KAPI KOLLARI) ================= -->
+  <g id="layer-vehicle-details" stroke="#0f172a" stroke-width="1.8" fill="none" stroke-linecap="round">
+    <!-- Ön Far -->
+    <path d="M 60 260 Q 95 240 140 245 L 135 270 Z" fill="#e2e8f0" opacity="0.9" />
+    <path d="M 65 262 Q 95 248 130 252" stroke="#38bdf8" stroke-width="3" /> <!-- LED Gündüz Farı -->
+
+    <!-- Arka Stop -->
+    <path d="M 945 255 Q 920 245 885 248 L 890 270 Z" fill="#ef4444" opacity="0.95" />
+    
+    <!-- Kapı Açma Çizgileri & Boşlukları -->
+    <path d="M 330 195 L 330 325" stroke="#334155" stroke-width="2" /> <!-- Ön Çamurluk Çizgisi -->
+    <path d="M 535 195 L 530 330" stroke="#334155" stroke-width="2" /> <!-- B Sütunu Kapı Ayrımı -->
+    <path d="M 720 205 L 720 325" stroke="#334155" stroke-width="2" /> <!-- Arka Kapı Çizgisi -->
+    
+    <!-- Kapı Kolları -->
+    <rect x="360" y="215" width="36" height="8" rx="3" fill="#334155" />
+    <rect x="560" y="215" width="36" height="8" rx="3" fill="#334155" />
+    
+    <!-- Yan Ayna -->
+    <path d="M 285 185 Q 260 175 255 195 Q 275 205 295 195 Z" fill="#1e293b" />
+    
+    <!-- Alt Marşpiyel Çıtası -->
+    <path d="M 315 328 L 705 328" stroke="#0f172a" stroke-width="4" />
+  </g>
+
+  <!-- ================= 5. DİNAMİK STICKER YERLEŞTİRME VE ÇİZİM ALANI ================= -->
+  <!-- Fabric.js Canvas bu katmanın üzerine veya doğrudan araç üstüne monte edilir -->
+  <g id="layer-sticker-workspace"></g>
+
+  <!-- ================= 6. TEKERLEKLER VE JANTLAR ================= -->
+  <g id="layer-wheels">
+    <!-- Ön Tekerlek -->
+    <circle cx="255" cy="300" r="50" fill="#090a0c" stroke="#1f242d" stroke-width="6" />
+    <circle cx="255" cy="300" r="35" fill="url(#rim-gradient)" stroke="#222" stroke-width="2" />
+    <circle cx="255" cy="300" r="14" fill="#111" />
+    <!-- 5 Kollu Spor Jant Deseni -->
+    <line x1="255" y1="268" x2="255" y2="332" stroke="#cbd5e1" stroke-width="4" stroke-linecap="round" />
+    <line x1="225" y1="290" x2="285" y2="310" stroke="#cbd5e1" stroke-width="4" stroke-linecap="round" />
+    <line x1="235" y1="325" x2="275" y2="275" stroke="#cbd5e1" stroke-width="4" stroke-linecap="round" />
+    
+    <!-- Arka Tekerlek -->
+    <circle cx="755" cy="300" r="50" fill="#090a0c" stroke="#1f242d" stroke-width="6" />
+    <circle cx="755" cy="300" r="35" fill="url(#rim-gradient)" stroke="#222" stroke-width="2" />
+    <circle cx="755" cy="300" r="14" fill="#111" />
+    <!-- 5 Kollu Spor Jant Deseni -->
+    <line x1="755" y1="268" x2="755" y2="332" stroke="#cbd5e1" stroke-width="4" stroke-linecap="round" />
+    <line x1="725" y1="290" x2="785" y2="310" stroke="#cbd5e1" stroke-width="4" stroke-linecap="round" />
+    <line x1="735" y1="325" x2="775" y2="275" stroke="#cbd5e1" stroke-width="4" stroke-linecap="round" />
+  </g>
+
+  <!-- ================= 7. EN ÜST GERÇEKÇİ KONTUR VE PANEL BOŞLUĞU OVERLAY ================= -->
+  <g id="layer-top-overlay" style="pointer-events: none; mix-blend-mode: multiply;">
+    <!-- Çamurluk Davlumbaz Gölgeleri -->
+    <path d="M 200 300 A 55 55 0 0 1 310 300" stroke="#000000" stroke-width="5" fill="none" opacity="0.4" />
+    <path d="M 700 300 A 55 55 0 0 1 810 300" stroke="#000000" stroke-width="5" fill="none" opacity="0.4" />
+  </g>
+</svg>
