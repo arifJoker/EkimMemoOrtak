@@ -23,12 +23,13 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 $zip = [System.IO.Compression.ZipFile]::Open($tempZip, [System.IO.Compression.ZipArchiveMode]::Create)
 $files = Get-ChildItem -Path $localDir -Recurse -File
 foreach ($file in $files) {
-    # .git veya gecici dosyalari atla
     if ($file.FullName -like "*\.git\*" -or $file.Name -eq "deploy.zip") {
         continue
     }
-    $relative = $file.FullName.Substring($localDir.Length + 1).Replace("\", "/")
-    [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $file.FullName, $relative) | Out-Null
+    $rel = $file.FullName.Substring($localDir.TrimEnd('\').Length + 1).Replace("\", "/")
+    if (![string]::IsNullOrEmpty($rel)) {
+        [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $file.FullName, $rel) | Out-Null
+    }
 }
 $zip.Dispose()
 
@@ -55,6 +56,9 @@ set_time_limit(300);
     `$dest . '/admin/product_edit.php',
     `$dest . '/admin/order_detail.php',
     `$dest . '/vehicle_sticker_customizer.php',
+    `$dest . '/vehicle_studio.php',
+    `$dest . '/assets/js/vehicle_customizer.js',
+    `$dest . '/assets/js/vehicle_3d_engine.js',
     `$dest . '/tambaski_deploy.zip',
     `$dest . '/temp_up.zip'
 ];
@@ -62,6 +66,23 @@ foreach (`$rogueFiles as `$rf) {
     if (is_file(`$rf)) @unlink(`$rf);
     elseif (is_dir(`$rf)) @rmdir(`$rf);
 }
+
+// assets/vehicles klasorunu komple temizle
+function rrmdir(`$dir) {
+    if (is_dir(`$dir)) {
+        `$objects = scandir(`$dir);
+        foreach (`$objects as `$object) {
+            if (`$object != "." && `$object != "..") {
+                if (is_dir(`$dir . DIRECTORY_SEPARATOR . `$object) && !is_link(`$dir . "/" . `$object))
+                    rrmdir(`$dir . DIRECTORY_SEPARATOR . `$object);
+                else
+                    @unlink(`$dir . DIRECTORY_SEPARATOR . `$object);
+            }
+        }
+        @rmdir(`$dir);
+    }
+}
+rrmdir(`$dest . '/assets/vehicles');
 
 if (file_exists(`$zipPath)) {
     `$zip = new ZipArchive();

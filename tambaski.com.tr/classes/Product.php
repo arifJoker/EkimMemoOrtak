@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/Helper.php';
 /**
  * Ürün, Matbaa Varyantları, Fiyat Matrisi ve AI Entegrasyon Sınıfı
  */

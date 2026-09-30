@@ -2,9 +2,9 @@
 
 | Geliştirici | Aktif Görev / Modül | İlgili Dosyalar | Başlangıç Zamanı | Kilit Durumu |
 | :--- | :--- | :--- | :--- | :--- |
-| **Arif** | Kartvizit & Dekota Ürün Ekleme/Düzenleme Ayrıştırması ve Hesaplama Restorasyonu | `admin/products.php`, `classes/Product.php`, `config/config.php` | 2026-09-30 08:10 | 🟢 [BOŞTA] |
+| **Arif** | - | - | - | 🟢 [BOŞTA] |
 | **Memo** | - | - | - | 🟢 [BOŞTA] |
 
 ---
-- **Son Eşitleme:** 2026-09-30 08:10
-- **Durum:** ✅ Admin ürün ekleme/düzenleme formunda Kartvizit (Standart Matbaa) ve Dekota Levha arayüzleri kategori bazlı tam ayrıştırıldı. Kartvizit ekranından Dekota USD m² alanları kaldırıldı, 4 paket ve 5 sabit tiraj kutusu geri getirildi. Canlı sunucuya deploy edildi.
+- **Son Eşitleme:** 2026-09-30 22:00
+- **Durum:** ✅ Kullanıcı talebi doğrultusunda Araç Stüdyosu (Vehicle Studio) modülü, ilgili JS/asset dosyaları, menü linkleri ve sepet aksiyonları hem yerelden hem de canlı sunucudan tamamen kaldırılıp temizlendi. Sistem orijinal e-ticaret ve matbaa durumuna getirildi. Kilitler boştadır.
