@@ -1,9 +1,9 @@
-﻿<?php
+<?php
 require_once __DIR__ . '/config/config.php';
 
 $cart = new Cart();
 
-// POST istekleri (ÃœrÃ¼n Ekleme / Silme / Kupon)
+// POST istekleri (Ürün Ekleme / Silme / Kupon)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
@@ -62,9 +62,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $res = $cart->add($productId, $quantity, $options, $customSize, $designData, $selectedPackage, $customPaperId);
         if ($res['success']) {
-            Helper::setFlash('success', 'ÃœrÃ¼n ve baskÄ± tercihiniz sepete eklendi.');
+            Helper::setFlash('success', 'Ürün ve baskı tercihiniz sepete eklendi.');
         } else {
-            Helper::setFlash('danger', $res['error'] ?? 'Sepete eklenirken bir hata oluÅŸtu.');
+            Helper::setFlash('danger', $res['error'] ?? 'Sepete eklenirken bir hata oluştu.');
         }
         header("Location: " . SITE_URL . "/cart.php");
         exit;
@@ -76,9 +76,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($itemId > 0 && $newQty > 0) {
             $upRes = $cart->updateQuantity($itemId, $newQty);
             if ($upRes) {
-                Helper::setFlash('success', "SipariÅŸ adediniz baÅŸarÄ±yla {$newQty} Adet olarak gÃ¼ncellendi!");
+                Helper::setFlash('success', "Sipariş adediniz başarıyla {$newQty} Adet olarak güncellendi!");
             } else {
-                Helper::setFlash('danger', 'Adet gÃ¼ncellenirken bir hata oluÅŸtu.');
+                Helper::setFlash('danger', 'Adet güncellenirken bir hata oluştu.');
             }
         }
         $redirect = (!empty($_POST['redirect_to']) && $_POST['redirect_to'] === 'checkout') ? (SITE_URL . '/checkout.php') : (SITE_URL . '/cart.php');
@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'remove') {
         $itemId = (int)($_POST['item_id'] ?? 0);
         $cart->remove($itemId);
-        Helper::setFlash('info', 'ÃœrÃ¼n sepetten kaldÄ±rÄ±ldÄ±.');
+        Helper::setFlash('info', 'Ürün sepetten kaldırıldı.');
         header("Location: " . SITE_URL . "/cart.php");
         exit;
     }
@@ -98,51 +98,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $code = trim($_POST['coupon_code'] ?? '');
         $res = $cart->applyCoupon($code);
         if ($res['success']) {
-            Helper::setFlash('success', 'Kupon kodu baÅŸarÄ±yla uygulandÄ±!');
+            Helper::setFlash('success', 'Kupon kodu başarıyla uygulandı!');
         } else {
-            Helper::setFlash('danger', $res['error'] ?? 'Kupon uygulanamadÄ±.');
+            Helper::setFlash('danger', $res['error'] ?? 'Kupon uygulanamadı.');
         }
         header("Location: " . SITE_URL . "/cart.php");
         exit;
     }
 
-
     if ($action === 'remove_coupon') {
         $cart->removeCoupon();
-        Helper::setFlash('info', 'Kupon kodu kaldÄ±rÄ±ldÄ±.');
+        Helper::setFlash('info', 'Kupon kodu kaldırıldı.');
         header("Location: " . SITE_URL . "/cart.php");
         exit;
     }
 }
 
 $summary = $cart->getSummary();
-$pageTitle = 'AlÄ±ÅŸveriÅŸ Sepetim â€“ TamBaskÄ±';
+$pageTitle = 'Alışveriş Sepetim – TamBaskı';
 
 require_once __DIR__ . '/includes/header.php';
 ?>
 
 <div class="container py-5">
-    <h3 class="fw-bold mb-4"><i class="bi bi-bag-check-fill text-primary me-2"></i>AlÄ±ÅŸveriÅŸ Sepetim (<?= $summary['count'] ?> ÃœrÃ¼n)</h3>
+    <h3 class="fw-bold mb-4"><i class="bi bi-bag-check-fill text-primary me-2"></i>Alışveriş Sepetim (<?= $summary['count'] ?> Ürün)</h3>
 
     <?php if (empty($summary['items'])): ?>
         <div class="apple-card p-5 text-center my-4">
             <i class="bi bi-bag-x text-muted" style="font-size: 64px;"></i>
-            <h4 class="fw-bold mt-3">Sepetinizde HenÃ¼z ÃœrÃ¼n Bulunmuyor</h4>
-            <p class="text-muted small">Ä°htiyacÄ±nÄ±z olan matbaa Ã¼rÃ¼nlerini keÅŸfedip anÄ±nda sipariÅŸ oluÅŸturabilirsiniz.</p>
+            <h4 class="fw-bold mt-3">Sepetinizde Henüz Ürün Bulunmuyor</h4>
+            <p class="text-muted small">İhtiyacınız olan matbaa ürünlerini keşfedip anında sipariş oluşturabilirsiniz.</p>
             <a href="<?= SITE_URL ?>/category.php" class="btn btn-apple btn-apple-pink mt-2">
-                <i class="bi bi-grid-fill me-1"></i> ÃœrÃ¼nleri Ä°ncele
+                <i class="bi bi-grid-fill me-1"></i> Ürünleri İncele
             </a>
         </div>
     <?php else: ?>
 
-        <!-- Ãœcretsiz Kargo Ä°lerleme Ã‡ubuÄŸu -->
+        <!-- Ücretsiz Kargo İlerleme Çubuğu -->
         <?php if ($summary['grand_total'] < $summary['free_shipping_limit']): 
             $remaining = $summary['free_shipping_limit'] - $summary['grand_total'];
             $percent = min(100, ($summary['grand_total'] / $summary['free_shipping_limit']) * 100);
         ?>
             <div class="p-3 bg-white rounded-4 border mb-4 shadow-sm">
                 <div class="d-flex justify-content-between small fw-bold mb-2">
-                    <span><i class="bi bi-truck text-primary me-1"></i> Ãœcretsiz Kargo Ä°Ã§in: <strong><?= Helper::formatPrice($remaining) ?></strong> daha ekleyin!</span>
+                    <span><i class="bi bi-truck text-primary me-1"></i> Ücretsiz Kargo İçin: <strong><?= Helper::formatPrice($remaining) ?></strong> daha ekleyin!</span>
                     <span><?= Helper::formatPrice($summary['free_shipping_limit']) ?></span>
                 </div>
                 <div class="progress" style="height: 8px;">
@@ -151,7 +150,7 @@ require_once __DIR__ . '/includes/header.php';
             </div>
         <?php else: ?>
             <div class="p-3 bg-success-subtle text-success rounded-4 border border-success mb-4 d-flex align-items-center gap-2 fw-bold small">
-                <i class="bi bi-check-circle-fill fs-5"></i> Tebrikler! Bu sipariÅŸinizde KARGO ÃœCRETSÄ°Z!
+                <i class="bi bi-check-circle-fill fs-5"></i> Tebrikler! Bu siparişinizde KARGO ÜCRETSİZ!
             </div>
         <?php endif; ?>
 
@@ -164,7 +163,7 @@ require_once __DIR__ . '/includes/header.php';
                     <?php foreach ($summary['items'] as $item): ?>
                         <div class="row align-items-center py-3 border-bottom g-3">
                             
-                            <!-- ÃœrÃ¼n GÃ¶rseli veya VektÃ¶rel Ã–nizleme -->
+                            <!-- Ürün Görseli veya Vektörel Önizleme -->
                             <div class="col-md-2 col-3 text-center">
                                 <?php if (!empty($item['design_svg'])): ?>
                                     <?php 
@@ -173,7 +172,7 @@ require_once __DIR__ . '/includes/header.php';
                                     $decodedSvg = $isJson ? json_decode($svgData, true) : null;
                                     $displaySvg = $decodedSvg['front'] ?? $svgData;
 
-                                    // Sadece kÃ¶k <svg> etiketini responsive yap, iÃ§ etiketlerin (rect, path vb.) width/height deÄŸerlerine dokunma
+                                    // Sadece kök <svg> etiketini responsive yap, iç etiketlerin (rect, path vb.) width/height değerlerine dokunma
                                     $displaySvg = preg_replace_callback('/<svg\b([^>]*)>/i', function($m) {
                                         $attrs = $m[1];
                                         $attrs = preg_replace('/\b(width|height|preserveAspectRatio)=("[^"]*"|\'[^\']*\')/i', '', $attrs);
@@ -186,7 +185,7 @@ require_once __DIR__ . '/includes/header.php';
                                     <div class="border rounded-3 p-1 shadow-sm d-flex align-items-center justify-content-center mx-auto cart-svg-thumb" style="width: 84px; height: 54px; background: #0f172a; overflow: hidden;">
                                         <?= $displaySvg ?>
                                     </div>
-                                    <span class="badge bg-primary mt-1" style="font-size: 9px;"><?= !empty($decodedSvg['back']) ? 'Ã‡ift YÃ¶n VektÃ¶r' : 'Ã–zel VektÃ¶r' ?></span>
+                                    <span class="badge bg-primary mt-1" style="font-size: 9px;"><?= !empty($decodedSvg['back']) ? 'Çift Yön Vektör' : 'Özel Vektör' ?></span>
                                 <?php elseif (!empty($item['featured_image'])): ?>
                                     <img src="<?= SITE_URL . '/' . htmlspecialchars($item['featured_image']) ?>" class="img-fluid rounded-3" style="max-height: 70px; object-fit: contain;">
                                 <?php else: ?>
@@ -194,7 +193,7 @@ require_once __DIR__ . '/includes/header.php';
                                 <?php endif; ?>
                             </div>
 
-                            <!-- ÃœrÃ¼n Bilgileri & SeÃ§ilen Varyantlar -->
+                            <!-- Ürün Bilgileri & Seçilen Varyantlar -->
                             <div class="col-md-6 col-9">
                                 <h6 class="fw-bold mb-1">
                                     <a href="<?= SITE_URL ?>/product.php?slug=<?= $item['product_slug'] ?>" class="text-decoration-none text-dark">
@@ -206,24 +205,24 @@ require_once __DIR__ . '/includes/header.php';
                                 </div>
                                 <?php if (!empty($item['options_labels'])): ?>
                                     <div class="small text-muted mb-1">
-                                        <?= implode(' â€¢ ', array_map('htmlspecialchars', $item['options_labels'])) ?>
+                                        <?= implode(' • ', array_map('htmlspecialchars', $item['options_labels'])) ?>
                                     </div>
                                 <?php endif; ?>
                                 
-                                <!-- TasarÄ±m Durumu Rozeti -->
+                                <!-- Tasarım Durumu Rozeti -->
                                 <div class="mt-1">
                                     <?php if ($item['design_type'] === 'uploaded'): ?>
-                                        <span class="badge bg-info text-dark small"><i class="bi bi-file-earmark-arrow-up"></i> YÃ¼klenen Dosya: <?= htmlspecialchars(basename($item['design_file'])) ?></span>
+                                        <span class="badge bg-info text-dark small"><i class="bi bi-file-earmark-arrow-up"></i> Yüklenen Dosya: <?= htmlspecialchars(basename($item['design_file'])) ?></span>
                                     <?php elseif ($item['design_type'] === 'sign_studio'): ?>
-                                        <span class="badge text-white small" style="background: linear-gradient(135deg, #d97706, #f59e0b);"><i class="bi bi-shield-shaded me-1"></i> Ä°SG VektÃ¶rel Levha TasarÄ±mÄ± (300 DPI)</span>
+                                        <span class="badge text-white small" style="background: linear-gradient(135deg, #d97706, #f59e0b);"><i class="bi bi-shield-shaded me-1"></i> İSG Vektörel Levha Tasarımı (300 DPI)</span>
                                     <?php elseif ($item['design_type'] === 'canva_studio'): ?>
-                                        <span class="badge text-white small" style="background: linear-gradient(135deg, #e11d48, #f43f5e);"><i class="bi bi-palette-fill me-1"></i> Canva VektÃ¶r TasarÄ±mÄ± (300 DPI)</span>
+                                        <span class="badge text-white small" style="background: linear-gradient(135deg, #e11d48, #f43f5e);"><i class="bi bi-palette-fill me-1"></i> Canva Vektör Tasarımı (300 DPI)</span>
                                     <?php elseif ($item['design_type'] === 'ai_generated'): ?>
-                                        <span class="badge text-white small" style="background: linear-gradient(135deg, #9333ea, #a855f7);"><i class="bi bi-stars me-1"></i> AI VektÃ¶r TasarÄ±mÄ±</span>
+                                        <span class="badge text-white small" style="background: linear-gradient(135deg, #9333ea, #a855f7);"><i class="bi bi-stars me-1"></i> AI Vektör Tasarımı</span>
                                     <?php elseif ($item['design_type'] === 'online_editor'): ?>
-                                        <span class="badge bg-success small"><i class="bi bi-vector-pen"></i> Online VektÃ¶rel TasarÄ±m KayÄ±tlÄ±</span>
+                                        <span class="badge bg-success small"><i class="bi bi-vector-pen"></i> Online Vektörel Tasarım Kayıtlı</span>
                                     <?php elseif ($item['design_type'] === 'design_request'): ?>
-                                        <span class="badge bg-warning text-dark small"><i class="bi bi-magic"></i> Grafik TasarÄ±m DesteÄŸi Talep Edildi</span>
+                                        <span class="badge bg-warning text-dark small"><i class="bi bi-magic"></i> Grafik Tasarım Desteği Talep Edildi</span>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -237,13 +236,13 @@ require_once __DIR__ . '/includes/header.php';
                                 <form action="<?= SITE_URL ?>/cart.php" method="POST" class="mt-2">
                                     <input type="hidden" name="action" value="remove">
                                     <input type="hidden" name="item_id" value="<?= $item['id'] ?>">
-                                    <button type="submit" class="btn btn-sm text-danger p-0 border-0" onclick="return confirm('Bu Ã¼rÃ¼nÃ¼ sepetten silmek istediÄŸinize emin misiniz?');">
-                                        <i class="bi bi-trash"></i> KaldÄ±r
+                                    <button type="submit" class="btn btn-sm text-danger p-0 border-0" onclick="return confirm('Bu ürünü sepetten silmek istediğinize emin misiniz?');">
+                                        <i class="bi bi-trash"></i> Kaldır
                                     </button>
                                 </form>
                             </div>
 
-                            <!-- ğŸ’¡ Sepet Ä°Ã§i AvantajlÄ± Adet YÃ¼kseltme Teklifi -->
+                            <!-- 💡 Sepet İçi Avantajlı Adet Yükseltme Teklifi -->
                             <?php if (!empty($item['upsell']) && $item['upsell']['active']): ?>
                                 <div class="col-12 mt-2 pt-2 border-top">
                                     <div class="p-3 rounded-4 border d-flex justify-content-between align-items-center flex-wrap gap-2 shadow-sm" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-color: #f59e0b !important;">
@@ -252,8 +251,8 @@ require_once __DIR__ . '/includes/header.php';
                                                 <i class="bi bi-stars fs-6 text-danger"></i>
                                             </div>
                                             <div class="small text-dark">
-                                                <div class="fw-bold text-dark"><i class="bi bi-fire text-danger me-1"></i> AvantajlÄ± Ãœretim FÄ±rsatÄ±: +<?= $item['upsell']['added_quantity'] ?> Adet Daha Ekleyin!</div>
-                                                <span>Sadece <strong><?= $item['upsell']['formatted_diff'] ?></strong> farkla bu Ã¼rÃ¼nÃ¼ <strong><?= number_format($item['quantity'], 0, '', '.') ?> yerine <?= number_format($item['upsell']['target_quantity'], 0, '', '.') ?> Adet</strong> olarak Ã¼retime verebilirsiniz. Birim fiyatÄ±nÄ±z <strong class="text-success"><?= $item['upsell']['formatted_target_unit_price'] ?></strong>'ye dÃ¼ÅŸer (%<?= $item['upsell']['unit_discount_pct'] ?> daha indirimli).</span>
+                                                <div class="fw-bold text-dark"><i class="bi bi-fire text-danger me-1"></i> Avantajlı Üretim Fırsatı: +<?= $item['upsell']['added_quantity'] ?> Adet Daha Ekleyin!</div>
+                                                <span>Sadece <strong><?= $item['upsell']['formatted_diff'] ?></strong> farkla bu ürünü <strong><?= number_format($item['quantity'], 0, '', '.') ?> yerine <?= number_format($item['upsell']['target_quantity'], 0, '', '.') ?> Adet</strong> olarak üretime verebilirsiniz. Birim fiyatınız <strong class="text-success"><?= $item['upsell']['formatted_target_unit_price'] ?></strong>'ye düşer (%<?= $item['upsell']['unit_discount_pct'] ?> daha indirimli).</span>
                                             </div>
                                         </div>
                                         <form action="<?= SITE_URL ?>/cart.php" method="POST" class="m-0">
@@ -261,7 +260,7 @@ require_once __DIR__ . '/includes/header.php';
                                             <input type="hidden" name="item_id" value="<?= $item['id'] ?>">
                                             <input type="hidden" name="new_quantity" value="<?= $item['upsell']['target_quantity'] ?>">
                                             <button type="submit" class="btn btn-sm btn-warning text-dark fw-bold rounded-pill px-3 py-2 shadow-sm text-nowrap">
-                                                <i class="bi bi-arrow-up-circle-fill text-danger me-1"></i> <?= number_format($item['upsell']['target_quantity'], 0, '', '.') ?> Adete YÃ¼kselt (<?= $item['upsell']['formatted_diff'] ?>)
+                                                <i class="bi bi-arrow-up-circle-fill text-danger me-1"></i> <?= number_format($item['upsell']['target_quantity'], 0, '', '.') ?> Adete Yükselt (<?= $item['upsell']['formatted_diff'] ?>)
                                             </button>
                                         </form>
                                     </div>
@@ -273,22 +272,22 @@ require_once __DIR__ . '/includes/header.php';
 
                     <div class="d-flex justify-content-between align-items-center mt-3 pt-2">
                         <a href="<?= SITE_URL ?>/category.php" class="btn btn-sm btn-apple-secondary">
-                            <i class="bi bi-arrow-left me-1"></i> AlÄ±ÅŸveriÅŸe Devam Et
+                            <i class="bi bi-arrow-left me-1"></i> Alışverişe Devam Et
                         </a>
                     </div>
 
                 </div>
             </div>
 
-            <!-- SaÄŸ: Kupon & SipariÅŸ Ã–zeti -->
+            <!-- Sağ: Kupon & Sipariş Özeti -->
             <div class="col-lg-4">
                 
-                <!-- Kupon Kodu KartÄ± -->
+                <!-- Kupon Kodu Kartı -->
                 <div class="apple-card p-3 mb-3">
-                    <h6 class="fw-bold mb-2 small"><i class="bi bi-ticket-perforated me-1 text-primary"></i> Ä°ndirim Kuponu</h6>
+                    <h6 class="fw-bold mb-2 small"><i class="bi bi-ticket-perforated me-1 text-primary"></i> İndirim Kuponu</h6>
                     <?php if ($summary['coupon']): ?>
                         <div class="d-flex justify-content-between align-items-center p-2 bg-success-subtle text-success rounded-3 small">
-                            <span>Kupon: <strong><?= htmlspecialchars($summary['coupon']['code']) ?></strong> uygulandÄ±</span>
+                            <span>Kupon: <strong><?= htmlspecialchars($summary['coupon']['code']) ?></strong> uygulandı</span>
                             <form action="<?= SITE_URL ?>/cart.php" method="POST" class="d-inline">
                                 <input type="hidden" name="action" value="remove_coupon">
                                 <button type="submit" class="btn-close btn-close-sm"></button>
@@ -303,52 +302,51 @@ require_once __DIR__ . '/includes/header.php';
                     <?php endif; ?>
                 </div>
 
-                <!-- SipariÅŸ Ã–zeti KartÄ± -->
+                <!-- Sipariş Özeti Kartı -->
                 <div class="apple-card p-4">
-                    <h5 class="fw-bold mb-3 border-bottom pb-2">SipariÅŸ Ã–zeti</h5>
+                    <h5 class="fw-bold mb-3 border-bottom pb-2">Sipariş Özeti</h5>
 
                     <div class="d-flex justify-content-between small text-muted mb-2">
-                        <span>Ara Toplam (KDV HariÃ§):</span>
+                        <span>Ara Toplam (KDV Hariç):</span>
                         <span class="text-dark fw-bold"><?= $summary['formatted_subtotal'] ?></span>
                     </div>
 
                     <div class="d-flex justify-content-between small text-muted mb-2">
-                        <span>KDV ToplamÄ±:</span>
+                        <span>KDV Toplamı:</span>
                         <span class="text-dark fw-bold"><?= $summary['formatted_tax'] ?></span>
                     </div>
 
                     <?php if ($summary['discount_amount'] > 0): ?>
                         <div class="d-flex justify-content-between small text-success fw-bold mb-2">
-                            <span>Kupon / Ä°skonto Ä°ndirimi:</span>
+                            <span>Kupon / İskonto İndirimi:</span>
                             <span>-<?= $summary['formatted_discount'] ?></span>
                         </div>
                     <?php endif; ?>
 
                     <div class="d-flex justify-content-between small text-muted mb-3">
-                        <span>Kargo Ãœcreti:</span>
+                        <span>Kargo Ücreti:</span>
                         <span class="text-dark fw-bold"><?= $summary['formatted_shipping'] ?></span>
                     </div>
 
                     <hr class="my-3">
 
                     <div class="d-flex justify-content-between align-items-baseline mb-4">
-                        <span class="fw-bold fs-6">Ã–denecek Toplam:</span>
+                        <span class="fw-bold fs-6">Ödenecek Toplam:</span>
                         <span class="price-display-lg text-primary"><?= $summary['formatted_grand_total'] ?></span>
                     </div>
 
                     <a href="<?= SITE_URL ?>/checkout.php" class="btn-apple btn-apple-pink w-100 py-3 fs-6 fw-bold shadow text-center text-white">
-                        SipariÅŸi Tamamla <i class="bi bi-arrow-right ms-2"></i>
+                        Siparişi Tamamla <i class="bi bi-arrow-right ms-2"></i>
                     </a>
 
                     <div class="mt-3 text-center text-muted" style="font-size: 11px;">
-                        <i class="bi bi-shield-lock-fill text-success me-1"></i> 256-Bit GÃ¼venli Ã–deme & SSL KorumasÄ±
+                        <i class="bi bi-shield-lock-fill text-success me-1"></i> 256-Bit Güvenli Ödeme & SSL Koruması
                     </div>
                 </div>
 
             </div>
 
         </div>
-
 
     <?php endif; ?>
 
